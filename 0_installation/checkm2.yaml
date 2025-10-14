@@ -1,0 +1,30 @@
+name: checkm2
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python>=3.7,<3.9
+  - scikit-learn=0.23.2
+  - h5py=2.10.0
+  - numpy=1.19.2
+  - diamond=2.0.4
+  - tensorflow>=2.2.0,<2.6.0
+  - lightgbm=3.2.1
+  - pandas=1.4.0
+  - scipy=1.8.0
+  - prodigal=2.6.3
+  - setuptools
+  - requests
+  - packaging
+  - tqdm=4.67.1
+  - biopython=1.83
+  - pysam=0.22.1
+  - matplotlib
+  - pyyaml=6.0.2
+  - sparse=0.15.5
+  - networkx=3.1
+  - python-igraph=0.10.4
+  - statsmodels=0.13.2
+  - biolib=0.1.9
+  - leidenalg=0.9.1
