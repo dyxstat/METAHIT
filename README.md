@@ -42,7 +42,7 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 9. `annotation`
 10. `MGE` 
 You can view the overall structure of METAHIT below:
-![METAHIT overview](images/Metahit_Overview.pdf)
+![METAHIT overview](images/Metahit_Overview.png)
 
 ### Basic Usage
 Each module can be executed separately.  
