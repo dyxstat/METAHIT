@@ -30,19 +30,20 @@ bash 0_installation/db_setup/gtdbtk_db.sh [DB_DIR]
 ```
 
 ## Usage
-Once installation and database setup are complete, **METAHIT** can be run by executing each module independently. The framework consists of **10 main modules**, each corresponding to a numbered folder in the repository:
-1. `preprocessing`
-2. `assembly`
-3. `alignment` 
-4. `coverage`
-5. `contact`
-6. `binning` 
-7. `reassembly` 
-8. `scaffolding` 
-9. `annotation`
-10. `MGE`
+Once installation and database setup are complete, **METAHIT** can be run by executing each module independently. The framework consists of **10 modules**, each corresponding to a numbered folder in the repository:
+1. `1_preprocessing`
+2. `2_assembly`
+3. `3_alignment` 
+4. `4_coverage`
+5. `5_contact`
+6. `6_binning` 
+7. `7_reassembly` 
+8. `8_scaffolding` 
+9. `9_annotation`
+10. `10_MGE`
 
 You can view the overall structure of METAHIT below:
+
 ![METAHIT overview](images/Metahit_Overview.png)
 
 ### Basic Usage
