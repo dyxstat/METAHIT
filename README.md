@@ -30,34 +30,45 @@ bash 0_installation/db_setup/gtdbtk_db.sh [DB_DIR]
 ```
 
 ## Usage
-## Usage
-
-Once installation and database setup are complete, **METAHIT** can be run as a unified pipeline or by executing each module independently. The framework consists of **10 main modules**, each corresponding to a numbered folder in the repository:
-
-1. `1_preprocessing` — Read QC and filtering  
-2. `2_assembly` — Assembly of metagenomic reads  
-3. `3_alignment` — Read mapping and alignment  
-4. `4_coverage` — Coverage calculation  
-5. `5_contact` — Hi-C contact matrix generation  
-6. `6_binning` — Metagenome binning  
-7. `7_reassembly` — MAG reassembly and refinement  
-8. `8_scaffolding` — Hi-C–based scaffolding  
-9. `9_annotation` — Genome annotation  
-10. `10_MGE` — Mobile genetic element detection  
-
+Once installation and database setup are complete, **METAHIT** can be run by executing each module independently. The framework consists of **10 main modules**, each corresponding to a numbered folder in the repository:
+1. `preprocessing`
+2. `assembly`
+3. `alignment` 
+4. `coverage`
+5. `contact`
+6. `binning` 
+7. `reassembly` 
+8. `scaffolding` 
+9. `annotation`
+10. `MGE` 
 You can view the overall structure of METAHIT below:
-
-![METAHIT overview](images/metahit_overview.png)
-
----
+![METAHIT overview](images/Metahit_Overview.pdf)
 
 ### Basic Usage
+Each module can be executed separately.  
+For example, to run the **binning** module:
 
-Each module can be executed separately or as part of the full pipeline.  
-For example, to run the **assembly** module:
 
-```bash
-bash 2_assembly/2_assembly.sh -i /path/to/reads -o /path/to/output -t 40
+
+### Selective Execution
+Some modules are **optional** and can be skipped.  
+For instance, you may choose to stop at binning (`6_binning`) or reassembly (`7_reassembly`) depending on your analysis goals.  
+Each module automatically reads the standardized outputs of the preceding stage, allowing flexible, modular execution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
