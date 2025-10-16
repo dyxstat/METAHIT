@@ -28,3 +28,43 @@ bash 0_installation/db_setup/checkv_db.sh [DB_DIR]
 ```bash
 bash 0_installation/db_setup/gtdbtk_db.sh [DB_DIR]
 ```
+
+## Usage
+## Usage
+
+Once installation and database setup are complete, **METAHIT** can be run as a unified pipeline or by executing each module independently. The framework consists of **10 main modules**, each corresponding to a numbered folder in the repository:
+
+1. `1_preprocessing` — Read QC and filtering  
+2. `2_assembly` — Assembly of metagenomic reads  
+3. `3_alignment` — Read mapping and alignment  
+4. `4_coverage` — Coverage calculation  
+5. `5_contact` — Hi-C contact matrix generation  
+6. `6_binning` — Metagenome binning  
+7. `7_reassembly` — MAG reassembly and refinement  
+8. `8_scaffolding` — Hi-C–based scaffolding  
+9. `9_annotation` — Genome annotation  
+10. `10_MGE` — Mobile genetic element detection  
+
+You can view the overall structure of METAHIT below:
+
+![METAHIT overview](images/metahit_overview.png)
+
+---
+
+### Basic Usage
+
+Each module can be executed separately or as part of the full pipeline.  
+For example, to run the **assembly** module:
+
+```bash
+bash 2_assembly/2_assembly.sh -i /path/to/reads -o /path/to/output -t 40
+
+
+
+
+
+
+
+
+
+
