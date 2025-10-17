@@ -39,9 +39,12 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 
 ![METAHIT overview](images/Metahit_Overview.png)
 
-### Sample Usage
-Each module in **METAHIT** can be executed independently, allowing users to run only specific steps of the workflow. For example, to run the binning module:
+### Basic Usage
 
+### Advanced Usage
+Each module in **METAHIT** can be executed independently, allowing users to run only specific steps of the workflow. 
+
+#### 6. Binning Module:
 ```bash
 bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> -t 80
 ```
@@ -54,7 +57,7 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> -t 80
 
 Additional optional parameters for fine-tuning MetaCC, bin3C, and ImputeCC are supported. All parameters have internal default values and can be customized as needed; see the source code (`6_binning/6a_binning.py`) for full details.
 
-### Selective Execution
+#### Selective Execution
 Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
 
 For example, the **reassembly** module is computationally intensive and performs best with sufficient sequencing coverage. In practice, users may choose to reassemble only selected bins—such as those with higher contamination or of particular biological importance—to balance resource use and data quality. When resources are constrained, this step can be skipped, and analyses can proceed using the consolidated bins from the **binning** module, although our benchmarking indicates that reassembly substantially improves contiguity and reduces contamination.
