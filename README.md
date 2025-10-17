@@ -44,18 +44,27 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 ### Advanced Usage
 Each module in **METAHIT** can be executed independently, allowing users to run only specific steps of the workflow. 
 
-#### 6. Binning Module:
+#### 6. Binning Module  
+
 ```bash
-bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> -t 80
+bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
 
-**Input arguments:**
-- `<FASTA>` — Assembled contigs file  
-- `<BAM>` — Mapped Hi-C alignments  
-- `<OUTDIR>` — Output directory for binning results  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory
+**Inputs**  
+- `<FASTA>` — Assembled contigs file 
+- `<BAM>` — Hi-C reads aligned to the contigs 
+- `<OUTDIR>` — Output directory for binning results 
+- `<PROJECT_PATH>` — Path to the METAHIT project directory 
 
-Additional optional parameters for fine-tuning MetaCC, bin3C, and ImputeCC are supported. All parameters have internal default values and can be customized as needed; see the source code (`modules/6_binning/6a_binning.py`) for full details.
+**Outputs**  
+- `<OUTDIR>/bin3c/fasta/*.fna` — bin3C bins 
+- `<OUTDIR>/metacc/BIN/*.fa` — MetaCC bins 
+- `<OUTDIR>/imputecc/FINAL_BIN/*.fa` — ImputeCC bins 
+- `<OUTDIR>/metahit/metahit_50_10_bins/*.fa` — Integrated final bins produced by MetaHIT bin refinement  
+- `<OUTDIR>/metahit/figures/heatmap.png` — Heatmap of final bins  
+
+**Parameters**  
+- `-t, --threads` — Number of CPU threads (default 80)  
 
 #### Selective Execution
 Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
