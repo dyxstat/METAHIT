@@ -50,7 +50,7 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> -t 80
 - `<FASTA>` — Assembled contigs file  
 - `<BAM>` — Mapped Hi-C alignments  
 - `<OUTDIR>` — Output directory for binning results  
-- `<PROJECT_PATH>` — Path to the METAHIT project base
+- `<PROJECT_PATH>` — Path to the METAHIT project directory
 
 Additional optional parameters for fine-tuning MetaCC, bin3C, and ImputeCC are supported. All parameters have internal default values and can be customized as needed; see the source code (`6_binning/6a_binning.py`) for full details.
 
