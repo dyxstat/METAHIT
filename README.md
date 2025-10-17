@@ -37,24 +37,31 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 ### Sample Usage
 Each module in **METAHIT** can be executed independently, allowing users to run only specific steps of the workflow.  
 For example, to run the binning module:
+
 ```bash
 bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> -t 80
 ```
+
 **Input arguments:**
 - `<FASTA>` — Assembled contigs file  
 - `<BAM>` — Mapped Hi-C alignments  
 - `<OUTDIR>` — Output directory for binning results  
-- `<PROJECT_PATH>` — Path to the METAHIT project base  
+- `<PROJECT_PATH>` — Path to the METAHIT project base
+
 Additional optional parameters for fine-tuning MetaCC, bin3C, and ImputeCC are supported. All parameters have internal default values and can be customized as needed; see the source code (`6_binning/6a_binning.py`) for full details.
 
 ### Selective Execution
-Since the **METAHIT** modules can be executed independently, each step is **optional** and can be skipped depending on computational resources and analysis needs.  
+Since the **METAHIT** modules can be executed independently, each step is **optional** and can be skipped depending on computational resources and analysis needs.
+
 For example, the **reassembly** module is computationally intensive and performs best with sufficient sequencing coverage. In practice, users may choose to reassemble only selected bins—such as those with higher contamination or of particular biological importance—to balance resource use and data quality. When resources are constrained, this step can be skipped, and analyses can proceed using the consolidated bins from the **binning** module, although our benchmarking indicates that reassembly substantially improves contiguity and reduces contamination.
+
 Similarly, the final three modules—**scaffolding**, **annotation**, and **MGE**—are also optional and can be included or omitted depending on the study’s objectives.
 
 ## Copyright
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
 
