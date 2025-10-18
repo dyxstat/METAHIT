@@ -42,17 +42,112 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 ### Basic Usage
 
 ### Advanced Usage
-Each module in **METAHIT** can be executed independently, allowing users to run only specific steps of the workflow. 
+Each module in **METAHIT** can be executed manually, allowing users to run using arbitrary parameters. 
+
+#### 1. Preprocessing Module  
+```bash
+bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+```
+
+**Inputs**  
+- <PROJECT_PATH> — Path to the METAHIT project directory  
+- <READ1> — Forward shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
+- <READ2> — Reverse shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
+- <OUTDIR> — Output directory for preprocessed reads  
+
+**Outputs**  
+- <OUTDIR>/final_<prefix>_1.fastq.gz — Final preprocessed forward reads  
+- <OUTDIR>/final_<prefix>_2.fastq.gz — Final preprocessed reverse reads  
+
+**Parameters**  
+- -t, --threads — Number of CPU threads (default 80)  
+- --dedup — Enable duplicate removal for Hi-C reads
+
+#### 2. Assembly Module  
+```bash
+bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+```
+
+**Inputs**  
+- <PROJECT_PATH> — Path to the METAHIT project directory  
+- <READ1> — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
+- <READ2> — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
+- <OUTDIR> — Output directory for assembled contigs  
+
+**Outputs**  
+- <OUTDIR>/final_assembly.fasta — Final assembled contigs  
+
+**Parameters**  
+- -t, --threads — Number of CPU threads (default 80)  
+- -l — Minimum contig length (default 1000 bp)  
+- --megahit / --metaspades / --metaflye — Choose assembler (default MEGAHIT)
+
+#### 3. Alignment Module  
+```bash
+bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+```
+
+**Inputs**  
+- <PROJECT_PATH> — Path to the METAHIT project directory  
+- <REFERENCE> — Assembled contigs file (.fasta)  
+- <READ1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- <READ2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- <OUTDIR> — Output directory for alignment results  
+
+**Outputs**  
+- <OUTDIR>/sorted_map.bam — Sorted BAM file of aligned Hi-C reads  
+- <OUTDIR>/3d_ratio.txt — 3D ratio 
+
+**Parameters**  
+- -t, --threads — Number of CPU threads (default 80)  
+- --samtools-filter — Filtering flag for `samtools view` (default `-F 0x900`)
+
+#### 4. Coverage Module  
+```bash
+bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
+```
+
+**Inputs**  
+- <PROJECT_PATH> — Path to the METAHIT project directory  
+- <READ1> — Forward shotgun reads (.fastq or .fastq.gz)  
+- <READ2> — Reverse shotgun reads (.fastq or .fastq.gz)  
+- <REFERENCE> — Assembled contigs file (.fasta)  
+- <OUTDIR> — Output directory for coverage results  
+
+**Outputs**  
+- <OUTDIR>/SG_map_sorted.bam — Sorted BAM file of mapped reads  
+- <OUTDIR>/coverage.txt — Contig-level coverage summary  
+- <OUTDIR>/pair.txt — Paired-contig information  
+
+**Parameters**  
+- -t, --threads — Number of CPU threads (default 80)
+
+#### 5. Contact Module  
+```bash
+bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
+```
+
+**Inputs**  
+- <METHOD> — Normalization method (`metator`, `hiczin`, `normcc`, etc.)  
+- <PROJECT_PATH> — Path to the METAHIT project directory  
+- <BAM> — Hi-C read alignment file (.bam)  
+- <FASTA> — Assembled contigs file (.fasta)  
+- <OUTDIR> — Output directory for contact maps  
+- <ENZYME> — Restriction enzymes used in the Hi-C library (e.g., Sau3AI,MluCI)  
+
+**Outputs**  
+- <OUTDIR>/Raw_contact_matrix.npz — Raw contact matrix   
+- <OUTDIR>/normalized_contact_matrix.npz — Normalized contact matrix
+- <OUTDIR>/contig_info.csv — Contig metadata 
 
 #### 6. Binning Module  
-
 ```bash
 bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
 
 **Inputs**  
-- `<FASTA>` — Assembled contigs file 
-- `<BAM>` — Hi-C reads aligned to the contigs 
+- `<FASTA>` — Assembled contigs file (.fa or .fasta)  
+- `<BAM>` — Hi-C reads aligned to the contigs (.bam) 
 - `<OUTDIR>` — Output directory for binning results 
 - `<PROJECT_PATH>` — Path to the METAHIT project directory 
 
@@ -62,6 +157,89 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 - `<OUTDIR>/imputecc/FINAL_BIN/*.fa` — ImputeCC bins 
 - `<OUTDIR>/metahit/metahit_50_10_bins/*.fa` — Integrated final bins produced by MetaHIT bin refinement  
 - `<OUTDIR>/metahit/figures/heatmap.png` — Heatmap of final bins  
+
+**Parameters**  
+- `-t, --threads` — Number of CPU threads (default 80)
+
+#### 7. Reassembly Module
+```bash
+bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
+```
+
+**Inputs**  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<BIN_DIR>` — Directory containing input bins  
+- `<ASSEMBLY>` — Original assembly FASTA file (.fa or .fasta)  
+- <HIC_READ1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- <HIC_READ2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
+- <SHOTGUN_READ1> — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
+- <SHOTGUN_READ2> — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
+- `<BAM>` — Hi-C read alignments to the assembly (.bam)  
+- `<OUTDIR>` — Output directory for reassembly results  
+
+**Outputs**  
+- `<OUTDIR>/reassembled_bins/` — Final reassembled bins (.fa)  
+- `<OUTDIR>/unmapped_assembly/final.contigs.fa` — Assembly of unmapped reads  
+- `<OUTDIR>/combined/combined_contigs.fa` — Combined contigs (bins and unmapped)  
+
+**Parameters**  
+- `-t, --threads` — Number of CPU threads (default 80)  
+- `-m, --memory` — Memory in GB (default 24)  
+- `--parallel` — Enable per-bin parallel reassembly (1 thread per bin)
+
+#### 8. Scaffolding Module  
+```bash
+bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
+```
+
+**Inputs**  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<BIN_FASTA>` — Input bin file for scaffolding (.fa or .fasta)  
+- `<BAM>` — Optional Hi-C read alignments to the assembly (.bam) 
+- `<ENZYME>` — Restriction enzymes used in Hi-C library (e.g., Sau3AI,MluCI)  
+- `<OUTDIR>` — Output directory for scaffolding results  
+- <HIC1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- <HIC2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
+
+**Outputs**  
+- `<OUTDIR>/yahs/scaffold_scaffolds_final.fa` — Scaffolded genome from YaHS  
+- `<OUTDIR>/figures/heatmap.png` — Contact heatmap of scaffolded genome  
+
+**Parameters**  
+- `-t, --threads` — Number of CPU threads (default 80)  
+- `-m, --memory` — Memory limit for YaHS and SPAdes (default: 80% of available RAM)  
+- `-r, --resolution` — Segment length for visualization (default 1000 bp)  
+- `--bam` — Skip new Hi-C alignment by providing an existing BAM
+
+#### 9. Annotation Module
+```bash
+bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
+```
+
+**Inputs**  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<BIN_DIR>` — Directory containing input bins 
+- `<OUTDIR>` — Output directory for annotation results  
+
+**Outputs**  
+- `<OUTDIR>/gtdbtk.bac120.summary.tsv` — Summary of GTDB-Tk bacterial classifications  
+- `<OUTDIR>/gtdbtk.ar122.summary.tsv` — Summary of GTDB-Tk archaeal classifications  
+
+**Parameters**  
+- `-t, --threads` — Number of CPU threads (default 80)
+
+  #### 10. MGE Module  
+bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
+
+**Inputs**  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<COMBINED_FASTA>` — Combined contigs FASTA file (include both binned and unmapped contigs, .fa)  
+- `<CONTACT_MATRIX>` — Normalized contact matrix (.npz) 
+- `<OUTDIR>` — Output directory for MGE analysis results  
+
+**Outputs**  
+- `<OUTDIR>/genomad_output/` — geNomad predictions of viral and plasmid contigs  
+- `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)  
