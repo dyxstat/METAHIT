@@ -228,8 +228,10 @@ bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THR
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
 
-  #### 10. MGE Module  
+#### 10. MGE Module  
+```bash
 bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
+```
 
 **Inputs**  
 - `<PROJECT_PATH>` — Path to the METAHIT project directory  
