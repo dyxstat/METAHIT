@@ -20,11 +20,11 @@ Required:
   --outdir PATH                Output directory
 
 Optional:
-  -t, --threads INT            Threads (default: 4)
+  -t, --threads INT            Threads (default: 80)
 EOF
 }
 
-THREADS=4
+THREADS=80
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--metahit-path) METAHIT_PATH="$2"; shift 2;;

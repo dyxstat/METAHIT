@@ -16,7 +16,7 @@ available_mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 available_mem_gb=$((available_mem_kb / 1024 / 1024))
 calculated_mem=$((available_mem_gb * 80 / 100))
 mem="${calculated_mem}g"
-threads=40
+threads=80
 resolution=1000
 
 # If insufficient arguments, show help

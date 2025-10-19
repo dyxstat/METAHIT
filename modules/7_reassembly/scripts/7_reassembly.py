@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument('--outdir', required=True, help='Output directory')
     parser.add_argument('-p', '--metahit_path', default=default_metahit_path,
                         help='Path to metahit folder (default: two directories up from script)')
-    parser.add_argument('-t', '--threads', default='4', help='Number of threads')
+    parser.add_argument('-t', '--threads', default='80', help='Number of threads')
     parser.add_argument('-m', '--memory', default='24', help='Memory (GB)')
     parser.add_argument('-k', '--top_k', type=int, default=100,
                         help='Number of top contigs to extract insert sizes from')
