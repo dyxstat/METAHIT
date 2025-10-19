@@ -16,22 +16,22 @@ The folder `installation/db_setup` contains four scripts to download and set up 
 
 **CheckM database downloading:**  
 ```bash
-bash installation/db_setup/checkm_db.sh [DB_DIR]
+bash installation/db/checkm_db.sh [DB_DIR]
 ```
 
 **CheckM2 database downloading:**  
 ```bash
-bash installation/db_setup/checkm2_db.sh [DB_DIR]
+bash installation/db/checkm2_db.sh [DB_DIR]
 ```
 
 **CheckV database downloading:**  
 ```bash
-bash installation/db_setup/checkv_db.sh [DB_DIR]
+bash installation/db/checkv_db.sh [DB_DIR]
 ```
 
 **GTDB-Tk database downloading:**  
 ```bash
-bash installation/db_setup/gtdbtk_db.sh [DB_DIR]
+bash installation/db/gtdbtk_db.sh [DB_DIR]
 ```
 
 ## Usage
