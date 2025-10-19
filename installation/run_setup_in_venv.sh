@@ -20,17 +20,26 @@ else
         git
 fi
 
-# Determine conda.sh path 
-CONDA_SH="/apps/anaconda3/2024.10-1/etc/profile.d/conda.sh"
-if [ ! -f "$CONDA_SH" ]; then
-    echo "[ERROR] Could not locate conda.sh at $CONDA_SH. Please adjust the script manually."
+# Locate conda.sh dynamically
+if [ -z "$CONDA_EXE" ]; then
+    echo "[ERROR] Conda not found in PATH. Please install Conda or add it to your PATH."
     exit 1
 fi
 
-# Source conda and activate the environment
+# Derive conda.sh path automatically
+CONDA_SH="$(dirname $(dirname $CONDA_EXE))/etc/profile.d/conda.sh"
+
+if [ ! -f "$CONDA_SH" ]; then
+    echo "[ERROR] Could not locate conda.sh automatically at $CONDA_SH."
+    echo "Please check your Conda installation."
+    exit 1
+fi
+
+# Source conda.sh and activate environment
 echo "[INFO] Activating Conda environment '$ENV_NAME'..."
 source "$CONDA_SH"
-conda activate $ENV_NAME
+conda activate "$ENV_NAME"
+
 
 # Run the setup script
 echo "[INFO] Running setup.sh inside '$ENV_NAME'..."

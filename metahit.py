@@ -174,12 +174,13 @@ def scaffolding(args):
         f'--hic1 "{absolute_path(args.hic1)}" '
         f'--hic2 "{absolute_path(args.hic2)}" '
         f'-t {args.threads} '
-        f'-m {args.memory} '
         f'-r {args.resolution}'
     )
 
     if args.bam:
         command += f' --bam "{absolute_path(args.bam)}"'
+    if args.memory:
+        command += f' -m {args.memory}'    
 
     run_command(command)
     
@@ -307,7 +308,7 @@ def main():
     scaf_parser.add_argument("--hic1", required=True, help="Forward preprocessed Hi-C reads (.fastq or .fastq.gz)")
     scaf_parser.add_argument("--hic2", required=True, help="Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)")
     scaf_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
-    scaf_parser.add_argument("-m", "--memory", type=str, default="200g", help="Memory limit (default=200g)")
+    scaf_parser.add_argument("-m", "--memory", type=str, default=None, help="Memory limit (default=80% of available RAM)")
     scaf_parser.add_argument("-r", "--resolution", type=int, default=10000, help="Segment length for visualization (default=10000 bp)")
     scaf_parser.set_defaults(func=scaffolding)
 
