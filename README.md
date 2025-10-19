@@ -6,13 +6,13 @@ METAHIT enables comprehensive and flexible genome-resolved microbiome analysis w
 To install all dependencies required for **METAHIT**, run the setup script located in the `installation` folder:
 
 ```bash
-bash run_setup_in_venv.sh
+bash installation/run_setup_in_venv.sh
 ```
 
 This command will automatically create and activate a minimal Conda environment (`metahit_venv`) and then execute `setup.sh` inside it. During this process, all necessary tools and environments (e.g., BBTools, CheckM2, GTDB-Tk, geNomad, CheckV) will be downloaded, configured, and installed into an `external/` directory within the repository. Once setup completes, you can optionally add `external/bin/` to your system `PATH` for easier access to the installed executables.
 
 ### Databases
-The folder `installation/db_setup` contains four scripts to download and set up databases for **CheckM**, **CheckM2**, **CheckV**, and **GTDB-Tk**. By default, each script downloads the database into a `database/` folder in your current working directory, but you can optionally provide a custom path.
+The folder `installation/db` contains four scripts to download and set up databases for **CheckM**, **CheckM2**, **CheckV**, and **GTDB-Tk**. By default, each script downloads the database into a `database/` folder in your current working directory, but you can optionally provide a custom path.
 
 **CheckM database downloading:**  
 ```bash
@@ -40,9 +40,16 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 ![METAHIT overview](images/Metahit_Overview.png)
 
 ### Basic Usage
+`metahit.py` is the main command-line wrapper that controls all modules in the MetaHit pipeline. Each module can be executed individually using subcommands.
 
-### Advanced Usage
-Each module in **METAHIT** can be executed manually, allowing users to run using arbitrary parameters. 
+```bash
+python metahit.py <module> [options]
+```
+
+Example:
+```bash
+python metahit.py preprocessing -p /path/to/project -1 reads_R1.fastq.gz -2 reads_R2.fastq.gz -o output_dir -t 80
+```
 
 #### 1. Preprocessing Module  
 ```bash
