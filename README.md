@@ -12,7 +12,7 @@ bash installation/run_setup_in_venv.sh
 This command will automatically create and activate a minimal Conda environment (`metahit_venv`) and then execute `setup.sh` inside it. During this process, all necessary tools and environments (e.g., BBTools, CheckM2, GTDB-Tk, geNomad, CheckV) will be downloaded, configured, and installed into an `external/` directory within the repository. Once setup completes, you can optionally add `external/bin/` to your system `PATH` for easier access to the installed executables.
 
 ### Databases
-The folder `installation/db` contains four scripts to download and set up databases for **CheckM**, **CheckM2**, **CheckV**, and **GTDB-Tk**. By default, each script downloads the database into a `database/` folder in your current working directory, but you can optionally provide a custom path.
+The folder `installation/db` contains five scripts to download and set up databases for **CheckM**, **CheckM2**, **GTDB-Tk**, **geNomad** and **CheckV**. By default, each script downloads the database into a `databases/` folder in your current working directory. You can optionally specify a custom path during installation. If you do, please make sure to provide the same custom path when running the corresponding modules — CheckM for module 6, CheckM2 for modules 7 and 8, GTDB-Tk for module 9, and geNomad and CheckV for module 10.
 
 **CheckM database downloading:**  
 ```bash
@@ -24,14 +24,19 @@ bash installation/db/checkm_db.sh [DB_DIR]
 bash installation/db/checkm2_db.sh [DB_DIR]
 ```
 
-**CheckV database downloading:**  
-```bash
-bash installation/db/checkv_db.sh [DB_DIR]
-```
-
 **GTDB-Tk database downloading:**  
 ```bash
 bash installation/db/gtdbtk_db.sh [DB_DIR]
+```
+
+**geNomad database downloading:**  
+```bash
+bash installation/db/genomad_db.sh [DB_DIR]
+```
+
+**CheckV database downloading:**  
+```bash
+bash installation/db/checkv_db.sh [DB_DIR]
 ```
 
 ## Usage
