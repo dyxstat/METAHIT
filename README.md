@@ -2,7 +2,7 @@
 METAHIT enables comprehensive and flexible genome-resolved microbiome analysis with metagenomic Hi-C.
 
 ## Installation
-To install **MetaHIT**, first clone the repository and navigate to the project directory:
+To install **METAHIT**, first clone the repository and navigate to the project directory:
 
 ```bash
 git clone https://github.com/dyxstat/METAHIT.git
