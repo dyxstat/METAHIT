@@ -9,7 +9,7 @@ To install all dependencies required for **METAHIT**, run the setup script locat
 bash installation/run_setup_in_venv.sh
 ```
 
-This command will automatically create and activate a minimal Conda environment (`metahit_venv`) and then execute `setup.sh` inside it. During this process, all necessary tools and environments (e.g., BBTools, CheckM2, GTDB-Tk, geNomad, CheckV) will be downloaded, configured, and installed into an `external/` directory within the repository. Once setup completes, you can optionally add `external/bin/` to your system `PATH` for easier access to the installed executables.
+This command will automatically create and activate a minimal Conda environment (`metahit_venv`) and then execute `setup.sh` inside it. During this process, all necessary tools and environments (e.g., BBTools, CheckM, CheckM2, GTDB-Tk, geNomad, CheckV) will be downloaded, configured, and installed into an `external/` directory within the repository. Once setup completes, you can optionally add `external/bin/` to your system `PATH` for easier access to the installed executables.
 
 ### Databases
 The folder `installation/db` contains five scripts to download and set up databases for **CheckM**, **CheckM2**, **GTDB-Tk**, **geNomad** and **CheckV**. By default, each script downloads the database into a `databases/` folder in your current working directory. You can optionally specify a custom path during installation. If you do, please make sure to provide the same custom path when running the corresponding modules — CheckM for module 6, CheckM2 for modules 7 and 8, GTDB-Tk for module 9, and geNomad and CheckV for module 10.
