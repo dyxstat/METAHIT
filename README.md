@@ -172,6 +172,7 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
+- `--checkm_db` - Custom path for the CheckM database
 
 #### 7. Reassembly Module
 ```bash
@@ -198,6 +199,7 @@ bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --h
 - `-t, --threads` — Number of CPU threads (default 80)  
 - `-m, --memory` — Memory in GB (default 24)  
 - `--parallel` — Enable per-bin parallel reassembly (1 thread per bin)
+- `--checkm2_db` - Custom path for the CheckM2 database
 
 #### 8. Scaffolding Module  
 ```bash
@@ -222,6 +224,7 @@ bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme
 - `-m, --memory` — Memory limit for YaHS and SPAdes (default: 80% of available RAM)  
 - `-r, --resolution` — Segment length for visualization (default 1000 bp)  
 - `--bam` — Skip new Hi-C alignment by providing an existing BAM
+- `--checkm2_db` - Custom path for the CheckM2 database
 
 #### 9. Annotation Module
 ```bash
@@ -239,6 +242,7 @@ bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THR
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
+- `--gtdbtk_db` - Custom path for the GTDB-Tk database
 
 #### 10. MGE Module  
 ```bash
@@ -256,7 +260,9 @@ bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_
 - `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
 
 **Parameters**  
-- `-t, --threads` — Number of CPU threads (default 80)  
+- `-t, --threads` — Number of CPU threads (default 80)
+- `--genomad_db` - Custom path for the geNomad database
+- `--checkv_db` - Custom path for the CheckV database
 
 #### Selective Execution
 Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
@@ -271,14 +277,6 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
-
-
-
-
-
-
-
-
 
 
 
