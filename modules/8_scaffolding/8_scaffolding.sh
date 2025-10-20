@@ -21,7 +21,7 @@ resolution=1000
 
 # If insufficient arguments, show help
 if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 -p metahit_path --fasta bin.fa [--bam hic_mapped.bam] --enzyme DpnII --outdir scaffolding_output --hic1 hic_R1.fq --hic2 hic_R2.fq -t 40 -m 200g -r 10000"
+    echo "Usage: $0 -p metahit_path --fasta bin.fa [--bam hic_mapped.bam] --enzyme DpnII --outdir scaffolding_output --hic1 hic_R1.fq --hic2 hic_R2.fq [--checkm2_db path_to_db] -t 40 -m 200g -r 10000"
     exit 1
 fi
 
@@ -38,6 +38,7 @@ while [[ "$#" -gt 0 ]]; do
         -t) threads=$2; shift 2;;
         -m) mem=$2; shift 2;;
         -r) resolution=$2; shift 2;;
+        --checkm2_db) checkm2_db=$2; shift 2;;
         *) echo_error "Unknown parameter passed: $1"; exit 1;;
     esac
 done
@@ -45,7 +46,7 @@ done
 # Check required inputs (BAM is now optional)
 if [[ -z "$path" || -z "$fasta" || -z "$enzyme" || -z "$outdir" || -z "$hic1" || -z "$hic2" ]]; then
     echo_error "Missing one or more required parameters."
-    echo "Usage: $0 -p metahit_path --fasta bin.fa [--bam hic_mapped.bam] --enzyme DpnII --outdir output_dir --hic1 hic_R1.fq --hic2 hic_R2.fq [-t threads] [-m mem] [-r resolution]"
+    echo "Usage: $0 -p metahit_path --fasta bin.fa [--bam hic_mapped.bam] --enzyme DpnII --outdir output_dir --hic1 hic_R1.fq --hic2 hic_R2.fq [--checkm2_db path_to_db] [-t threads] [-m mem] [-r resolution]"
     exit 1
 fi
 
@@ -63,6 +64,11 @@ cmd="python \"$scaffolding_script\" -p \"$path\" --fasta \"$fasta\" --enzyme \"$
 # Add BAM only if provided
 if [[ -n "$bam" ]]; then
     cmd="$cmd --bam \"$bam\""
+fi
+
+# Add CheckM2 DB if provided
+if [[ -n "$checkm2_db" ]]; then
+    cmd="$cmd --checkm2_db \"$checkm2_db\""
 fi
 
 eval $cmd

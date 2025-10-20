@@ -6,9 +6,9 @@ echo "[FREE MEMORY]: $free_mem"
 
 # Check for required arguments
 if [ "$#" -lt 4 ]; then
-    echo "Usage: $0 <FASTA> <BAM> <OUTDIR_BASE> <PROJECT_PATH> [optional args]"
+    echo "Usage: $0 <FASTA> <BAM> <OUTDIR_BASE> <PROJECT_PATH> [--checkm_db /path/to/checkm_data] [optional args]"
     echo "Example:"
-    echo "  $0 final.contigs.fa ALL_MAP_SORTED.bam bin_refinement metahit [--threads 80]"
+    echo "  $0 final.contigs.fa ALL_MAP_SORTED.bam bin_refinement metahit --checkm_db /path/to/checkm_data [--threads 80]"
     exit 1
 fi
 
@@ -18,14 +18,33 @@ OUTDIR=$3
 PROJECT_PATH=$4
 shift 4
 
+# ---- Optional argument: CheckM database path ----
+CHECKM_DB=""
+for arg in "$@"; do
+    if [[ "$arg" == "--checkm_db" ]]; then
+        CHECKM_DB="--checkm_db"
+        shift
+        CHECKM_DB_PATH="$1"
+        shift
+        break
+    fi
+done
+
 # ---- Part 1: Binning ----
 BINNING_SCRIPT="${PROJECT_PATH}/6_binning/scripts/6a_binning.py"
 
 echo "[INFO] Running binning tools (MetaCC, bin3C, ImputeCC)..."
-python "$BINNING_SCRIPT" --FASTA "$FASTA" --BAM "$BAM" --OUTDIR "$OUTDIR" "$@" || {
-    echo "[ERROR] Binning failed."
-    exit 1
-}
+if [ -n "$CHECKM_DB" ]; then
+    python "$BINNING_SCRIPT" --FASTA "$FASTA" --BAM "$BAM" --OUTDIR "$OUTDIR" --checkm_db "$CHECKM_DB_PATH" "$@" || {
+        echo "[ERROR] Binning failed."
+        exit 1
+    }
+else
+    python "$BINNING_SCRIPT" --FASTA "$FASTA" --BAM "$BAM" --OUTDIR "$OUTDIR" "$@" || {
+        echo "[ERROR] Binning failed."
+        exit 1
+    }
+fi
 echo "[INFO] Binning completed successfully."
 
 # ---- Part 2: Run METAHIT bin integration ----

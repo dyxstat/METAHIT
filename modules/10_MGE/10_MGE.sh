@@ -21,10 +21,15 @@ Required:
 
 Optional:
   -t, --threads INT            Threads (default: 80)
+  --genomad_db PATH            Path to custom geNomad database
+  --checkv_db PATH             Path to custom CheckV database
 EOF
 }
 
 THREADS=80
+GENOMAD_DB=""
+CHECKV_DB=""
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--metahit-path) METAHIT_PATH="$2"; shift 2;;
@@ -32,6 +37,8 @@ while [[ $# -gt 0 ]]; do
     --contact)         CONTACT_MATRIX="$2"; shift 2;;
     --outdir)          OUTDIR="$2"; shift 2;;
     -t|--threads)      THREADS="$2"; shift 2;;
+    --genomad_db)      GENOMAD_DB="$2"; shift 2;;
+    --checkv_db)       CHECKV_DB="$2"; shift 2;;
     -h|--help)         usage; exit 0;;
     *) echo "Error: Unknown parameter: $1"; usage; exit 1;;
   esac
@@ -51,7 +58,13 @@ echo "[INFO] ===== STEP 1: Run geNomad ====="
 eval "$(conda shell.bash hook)"
 conda activate genomad
 
-GENOMAD_DB="$METAHIT_PATH/databases/genomad_db"
+if [[ -z "$GENOMAD_DB" ]]; then
+    GENOMAD_DB="$METAHIT_PATH/databases/genomad_db"
+    echo "[INFO] Using default geNomad DB: $GENOMAD_DB"
+else
+    echo "[INFO] Using custom geNomad DB: $GENOMAD_DB"
+fi
+
 [[ -f "$GENOMAD_DB/version.txt" ]] || { echo "[ERROR] geNomad DB missing at $GENOMAD_DB"; exit 1; }
 
 genomad end-to-end \
@@ -106,7 +119,12 @@ EOF
 # STEP 2: Run CheckV (only viruses)
 ################################################################################
 echo "[INFO] ===== STEP 2: Run CheckV ====="
-CHECKV_DB="$METAHIT_PATH/databases/checkv_db/checkv-db-v1.5"
+if [[ -z "$CHECKV_DB" ]]; then
+    CHECKV_DB="$METAHIT_PATH/databases/checkv_db/checkv-db-v1.5"
+    echo "[INFO] Using default CheckV DB: $CHECKV_DB"
+else
+    echo "[INFO] Using custom CheckV DB: $CHECKV_DB"
+fi
 
 conda activate checkv_env
 checkv end_to_end "$FILTERED_VIRAL" "$OUTDIR/checkv_output/virus" -t "$THREADS" -d "$CHECKV_DB"
@@ -175,7 +193,6 @@ with open(summary_file,"w") as fh:
     fh.write(f"Virus MQ: {mq_count}\n")
     fh.write(f"Virus HQ+MQ total: {len(virus_keep)}\n\n")
 
-    # Export QC FASTA for HQ+MQ viruses
     ids_virus = set(virus_keep["contig_id"])
     with open(viral_qc,"w") as out_f:
         for rec in SeqIO.parse(filtered_viral,"fasta"):

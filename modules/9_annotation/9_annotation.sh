@@ -7,12 +7,13 @@ echo "Running: gtdbtk classify_wf"
 
 # Display usage if insufficient arguments
 if [ "$#" -lt 4 ]; then
-    echo "Usage: $0 -p <METAHIT_PATH> --bin <BIN_DIR> --outdir <OUTPUT_DIR> -t <THREADS> [additional gtdbtk options]"
+    echo "Usage: $0 -p <METAHIT_PATH> --bin <BIN_DIR> --outdir <OUTPUT_DIR> -t <THREADS> [--gtdbtk_db <GTDB_DB_PATH>] [additional gtdbtk options]"
     exit 1
 fi
 
 # Defaults
 THREADS=1
+GTDBTK_DB=""
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
@@ -33,6 +34,10 @@ while [[ "$#" -gt 0 ]]; do
             THREADS=$2
             shift 2
             ;;
+        --gtdbtk_db)
+            GTDBTK_DB=$2
+            shift 2
+            ;;
         *)
             break
             ;;
@@ -50,12 +55,18 @@ echo "[INFO] Activating GTDB-Tk environment 'gtdbtk-2.4.0'..."
 eval "$(conda shell.bash hook)"
 conda activate gtdbtk-2.4.0
 
-# Set GTDB-Tk database path
-export GTDBTK_DATA_PATH="${PATH_DIR}/databases/release220"
-
 if [ $? -ne 0 ]; then
     echo "Error: Could not activate Conda environment 'gtdbtk-2.4.0'."
     exit 1
+fi
+
+# Set GTDB-Tk database path
+if [ -n "$GTDBTK_DB" ]; then
+    export GTDBTK_DATA_PATH="$GTDBTK_DB"
+    echo "[INFO] Using custom GTDB-Tk database: $GTDBTK_DB"
+else
+    export GTDBTK_DATA_PATH="${PATH_DIR}/databases/release220"
+    echo "[INFO] Using default GTDB-Tk database: ${PATH_DIR}/databases/release220"
 fi
 
 # Run GTDB-Tk classification

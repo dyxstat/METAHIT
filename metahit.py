@@ -132,6 +132,9 @@ def binning(args):
         f'"{absolute_path(args.project_path)}" '
         f'--threads {args.threads}'
     )
+    
+    if args.checkm_db:
+        command += f' --checkm_db "{absolute_path(args.checkm_db)}"'
 
     run_command(command)
     
@@ -157,6 +160,8 @@ def reassembly(args):
 
     if args.parallel:
         command += " --parallel"
+    if args.checkm2_db:
+        command += f' --checkm2_db "{absolute_path(args.checkm2_db)}"'
 
     run_command(command)
     
@@ -181,7 +186,9 @@ def scaffolding(args):
         command += f' --bam "{absolute_path(args.bam)}"'
     if args.memory:
         command += f' -m {args.memory}'    
-
+    if args.checkm2_db:
+        command += f' --checkm2_db "{absolute_path(args.checkm2_db)}"'
+        
     run_command(command)
     
 def annotation(args):
@@ -196,6 +203,9 @@ def annotation(args):
         f'--outdir "{output_dir}" '
         f'-t {args.threads}'
     )
+    
+    if args.gtdbtk_db:
+        command += f' --gtdbtk_db "{absolute_path(args.gtdbtk_db)}"'
 
     run_command(command)
 
@@ -212,6 +222,11 @@ def mge(args):
         f'--outdir "{output_dir}" '
         f'-t {args.threads}'
     )
+
+    if args.genomad_db:
+        command += f' --genomad_db "{absolute_path(args.genomad_db)}"'
+    if args.checkv_db:
+        command += f' --checkv_db "{absolute_path(args.checkv_db)}"'
 
     run_command(command)
 
@@ -280,6 +295,7 @@ def main():
     bin_parser.add_argument("--output", required=True, help="Output directory for binning results")
     bin_parser.add_argument("--project_path", required=True, help="Path to the MetaHit project directory")
     bin_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
+    bin_parser.add_argument("--checkm_db", help="Path to CheckM database (if not using default environment variable)")
     bin_parser.set_defaults(func=binning)
     
     # Reassembly subcommand
@@ -296,6 +312,7 @@ def main():
     reas_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default 80)")
     reas_parser.add_argument("-m", "--memory", type=int, default=24, help="Memory in GB (default 24)")
     reas_parser.add_argument("--parallel", action="store_true", help="Enable per-bin parallel reassembly (1 thread per bin)")
+    reas_parser.add_argument("--checkm2_db", help="Path to CheckM2 database (if not using default environment variable)")
     reas_parser.set_defaults(func=reassembly)
 
     # Scaffolding subcommand
@@ -310,6 +327,7 @@ def main():
     scaf_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
     scaf_parser.add_argument("-m", "--memory", type=str, default=None, help="Memory limit (default=80% of available RAM)")
     scaf_parser.add_argument("-r", "--resolution", type=int, default=10000, help="Segment length for visualization (default=10000 bp)")
+    scaf_parser.add_argument("--checkm2_db", help="Path to CheckM2 database (if not using default environment variable)")
     scaf_parser.set_defaults(func=scaffolding)
 
     # Annotation subcommand
@@ -318,6 +336,7 @@ def main():
     anno_parser.add_argument("--bin", required=True, help="Directory containing input bins")
     anno_parser.add_argument("--outdir", required=True, help="Output directory for annotation results")
     anno_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
+    anno_parser.add_argument("--gtdbtk_db", help="Path to GTDB-Tk database (if not using default environment variable)")
     anno_parser.set_defaults(func=annotation)
 
     # MGE subcommand
@@ -327,6 +346,8 @@ def main():
     mge_parser.add_argument("--contact", required=True, help="Normalized contact matrix (.npz)")
     mge_parser.add_argument("--outdir", required=True, help="Output directory for MGE analysis results")
     mge_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
+    mge_parser.add_argument("--genomad_db", help="Path to geNomad database (if not using default environment variable)")
+    mge_parser.add_argument("--checkv_db", help="Path to CheckV database (if not using default environment variable)")
     mge_parser.set_defaults(func=mge)
 
     args = parser.parse_args()

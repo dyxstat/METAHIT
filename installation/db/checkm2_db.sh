@@ -1,29 +1,22 @@
 #!/bin/bash
 
-# Define default download directory
-DB_DIR="$../databases"
+# checkm2_db.sh
+# Download and set up the CheckM2 database in a user-specified or default directory.
+
+# Determine database directory
+if [ -n "$1" ]; then
+    DB_DIR="$1"
+else
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    DB_DIR="$(cd "$SCRIPT_DIR/../../" && pwd)/databases"
+fi
+
 mkdir -p "$DB_DIR"
 
-# Function to download a file with progress
-download_file() {
-    local url=$1
-    local dest=$2
-    echo "Downloading: $url"
-    wget -c "$url" -O "$dest"
-}
+echo "[INFO] Database directory set to: $DB_DIR"
 
-# Function to extract tar.gz files
-extract_tar_gz() {
-    local file=$1
-    local dest_dir=$2
-    echo "Extracting: $file"
-    tar -xvzf "$file" -C "$dest_dir"
-}
-
-# 2. Download CheckM2 Database
+# Run CheckM2 database download
+echo "[INFO] Downloading CheckM2 database..."
 checkm2 database --download --path "$DB_DIR"
 
-# Cleanup downloaded files
-rm -f "$CHECKM2_DB" 
-
-echo "All databases downloaded and extracted to: $DB_DIR"
+echo "[INFO] CheckM2 database successfully installed at: $DB_DIR"
