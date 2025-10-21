@@ -65,7 +65,7 @@ Example:
 python metahit.py preprocessing -p /path/to/project -1 reads_R1.fastq.gz -2 reads_R2.fastq.gz -o output_dir -t 80
 ```
 
-#### 1. Preprocessing Module  
+### 1. Preprocessing Module  
 ```bash
 bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
@@ -84,7 +84,7 @@ bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [opt
 - -t, --threads — Number of CPU threads (default 80)  
 - --dedup — Enable duplicate removal for Hi-C reads
 
-#### 2. Assembly Module  
+### 2. Assembly Module  
 ```bash
 bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
@@ -103,7 +103,7 @@ bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 - -l — Minimum contig length (default 1000 bp)  
 - --megahit / --metaspades / --metaflye — Choose assembler (default MEGAHIT)
 
-#### 3. Alignment Module  
+### 3. Alignment Module  
 ```bash
 bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
@@ -123,7 +123,7 @@ bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <O
 - -t, --threads — Number of CPU threads (default 80)  
 - --samtools-filter — Filtering flag for `samtools view` (default `-F 0x900`)
 
-#### 4. Coverage Module  
+### 4. Coverage Module  
 ```bash
 bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
 ```
@@ -143,7 +143,7 @@ bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OU
 **Parameters**  
 - -t, --threads — Number of CPU threads (default 80)
 
-#### 5. Contact Module  
+### 5. Contact Module  
 ```bash
 bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
 ```
@@ -161,7 +161,7 @@ bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <
 - <OUTDIR>/normalized_contact_matrix.npz — Normalized contact matrix
 - <OUTDIR>/contig_info.csv — Contig metadata 
 
-#### 6. Binning Module  
+### 6. Binning Module  
 ```bash
 bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
@@ -183,7 +183,7 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 - `-t, --threads` — Number of CPU threads (default 80)
 - `--checkm_db` - Custom path for the CheckM database
 
-#### 7. Reassembly Module
+### 7. Reassembly Module
 ```bash
 bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
 ```
@@ -210,7 +210,7 @@ bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --h
 - `--parallel` — Enable per-bin parallel reassembly (1 thread per bin)
 - `--checkm2_db` - Custom path for the CheckM2 database
 
-#### 8. Scaffolding Module  
+### 8. Scaffolding Module  
 ```bash
 bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
 ```
@@ -235,7 +235,7 @@ bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme
 - `--bam` — Skip new Hi-C alignment by providing an existing BAM
 - `--checkm2_db` - Custom path for the CheckM2 database
 
-#### 9. Annotation Module
+### 9. Annotation Module
 ```bash
 bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
 ```
@@ -253,7 +253,7 @@ bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THR
 - `-t, --threads` — Number of CPU threads (default 80)
 - `--gtdbtk_db` - Custom path for the GTDB-Tk database
 
-#### 10. MGE Module  
+### 10. MGE Module  
 ```bash
 bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
 ```
@@ -273,7 +273,7 @@ bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_
 - `--genomad_db` - Custom path for the geNomad database
 - `--checkv_db` - Custom path for the CheckV database
 
-#### Selective Execution
+### Selective Execution
 Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
 
 For example, the **reassembly** module is computationally intensive and performs best with sufficient sequencing coverage. In practice, users may choose to reassemble only selected bins—such as those with higher contamination or of particular biological importance—to balance resource use and data quality. When resources are constrained, this step can be skipped, and analyses can proceed using the consolidated bins from the **binning** module, although our benchmarking indicates that reassembly substantially improves contiguity and reduces contamination.
