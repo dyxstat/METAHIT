@@ -60,14 +60,9 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 python metahit.py <module> [options]
 ```
 
-Example:
-```bash
-python metahit.py preprocessing -p /path/to/project -1 reads_R1.fastq.gz -2 reads_R2.fastq.gz -o output_dir -t 80
-```
-
 ### 1. Preprocessing Module  
 ```bash
-bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -86,7 +81,7 @@ bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [opt
 
 ### 2. Assembly Module  
 ```bash
-bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -105,7 +100,7 @@ bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 
 ### 3. Alignment Module  
 ```bash
-bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -125,7 +120,7 @@ bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <O
 
 ### 4. Coverage Module  
 ```bash
-bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
+python metahit.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -145,7 +140,7 @@ bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OU
 
 ### 5. Contact Module  
 ```bash
-bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
+python metahit.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
 ```
 
 **Inputs**  
@@ -163,7 +158,7 @@ bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <
 
 ### 6. Binning Module  
 ```bash
-bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
+python metahit.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
 
 **Inputs**  
@@ -185,7 +180,7 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 
 ### 7. Reassembly Module
 ```bash
-bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
+python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
 ```
 
 **Inputs**  
@@ -212,7 +207,7 @@ bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --h
 
 ### 8. Scaffolding Module  
 ```bash
-bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
+python metahit.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
 ```
 
 **Inputs**  
@@ -237,7 +232,7 @@ bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme
 
 ### 9. Annotation Module
 ```bash
-bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
+python metahit.py annotation -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
 ```
 
 **Inputs**  
@@ -255,7 +250,7 @@ bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THR
 
 ### 10. MGE Module  
 ```bash
-bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
+python metahit.py MGE -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
 ```
 
 **Inputs**  
