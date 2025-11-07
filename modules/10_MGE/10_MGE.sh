@@ -5,7 +5,7 @@
 #   1.5 Remove proviruses and make first report
 #   2   Run CheckV QC on viral contigs, keep HQ/MQ only, make second report
 #   3   Use normalized contact matrix to find host–MGE interactions (HQ vs MQ)
-#   4   Generate final combined summary
+#   4   Generate final combined summary and virus-host linkages table
 
 set -euo pipefail
 
@@ -20,16 +20,11 @@ Required:
   --outdir PATH                Output directory
 
 Optional:
-  -t, --threads INT            Threads (default: 80)
-  --genomad_db PATH            Path to custom geNomad database
-  --checkv_db PATH             Path to custom CheckV database
+  -t, --threads INT            Threads (default: 4)
 EOF
 }
 
-THREADS=80
-GENOMAD_DB=""
-CHECKV_DB=""
-
+THREADS=4
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--metahit-path) METAHIT_PATH="$2"; shift 2;;
@@ -37,8 +32,6 @@ while [[ $# -gt 0 ]]; do
     --contact)         CONTACT_MATRIX="$2"; shift 2;;
     --outdir)          OUTDIR="$2"; shift 2;;
     -t|--threads)      THREADS="$2"; shift 2;;
-    --genomad_db)      GENOMAD_DB="$2"; shift 2;;
-    --checkv_db)       CHECKV_DB="$2"; shift 2;;
     -h|--help)         usage; exit 0;;
     *) echo "Error: Unknown parameter: $1"; usage; exit 1;;
   esac
@@ -58,13 +51,7 @@ echo "[INFO] ===== STEP 1: Run geNomad ====="
 eval "$(conda shell.bash hook)"
 conda activate genomad
 
-if [[ -z "$GENOMAD_DB" ]]; then
-    GENOMAD_DB="$METAHIT_PATH/databases/genomad_db"
-    echo "[INFO] Using default geNomad DB: $GENOMAD_DB"
-else
-    echo "[INFO] Using custom geNomad DB: $GENOMAD_DB"
-fi
-
+GENOMAD_DB="$METAHIT_PATH/databases/genomad_db"
 [[ -f "$GENOMAD_DB/version.txt" ]] || { echo "[ERROR] geNomad DB missing at $GENOMAD_DB"; exit 1; }
 
 genomad end-to-end \
@@ -119,12 +106,7 @@ EOF
 # STEP 2: Run CheckV (only viruses)
 ################################################################################
 echo "[INFO] ===== STEP 2: Run CheckV ====="
-if [[ -z "$CHECKV_DB" ]]; then
-    CHECKV_DB="$METAHIT_PATH/databases/checkv_db/checkv-db-v1.5"
-    echo "[INFO] Using default CheckV DB: $CHECKV_DB"
-else
-    echo "[INFO] Using custom CheckV DB: $CHECKV_DB"
-fi
+CHECKV_DB="$METAHIT_PATH/databases/checkv_db/checkv-db-v1.5"
 
 conda activate checkv_env
 checkv end_to_end "$FILTERED_VIRAL" "$OUTDIR/checkv_output/virus" -t "$THREADS" -d "$CHECKV_DB"
@@ -133,7 +115,7 @@ conda activate metahit_env
 VIRAL_QC="$OUTDIR/checkv_output/virus_qc.fna"
 
 ################################################################################
-# STEP 1.5 + STEP 2 + STEP 3 Reports in one summary
+# STEP 1.5 + STEP 2 + STEP 3 + STEP 4 Reports and Linkages
 ################################################################################
 echo "[INFO] ===== Reporting ====="
 
@@ -186,13 +168,21 @@ with open(summary_file,"w") as fh:
 
     fh.write("=== STEP 2 Report (CheckV Quality, Viruses Only) ===\n")
     virus_df = pd.read_csv(f"{outdir}/checkv_output/virus/quality_summary.tsv", sep="\t")
-    virus_keep = virus_df[virus_df["checkv_quality"].isin(["High-quality","Medium-quality"])]
+    # Keep all quality levels EXCEPT "Not-determined"
+    virus_keep = virus_df[virus_df["checkv_quality"] != "Not-determined"]
+    complete_count = (virus_keep["checkv_quality"] == "Complete").sum()
     hq_count = (virus_keep["checkv_quality"] == "High-quality").sum()
     mq_count = (virus_keep["checkv_quality"] == "Medium-quality").sum()
-    fh.write(f"Virus HQ: {hq_count}\n")
-    fh.write(f"Virus MQ: {mq_count}\n")
-    fh.write(f"Virus HQ+MQ total: {len(virus_keep)}\n\n")
+    lq_count = (virus_keep["checkv_quality"] == "Low-quality").sum()
+    nd_count = (virus_df["checkv_quality"] == "Not-determined").sum()
+    fh.write(f"Virus Complete: {complete_count}\n")
+    fh.write(f"Virus High-quality: {hq_count}\n")
+    fh.write(f"Virus Medium-quality: {mq_count}\n")
+    fh.write(f"Virus Low-quality: {lq_count}\n")
+    fh.write(f"Virus Not-determined (excluded): {nd_count}\n")
+    fh.write(f"Virus total (for host attribution): {len(virus_keep)}\n\n")
 
+    # Export QC FASTA for HQ+MQ viruses
     ids_virus = set(virus_keep["contig_id"])
     with open(viral_qc,"w") as out_f:
         for rec in SeqIO.parse(filtered_viral,"fasta"):
@@ -206,8 +196,10 @@ with open(summary_file,"w") as fh:
     all_mge = viral_contigs
     host_contigs = {c for c in contigs if (c.startswith("bin") and c not in all_mge)}
     quality_map = dict(zip(virus_df["contig_id"], virus_df["checkv_quality"]))
+    complete_set = {c for c in viral_contigs if quality_map.get(c)=="Complete"}
     hq_set = {c for c in viral_contigs if quality_map.get(c)=="High-quality"}
     mq_set = {c for c in viral_contigs if quality_map.get(c)=="Medium-quality"}
+    lq_set = {c for c in viral_contigs if quality_map.get(c)=="Low-quality"}
     def count_contacts(mge_set):
         count=0
         for r,c,v in zip(mat.row, mat.col, mat.data):
@@ -216,10 +208,53 @@ with open(summary_file,"w") as fh:
             if (a in mge_set and b in host_contigs) or (b in mge_set and a in host_contigs):
                 count+=1
         return count
-    fh.write(f"HQ viral contigs: {len(hq_set)}\n")
-    fh.write(f"MQ viral contigs: {len(mq_set)}\n")
-    fh.write(f"HQ–host contacts: {count_contacts(hq_set)}\n")
-    fh.write(f"MQ–host contacts: {count_contacts(mq_set)}\n")
+    fh.write(f"Complete viral contigs: {len(complete_set)}\n")
+    fh.write(f"High-quality viral contigs: {len(hq_set)}\n")
+    fh.write(f"Medium-quality viral contigs: {len(mq_set)}\n")
+    fh.write(f"Low-quality viral contigs: {len(lq_set)}\n")
+    fh.write(f"Complete–host contacts: {count_contacts(complete_set)}\n")
+    fh.write(f"High-quality–host contacts: {count_contacts(hq_set)}\n")
+    fh.write(f"Medium-quality–host contacts: {count_contacts(mq_set)}\n")
+    fh.write(f"Low-quality–host contacts: {count_contacts(lq_set)}\n\n")
+
+    # STEP 4: Extract individual virus-host linkages
+    fh.write("=== STEP 4 Report (Virus-Host Linkages Table) ===\n")
+    linkages = []
+    for r, c, v in zip(mat.row, mat.col, mat.data):
+        if v <= 0:
+            continue
+        contig_a = contigs[r]
+        contig_b = contigs[c]
+        if contig_a in viral_contigs and contig_b in host_contigs:
+            linkages.append({
+                'viral_contig': contig_a,
+                'host_contig': contig_b,
+                'contact_strength': int(v),
+                'viral_quality': quality_map.get(contig_a, 'Unknown')
+            })
+        elif contig_b in viral_contigs and contig_a in host_contigs:
+            linkages.append({
+                'viral_contig': contig_b,
+                'host_contig': contig_a,
+                'contact_strength': int(v),
+                'viral_quality': quality_map.get(contig_b, 'Unknown')
+            })
+    
+    linkages_df = pd.DataFrame(linkages)
+    if len(linkages_df) > 0:
+        linkages_df = linkages_df.sort_values('contact_strength', ascending=False)
+        linkages_file = f"{outdir}/virus_host_linkages.tsv"
+        linkages_df.to_csv(linkages_file, sep='\t', index=False)
+        
+        fh.write(f"Total virus-host linkages: {len(linkages_df)}\n")
+        fh.write(f"Unique viral contigs with hosts: {linkages_df['viral_contig'].nunique()}\n")
+        fh.write(f"Unique host contigs with viruses: {linkages_df['host_contig'].nunique()}\n")
+        fh.write(f"Linkages table saved to: virus_host_linkages.tsv\n")
+    else:
+        fh.write("No virus-host linkages found.\n")
+
 EOF
 
-echo "[INFO] ===== MGE analysis finished, summary in checkv_output/MGE_summary.txt ====="
+echo "[INFO] ===== MGE analysis finished ====="
+echo "[INFO] Summary: $OUTDIR/checkv_output/MGE_summary.txt"
+echo "[INFO] Linkages: $OUTDIR/virus_host_linkages.tsv"
