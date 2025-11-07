@@ -2,6 +2,15 @@
 METAHIT enables comprehensive and flexible genome-resolved microbiome analysis with metagenomic Hi-C.
 
 ## Installation
+To install **METAHIT**, first clone the repository and navigate to the project directory:
+
+```bash
+git clone https://github.com/dyxstat/METAHIT.git
+cd METAHIT
+```
+
+Once complete, you can proceed to set up dependencies and databases.
+
 ### Dependencies
 To install all dependencies required for **METAHIT**, run the setup script located in the `installation` folder:
 
@@ -51,14 +60,9 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 python metahit.py <module> [options]
 ```
 
-Example:
+### 1. Preprocessing Module  
 ```bash
-python metahit.py preprocessing -p /path/to/project -1 reads_R1.fastq.gz -2 reads_R2.fastq.gz -o output_dir -t 80
-```
-
-#### 1. Preprocessing Module  
-```bash
-bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -75,9 +79,9 @@ bash 1_preprocessing.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [opt
 - -t, --threads — Number of CPU threads (default 80)  
 - --dedup — Enable duplicate removal for Hi-C reads
 
-#### 2. Assembly Module  
+### 2. Assembly Module  
 ```bash
-bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -94,9 +98,9 @@ bash 2_assembly.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 - -l — Minimum contig length (default 1000 bp)  
 - --megahit / --metaspades / --metaflye — Choose assembler (default MEGAHIT)
 
-#### 3. Alignment Module  
+### 3. Alignment Module  
 ```bash
-bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahit.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -114,9 +118,9 @@ bash 3_alignment.sh -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <O
 - -t, --threads — Number of CPU threads (default 80)  
 - --samtools-filter — Filtering flag for `samtools view` (default `-F 0x900`)
 
-#### 4. Coverage Module  
+### 4. Coverage Module  
 ```bash
-bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
+python metahit.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
@@ -134,9 +138,9 @@ bash 4_coverage.sh -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OU
 **Parameters**  
 - -t, --threads — Number of CPU threads (default 80)
 
-#### 5. Contact Module  
+### 5. Contact Module  
 ```bash
-bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
+python metahit.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
 ```
 
 **Inputs**  
@@ -152,9 +156,9 @@ bash 5_contact.sh <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <
 - <OUTDIR>/normalized_contact_matrix.npz — Normalized contact matrix
 - <OUTDIR>/contig_info.csv — Contig metadata 
 
-#### 6. Binning Module  
+### 6. Binning Module  
 ```bash
-bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
+python metahit.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
 
 **Inputs**  
@@ -172,10 +176,11 @@ bash 6_binning.sh <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
+- `--checkm_db` - Custom path for the CheckM database
 
-#### 7. Reassembly Module
+### 7. Reassembly Module
 ```bash
-bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
+python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
 ```
 
 **Inputs**  
@@ -198,10 +203,11 @@ bash 7_reassembly.sh -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --h
 - `-t, --threads` — Number of CPU threads (default 80)  
 - `-m, --memory` — Memory in GB (default 24)  
 - `--parallel` — Enable per-bin parallel reassembly (1 thread per bin)
+- `--checkm2_db` - Custom path for the CheckM2 database
 
-#### 8. Scaffolding Module  
+### 8. Scaffolding Module  
 ```bash
-bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
+python metahit.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
 ```
 
 **Inputs**  
@@ -222,10 +228,11 @@ bash 8_scaffolding.sh -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme
 - `-m, --memory` — Memory limit for YaHS and SPAdes (default: 80% of available RAM)  
 - `-r, --resolution` — Segment length for visualization (default 1000 bp)  
 - `--bam` — Skip new Hi-C alignment by providing an existing BAM
+- `--checkm2_db` - Custom path for the CheckM2 database
 
-#### 9. Annotation Module
+### 9. Annotation Module
 ```bash
-bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
+python metahit.py annotation -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
 ```
 
 **Inputs**  
@@ -239,10 +246,11 @@ bash 9_annotation.sh -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THR
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
+- `--gtdbtk_db` - Custom path for the GTDB-Tk database
 
-#### 10. MGE Module  
+### 10. MGE Module  
 ```bash
-bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
+python metahit.py MGE -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
 ```
 
 **Inputs**  
@@ -256,9 +264,11 @@ bash 10_MGE.sh -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_
 - `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
 
 **Parameters**  
-- `-t, --threads` — Number of CPU threads (default 80)  
+- `-t, --threads` — Number of CPU threads (default 80)
+- `--genomad_db` - Custom path for the geNomad database
+- `--checkv_db` - Custom path for the CheckV database
 
-#### Selective Execution
+### Selective Execution
 Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
 
 For example, the **reassembly** module is computationally intensive and performs best with sufficient sequencing coverage. In practice, users may choose to reassemble only selected bins—such as those with higher contamination or of particular biological importance—to balance resource use and data quality. When resources are constrained, this step can be skipped, and analyses can proceed using the consolidated bins from the **binning** module, although our benchmarking indicates that reassembly substantially improves contiguity and reduces contamination.
@@ -271,14 +281,6 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
-
-
-
-
-
-
-
-
 
 
 
