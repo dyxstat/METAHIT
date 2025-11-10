@@ -57,6 +57,7 @@ Once installation and database setup are complete, **METAHIT** can be run by exe
 `metahit.py` is the main command-line wrapper that controls all modules in the MetaHit pipeline. Each module can be executed individually using subcommands.
 
 ```bash
+conda activate metahit_env
 python metahit.py <module> [options]
 ```
 
