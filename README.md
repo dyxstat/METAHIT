@@ -261,7 +261,9 @@ python metahit.py MGE -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <C
 - `<OUTDIR>` — Output directory for MGE analysis results  
 
 **Outputs**  
-- `<OUTDIR>/genomad_output/` — geNomad predictions of viral and plasmid contigs  
+- `<OUTDIR>/virus_host_linkages.tsv` - Virus-host linkages table
+- `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_virus_summary.tsv` — geNomad summary of viral contigs
+- `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_plasmid_summary.tsv` — geNomad summary of plasmid contigs
 - `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
 
 **Parameters**  
