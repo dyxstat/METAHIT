@@ -66,18 +66,18 @@ python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTD
 ```
 
 **Inputs**  
-- <PROJECT_PATH> — Path to the METAHIT project directory  
-- <READ1> — Forward shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
-- <READ2> — Reverse shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
-- <OUTDIR> — Output directory for preprocessed reads  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<READ1>` — Forward shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
+- `<READ2>` — Reverse shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
+- `<OUTDIR>` — Output directory for preprocessed reads  
 
 **Outputs**  
-- <OUTDIR>/final_<prefix>_1.fastq.gz — Final preprocessed forward reads  
-- <OUTDIR>/final_<prefix>_2.fastq.gz — Final preprocessed reverse reads  
+- `<OUTDIR>/final_<prefix>_1.fastq.gz` — Final preprocessed forward reads  
+- `<OUTDIR>/final_<prefix>_2.fastq.gz` — Final preprocessed reverse reads  
 
 **Parameters**  
-- -t, --threads — Number of CPU threads (default 80)  
-- --dedup — Enable duplicate removal for Hi-C reads
+- `-t, --threads` — Number of CPU threads (default 80)  
+- `--dedup` — Enable duplicate removal for Hi-C reads
 
 ### 2. Assembly Module  
 ```bash
@@ -85,18 +85,18 @@ python metahit.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [
 ```
 
 **Inputs**  
-- <PROJECT_PATH> — Path to the METAHIT project directory  
-- <READ1> — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
-- <READ2> — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
-- <OUTDIR> — Output directory for assembled contigs  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<READ1>` — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
+- `<READ2>` — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
+- `<OUTDIR>` — Output directory for assembled contigs  
 
 **Outputs**  
-- <OUTDIR>/final_assembly.fasta — Final assembled contigs  
+- `<OUTDIR>/final_assembly.fasta` — Final assembled contigs  
 
 **Parameters**  
-- -t, --threads — Number of CPU threads (default 80)  
-- -l — Minimum contig length (default 1000 bp)  
-- --megahit / --metaspades / --metaflye — Choose assembler (default MEGAHIT)
+- `-t, --threads` — Number of CPU threads (default 80)  
+- `-l` — Minimum contig length (default 1000 bp)  
+- `--megahit / --metaspades / --metaflye` — Choose assembler (default MEGAHIT)
 
 ### 3. Alignment Module  
 ```bash
@@ -104,19 +104,19 @@ python metahit.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ
 ```
 
 **Inputs**  
-- <PROJECT_PATH> — Path to the METAHIT project directory  
-- <REFERENCE> — Assembled contigs file (.fasta)  
-- <READ1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
-- <READ2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)  
-- <OUTDIR> — Output directory for alignment results  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<REFERENCE>` — Assembled contigs file (.fasta)  
+- `<READ1>` — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- `<READ2>` — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- `<OUTDIR>` — Output directory for alignment results  
 
 **Outputs**  
-- <OUTDIR>/sorted_map.bam — Sorted BAM file of aligned Hi-C reads  
-- <OUTDIR>/3d_ratio.txt — 3D ratio 
+- `<OUTDIR>/sorted_map.bam` — Sorted BAM file of aligned Hi-C reads  
+- `<OUTDIR>/3d_ratio.txt` — 3D ratio 
 
 **Parameters**  
-- -t, --threads — Number of CPU threads (default 80)  
-- --samtools-filter — Filtering flag for `samtools view` (default `-F 0x900`)
+- `-t, --threads` — Number of CPU threads (default 80)  
+- `--samtools-filter` — Filtering flag for `samtools view` (default `-F 0x900`)
 
 ### 4. Coverage Module  
 ```bash
@@ -124,19 +124,19 @@ python metahit.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE
 ```
 
 **Inputs**  
-- <PROJECT_PATH> — Path to the METAHIT project directory  
-- <READ1> — Forward shotgun reads (.fastq or .fastq.gz)  
-- <READ2> — Reverse shotgun reads (.fastq or .fastq.gz)  
-- <REFERENCE> — Assembled contigs file (.fasta)  
-- <OUTDIR> — Output directory for coverage results  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<READ1>` — Forward shotgun reads (.fastq or .fastq.gz)  
+- `<READ2>` — Reverse shotgun reads (.fastq or .fastq.gz)  
+- `<REFERENCE>` — Assembled contigs file (.fasta)  
+- `<OUTDIR>` — Output directory for coverage results  
 
 **Outputs**  
-- <OUTDIR>/SG_map_sorted.bam — Sorted BAM file of mapped reads  
-- <OUTDIR>/coverage.txt — Contig-level coverage summary  
-- <OUTDIR>/pair.txt — Paired-contig information  
+- `<OUTDIR>/SG_map_sorted.bam` — Sorted BAM file of mapped reads  
+- `<OUTDIR>/coverage.txt` — Contig-level coverage summary  
+- `<OUTDIR>/pair.txt` — Paired-contig information  
 
 **Parameters**  
-- -t, --threads — Number of CPU threads (default 80)
+- `-t, --threads` — Number of CPU threads (default 80)
 
 ### 5. Contact Module  
 ```bash
@@ -144,17 +144,17 @@ python metahit.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA>
 ```
 
 **Inputs**  
-- <METHOD> — Normalization method (`metator`, `hiczin`, `normcc`, etc.)  
-- <PROJECT_PATH> — Path to the METAHIT project directory  
-- <BAM> — Hi-C read alignment file (.bam)  
-- <FASTA> — Assembled contigs file (.fasta)  
-- <OUTDIR> — Output directory for contact maps  
-- <ENZYME> — Restriction enzymes used in the Hi-C library (e.g., Sau3AI,MluCI)  
+- `<METHOD>` — Normalization method (`metator`, `hiczin`, `normcc`, etc.)  
+- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<BAM>` — Hi-C read alignment file (.bam)  
+- `<FASTA>` — Assembled contigs file (.fasta)  
+- `<OUTDIR>` — Output directory for contact maps  
+- `<ENZYME>` — Restriction enzymes used in the Hi-C library (e.g., Sau3AI,MluCI)  
 
 **Outputs**  
-- <OUTDIR>/Raw_contact_matrix.npz — Raw contact matrix   
-- <OUTDIR>/normalized_contact_matrix.npz — Normalized contact matrix
-- <OUTDIR>/contig_info.csv — Contig metadata 
+- `<OUTDIR>/Raw_contact_matrix.npz` — Raw contact matrix   
+- `<OUTDIR>/normalized_contact_matrix.npz` — Normalized contact matrix
+- `<OUTDIR>/contig_info.csv` — Contig metadata 
 
 ### 6. Binning Module  
 ```bash
@@ -187,10 +187,10 @@ python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEM
 - `<PROJECT_PATH>` — Path to the METAHIT project directory  
 - `<BIN_DIR>` — Directory containing input bins  
 - `<ASSEMBLY>` — Original assembly FASTA file (.fa or .fasta)  
-- <HIC_READ1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
-- <HIC_READ2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
-- <SHOTGUN_READ1> — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
-- <SHOTGUN_READ2> — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
+- `<HIC_READ1>` — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- `<HIC_READ2>` — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
+- `<SHOTGUN_READ1>` — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
+- `<SHOTGUN_READ2>` — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
 - `<BAM>` — Hi-C read alignments to the assembly (.bam)  
 - `<OUTDIR>` — Output directory for reassembly results  
 
@@ -216,8 +216,8 @@ python metahit.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> 
 - `<BAM>` — Optional Hi-C read alignments to the assembly (.bam) 
 - `<ENZYME>` — Restriction enzymes used in Hi-C library (e.g., Sau3AI,MluCI)  
 - `<OUTDIR>` — Output directory for scaffolding results  
-- <HIC1> — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
-- <HIC2> — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
+- `<HIC1>` — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
+- `<HIC2>` — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz) 
 
 **Outputs**  
 - `<OUTDIR>/yahs/scaffold_scaffolds_final.fa` — Scaffolded genome from YaHS  
