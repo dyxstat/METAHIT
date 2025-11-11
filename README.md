@@ -79,6 +79,7 @@ python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTD
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)  
 - `--dedup` — Enable duplicate removal for Hi-C reads
+- `--prefix` — Custom prefix for output files (default: base name derived from input reads)
 
 ### 2. Assembly Module  
 ```bash
