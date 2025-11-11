@@ -34,7 +34,9 @@ def preprocessing(args):
         f'-o "{output_dir}" '
         f'-t {args.threads}'
     )
-
+    
+    if args.prefix:
+        command += f' --prefix "{args.prefix}"'
     if args.dedup:
         command += " --dedup"
 
@@ -242,6 +244,7 @@ def main():
     pre_parser.add_argument("-o", "--output", required=True, help="Output directory for preprocessed reads")
     pre_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
     pre_parser.add_argument("--dedup", action="store_true", help="Enable duplicate removal for Hi-C reads")
+    pre_parser.add_argument("--prefix", help="Custom prefix for output files (default=derived from input filename)")
     pre_parser.set_defaults(func=preprocessing)
 
     # Assembly subcommand
