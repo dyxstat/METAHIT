@@ -27,7 +27,7 @@ def preprocessing(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/1_preprocessing/1_preprocessing.sh" '
+        f'"{script_dir}/modules/1_preprocessing/1_preprocessing.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'-1 "{absolute_path(args.r1)}" '
         f'-2 "{absolute_path(args.r2)}" '
@@ -48,7 +48,7 @@ def assembly(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/2_assembly/2_assembly.sh" '
+        f'"{script_dir}/modules/2_assembly/2_assembly.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'-1 "{absolute_path(args.r1)}" '
         f'-2 "{absolute_path(args.r2)}" '
@@ -73,7 +73,7 @@ def alignment(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/3_alignment/3_alignment.sh" '
+        f'"{script_dir}/modules/3_alignment/3_alignment.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'-r "{absolute_path(args.reference)}" '
         f'-1 "{absolute_path(args.r1)}" '
@@ -93,7 +93,7 @@ def coverage(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/4_coverage/4_coverage.sh" '
+        f'"{script_dir}/modules/4_coverage/4_coverage.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'-1 "{absolute_path(args.r1)}" '
         f'-2 "{absolute_path(args.r2)}" '
@@ -110,7 +110,7 @@ def contact(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/5_contact/5_contact.sh" '
+        f'"{script_dir}/modules/5_contact/5_contact.sh" '
         f'{args.method} '
         f'-p "{absolute_path(args.project_path)}" '
         f'--bam "{absolute_path(args.bam)}" '
@@ -127,7 +127,7 @@ def binning(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/6_binning/6_binning.sh" '
+        f'"{script_dir}/modules/6_binning/6_binning.sh" '
         f'"{absolute_path(args.fasta)}" '
         f'"{absolute_path(args.bam)}" '
         f'"{output_dir}" '
@@ -146,7 +146,7 @@ def reassembly(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/7_reassembly/7_reassembly.sh" '
+        f'"{script_dir}/modules/7_reassembly/7_reassembly.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'--bin "{absolute_path(args.bin)}" '
         f'--assembly "{absolute_path(args.assembly)}" '
@@ -173,7 +173,7 @@ def scaffolding(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/8_scaffolding/8_scaffolding.sh" '
+        f'"{script_dir}/modules/8_scaffolding/8_scaffolding.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'--fasta "{absolute_path(args.fasta)}" '
         f'--enzyme "{args.enzyme}" '
@@ -199,7 +199,7 @@ def annotation(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/9_annotation/9_annotation.sh" '
+        f'"{script_dir}/modules/9_annotation/9_annotation.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'--bin "{absolute_path(args.bin)}" '
         f'--outdir "{output_dir}" '
@@ -217,7 +217,7 @@ def mge(args):
     ensure_dir_exists(output_dir)
 
     command = (
-        f'"{script_dir}/10_MGE/10_MGE.sh" '
+        f'"{script_dir}/modules/10_MGE/10_MGE.sh" '
         f'-p "{absolute_path(args.project_path)}" '
         f'--combined "{absolute_path(args.combined)}" '
         f'--contact "{absolute_path(args.contact)}" '
