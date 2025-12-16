@@ -146,7 +146,7 @@ ${path}/external/bbmap/bbduk.sh -Xmx$xmx in1="${out}/step2_qualtrim_${base}_1.fa
 # Deduplication step
 if [ "$dedup" = true ]; then
     echo "Running deduplication with Clumpify"
-    clumpify.sh in1="${out}/step3_lefttrim_${base}_1.fastq.gz" in2="${out}/step3_lefttrim_${base}_2.fastq.gz" \
+    ${path}/external/bbmap/clumpify.sh in1="${out}/step3_lefttrim_${base}_1.fastq.gz" in2="${out}/step3_lefttrim_${base}_2.fastq.gz" \
         out1="${out}/final_${base}_1.fastq.gz" out2="${out}/final_${base}_2.fastq.gz" dedupe threads="$threads" 
 else
     mv "${out}/step3_lefttrim_${base}_1.fastq.gz" "${out}/final_${base}_1.fastq.gz"
