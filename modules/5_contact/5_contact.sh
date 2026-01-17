@@ -20,6 +20,7 @@ METACC_MIN_SIGNAL=1
 METACC_MIN_LEN=1000
 METACC_MIN_MAPQ=30
 METACC_MIN_MATCH=30
+THRES=5 
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -32,6 +33,7 @@ while [[ "$#" -gt 0 ]]; do
         --metacc-min-len) METACC_MIN_LEN="$2"; shift 2;;
         --metacc-min-mapq) METACC_MIN_MAPQ="$2"; shift 2;;
         --metacc-min-match) METACC_MIN_MATCH="$2"; shift 2;;
+        --thres) THRES="$2"; shift 2;;   # <--- ADDED THIS LINE
         *) echo "[ERROR] Unknown parameter: $1"; exit 1;;
     esac
 done
@@ -70,10 +72,12 @@ if [ "$COMMAND" == "metator" ] || [ "$COMMAND" == "hiczin" ]; then
     contig_file="$merged_contig_file"
 fi
 
+# <--- UPDATED THIS COMMAND TO INCLUDE --thres "$THRES"
 python "${path}/5_contact/scripts/normalization.py" "$COMMAND" \
     --contig_file "$contig_file" \
     --contact_matrix_file "$contact_matrix_file" \
-    --output_path "$output_path"
+    --output_path "$output_path" \
+    --thres "$THRES"
 
 if [ $? -ne 0 ]; then
     echo "[ERROR] Normalization step '$COMMAND' failed."
