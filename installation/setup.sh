@@ -80,12 +80,13 @@ echo_info "Verifying installations..."
 
 # Check if the gtdbtk-2.4.0 environment exists
 if ! conda info --envs | grep -q "gtdbtk-2.4.0"; then
-    echo "[INFO] Creating GTDB-Tk environment 'gtdbtk-2.4.0'..."
-    conda create -n gtdbtk-2.4.0 -c bioconda -c conda-forge gtdbtk=2.4.0 -y
+    echo "[INFO] Creating GTDB-Tk environment 'gtdbtk-2.4.0'"
+    conda create -n gtdbtk-2.4.0 -c bioconda -c conda-forge gtdbtk=2.4.0 python=3.9 -y
     if [ $? -ne 0 ]; then
         echo "Error: Failed to create GTDB-Tk environment."
         exit 1
     fi
+fi
 fi
 
 
