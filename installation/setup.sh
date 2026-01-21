@@ -87,7 +87,6 @@ if ! conda info --envs | grep -q "gtdbtk-2.4.0"; then
         exit 1
     fi
 fi
-fi
 
 
 conda env create -f env.yaml
