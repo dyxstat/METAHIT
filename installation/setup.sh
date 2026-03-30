@@ -89,9 +89,26 @@ if ! conda info --envs | grep -q "gtdbtk-2.4.0"; then
 fi
 
 
-conda env create -f env.yaml
-conda env create -f checkm2.yaml
-conda create -n genomad -c conda-forge -c bioconda genomad
+if ! conda info --envs | grep -q "metahit_env"; then
+    echo_info "Creating environment from env.yaml"
+    conda env create -f env.yaml
+else
+    echo_info "Environment 'metahit_env' already exists. Skipping."
+fi
+
+if ! conda info --envs | grep -q "checkm2"; then
+    echo_info "Creating environment from checkm2.yaml"
+    conda env create -f checkm2.yaml
+else
+    echo_info "Environment 'checkm2' already exists. Skipping."
+fi
+
+if ! conda info --envs | grep -q "genomad"; then
+    echo_info "Creating Genomad environment"
+    conda create -n genomad -c conda-forge -c bioconda genomad -y
+else
+    echo_info "Environment 'genomad' already exists. Skipping."
+fi
 
 # Create CheckV environment
 echo_info "Creating CheckV environment 'checkv_env'..."
