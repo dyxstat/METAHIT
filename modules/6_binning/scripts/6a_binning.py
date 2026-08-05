@@ -22,9 +22,9 @@ import pandas as pd
 libraries for bin3c
 '''
 
-from bin3C_python3.mzd.cluster import *
-from bin3C_python3.mzd.exceptions import ApplicationException
-from bin3C_python3.mzd.utils import *
+from bin3c_python3.mzd.cluster import *
+from bin3c_python3.mzd.exceptions import ApplicationException
+from bin3c_python3.mzd.utils import *
 import logging
 import sys
 
@@ -68,7 +68,7 @@ def replace_in_file(file_path):
 if __name__ == '__main__':
     
     def mk_version():
-        return 'Metahit v{}'.format(__version__)
+        return 'METAHICT v{}'.format(__version__)
 
     def out_name(base, suffix):
         return '{}{}'.format(base, suffix)
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     global_parser.add_argument('--BAM', help='Input bam file in query order')
     global_parser.add_argument('--OUTDIR', help='Output directory')
     global_parser.add_argument(
-        '-e', '--enzyme', metavar='NEB_NAME', action='append', required=False, default=["Sau3AI,MluCI"],
+        '-e', '--enzyme', metavar='NEB_NAME', action='append', required=False, default=None,
         help='Comma-separated enzyme names (e.g., Sau3AI,MluCI). Default: Sau3AI,MluCI'
     )
 
@@ -137,18 +137,6 @@ if __name__ == '__main__':
     
     global_parser.add_argument('-t', '--threads', default=30, type=int, help="the number of threads. default is 30.")
     
-    global_parser.add_argument('--gene-cov', type=float, help='gene coverage used in detecting marker genes, default 0.9')
-    global_parser.add_argument('--rwr-rp', type=float, help='random walk restart probability, default 0.5')
-    global_parser.add_argument('--rwr-thres', type=int, help='cut-off to maintain sparsity in each random walk step, default 80')
-    global_parser.add_argument('--max-markers', type=int, help='maximum number of contigs with marker genes, default 8000')
-    global_parser.add_argument('--intra', type=int, help='percentile threshold to assign the contigs to preliminary bins in pre-clustering step, default 50')
-    global_parser.add_argument('--inter', type=int, help='percentile threshold to assign the contigs to new bins in pre-clustering step, default 0')
-    global_parser.add_argument('--cont-weight', type=float, help='coefficient of completeness - cont_weight * completeness, default 2')
-    global_parser.add_argument('--min-comp', type=float, help='minimum completeness of bin to consider during bin selection process, default 50')
-    global_parser.add_argument('--max-cont' , type=float, help='maximum contamination of bin to consider during bin selection process, default 10')
-    global_parser.add_argument('--report-quality', type=float, help="minimum quality of bin to report, default 10")
-    global_parser.add_argument('--imputecc-min-binsize', type=int, help='Minimum bin size used in output [100000]')
-
     args = global_parser.parse_args()
 
     if args.version:
@@ -160,7 +148,7 @@ if __name__ == '__main__':
     bin3c_folder = os.path.join(args.OUTDIR , 'bin3c')
     imputecc_folder = os.path.join(args.OUTDIR , 'imputecc')
     metacc_temp_folder = os.path.join(metacc_folder , 'tmp')
-    metahit_folder = os.path.join(args.OUTDIR , 'metahit_bin_refinement')
+    metahict_folder = os.path.join(args.OUTDIR , 'metahict_bin_refinement')
 
     try:
         make_dir(args.OUTDIR)
@@ -208,7 +196,7 @@ if __name__ == '__main__':
     imputecc_runtime_defaults = {'gene_cov': 0.9,'rwr_rp': 0.5,'rwr_thres': 80,'max_markers': 8000,'intra': 50,'inter': 0,'min_binsize':100000,'cont_weight': 2,'min_comp': 50.0,'max_cont': 10.0,'report_quality': 10.0}
     
     enzyme = []
-    for e in args.enzyme:
+    for e in (args.enzyme or ["Sau3AI,MluCI"]):
         enzyme.extend(e.split(","))
     
     try:
@@ -274,15 +262,15 @@ if __name__ == '__main__':
         if not os.path.exists(marker_file):
             args.num_gene = gen_bestk(interm_folder , args.FASTA)
         imp = ImputeMatrix(CONTIG_INFO, HIC_MATRIX, marker_file,
-                            gene_cov = ifelse(args.gene_cov, imputecc_runtime_defaults['gene_cov']),
-                            rwr_rp = ifelse(args.rwr_rp, imputecc_runtime_defaults['rwr_rp']),
-                            rwr_thres= ifelse(args.rwr_thres, imputecc_runtime_defaults['rwr_thres']),
-                            max_markers= ifelse(args.max_markers, imputecc_runtime_defaults['max_markers']))
+                            gene_cov=imputecc_runtime_defaults['gene_cov'],
+                            rwr_rp=imputecc_runtime_defaults['rwr_rp'],
+                            rwr_thres=imputecc_runtime_defaults['rwr_thres'],
+                            max_markers=imputecc_runtime_defaults['max_markers'])
         save_object(os.path.join(interm_folder, 'ImputeCC_storage'), imp)
         bins, bin_of_contigs = PreCluster(imp.marker_contig_counts, imp.marker_contigs, imp.contig_markers,
                                          imp.imputed_matrix, imp.dict_contigRevLocal,
-                                         intra= ifelse(args.intra , imputecc_runtime_defaults['intra']),
-                                         inter = ifelse(args.inter , imputecc_runtime_defaults['inter']))
+                                         intra=imputecc_runtime_defaults['intra'],
+                                         inter=imputecc_runtime_defaults['inter'])
 
         checkm_bac_gene_table = os.path.join(interm_folder, 'checkm_gene_table' , 'checkm_bac_gene_table.tsv')
         checkm_ar_gene_table = os.path.join(interm_folder, 'checkm_gene_table' , 'checkm_ar_gene_table.tsv')
@@ -313,13 +301,13 @@ if __name__ == '__main__':
              imp.contig_markers, bins, bin_of_contigs,
              imp.normcc_matrix, imp.imputed_matrix, 
              checkm_bac_gene_table, checkm_ar_gene_table, imputecc_folder,
-             intra= ifelse(args.intra , imputecc_runtime_defaults['intra']),
-             inter = ifelse(args.inter , imputecc_runtime_defaults['inter']),
-             cont_weight = ifelse(args.cont_weight , imputecc_runtime_defaults['cont_weight']),
-             min_comp = ifelse(args.min_comp , imputecc_runtime_defaults['min_comp']), 
-             max_cont = ifelse(args.max_cont , imputecc_runtime_defaults['max_cont']), 
-             report_quality = ifelse(args.report_quality , imputecc_runtime_defaults['report_quality']),
-             min_binsize = ifelse(args.imputecc_min_binsize , imputecc_runtime_defaults['min_binsize']))
+             intra=imputecc_runtime_defaults['intra'],
+             inter=imputecc_runtime_defaults['inter'],
+             cont_weight=imputecc_runtime_defaults['cont_weight'],
+             min_comp=imputecc_runtime_defaults['min_comp'],
+             max_cont=imputecc_runtime_defaults['max_cont'],
+             report_quality=imputecc_runtime_defaults['report_quality'],
+             min_binsize=imputecc_runtime_defaults['min_binsize'])
         
         gen_bins(args.FASTA , os.path.join(os.path.join(imputecc_folder , 'tmp') , 'cluster_imputecc.txt') , os.path.join(imputecc_folder ,'FINAL_BIN'))
         for file in os.listdir(os.path.join(bin3c_folder,"fasta")):

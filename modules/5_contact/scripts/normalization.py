@@ -490,7 +490,7 @@ class Normalization:
         return X.T.dot(_orig.dot(X)), x
 
 def main():
-    parser = argparse.ArgumentParser(description="Normalization tool for MetaHit pipeline.")
+    parser = argparse.ArgumentParser(description="Normalization tool for METAHICT pipeline.")
     subparsers = parser.add_subparsers(dest='command', help='Available normalization commands')
 
     # Raw normalization
@@ -507,6 +507,8 @@ def main():
     parser_normcc.add_argument('--contig_file', '-c', required=True, help='Path to contig_info.csv')
     parser_normcc.add_argument('--contact_matrix_file', '-m', required=True, help='Path to contact_matrix.npz')
     parser_normcc.add_argument('--output_path', '-o', required=True, help='Output directory')
+    parser_normcc.add_argument('--min_len', type=int, default=1000, help='Minimum contig length')
+    parser_normcc.add_argument('--min_signal', type=int, default=2, help='Minimum signal')
     parser_normcc.add_argument('--thres', type=float, default=5, help='Threshold percentage for denoising (0-100)')
 
 
@@ -515,6 +517,8 @@ def main():
     parser_hiczin.add_argument('-c', '--contig_file', required=True, help='Path to contig_info.csv')
     parser_hiczin.add_argument('-m', '--contact_matrix_file', required=True, help='Path to contact_matrix.npz')
     parser_hiczin.add_argument('-o', '--output_path', required=True, help='Output directory')
+    parser_hiczin.add_argument('--min_len', type=int, default=1000, help='Minimum contig length')
+    parser_hiczin.add_argument('--min_signal', type=int, default=2, help='Minimum signal')
     parser_hiczin.add_argument('--epsilon', type=float, default=1, help='Epsilon value')
     parser_hiczin.add_argument('--thres', type=float, default=5, help='Threshold percentage for denoising (0-100)')
 
@@ -523,6 +527,8 @@ def main():
     parser_bin3c.add_argument('-c', '--contig_file', required=True, help='Path to contig_info.csv')
     parser_bin3c.add_argument('-m', '--contact_matrix_file', required=True, help='Path to contact_matrix.npz')
     parser_bin3c.add_argument('-o', '--output_path', required=True, help='Output directory')
+    parser_bin3c.add_argument('--min_len', type=int, default=1000, help='Minimum contig length')
+    parser_bin3c.add_argument('--min_signal', type=int, default=2, help='Minimum signal')
     parser_bin3c.add_argument('--epsilon', type=float, default=1, help='Epsilon value')
     parser_bin3c.add_argument('--max_iter', type=int, default=1000, help='Maximum iterations for Sinkhorn-Knopp')
     parser_bin3c.add_argument('--tol', type=float, default=1e-6, help='Tolerance for convergence')
@@ -533,6 +539,8 @@ def main():
     parser_metator.add_argument('-c', '--contig_file', required=True, help='Path to contig_info.csv')
     parser_metator.add_argument('-m', '--contact_matrix_file', required=True, help='Path to contact_matrix.npz')
     parser_metator.add_argument('-o', '--output_path', required=True, help='Output directory')
+    parser_metator.add_argument('--min_len', type=int, default=1000, help='Minimum contig length')
+    parser_metator.add_argument('--min_signal', type=int, default=2, help='Minimum signal')
     parser_metator.add_argument('--epsilon', type=float, default=1, help='Epsilon value')
     parser_metator.add_argument('--thres', type=float, default=5, help='Threshold percentage for denoising (0-100)')
 
@@ -559,6 +567,8 @@ def main():
             contig_file=args.contig_file,
             contact_matrix_file=args.contact_matrix_file,
             output_path=args.output_path,
+            min_len=args.min_len,
+            min_signal=args.min_signal,
             thres=args.thres
         )
         normalizer.normcc()
@@ -568,6 +578,8 @@ def main():
             contig_file=args.contig_file,
             contact_matrix_file=args.contact_matrix_file,
             output_path=args.output_path,
+            min_len=args.min_len,
+            min_signal=args.min_signal,
             thres=args.thres
         )
         normalizer.hiczin(epsilon=args.epsilon)
@@ -577,6 +589,8 @@ def main():
             contig_file=args.contig_file,
             contact_matrix_file=args.contact_matrix_file,
             output_path=args.output_path,
+            min_len=args.min_len,
+            min_signal=args.min_signal,
             thres=args.thres
         )
         normalizer.bin3c(epsilon=args.epsilon, max_iter=args.max_iter, tol=args.tol)
@@ -586,6 +600,8 @@ def main():
             contig_file=args.contig_file,
             contact_matrix_file=args.contact_matrix_file,
             output_path=args.output_path,
+            min_len=args.min_len,
+            min_signal=args.min_signal,
             thres=args.thres
         )
         normalizer.metator(epsilon=args.epsilon)

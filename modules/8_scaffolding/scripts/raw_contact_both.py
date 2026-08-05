@@ -22,8 +22,8 @@ libraries for bin3c
 import matplotlib
 matplotlib.use('Agg')
 
-from bin3C_python3.mzd import io_utils, sparse_utils
-from bin3C_python3.mzd.seq_utils import *
+from bin3c_python3.mzd import io_utils, sparse_utils
+from bin3c_python3.mzd.seq_utils import *
 from collections import OrderedDict, namedtuple
 from numba import jit, int64, float64, void
 import Bio.SeqIO as SeqIO
@@ -240,17 +240,21 @@ class SeqOrder:
         # now reintroduce the gaps to the gapless representation supplied
 
         # handle our local type
-        if isinstance(gapless_indices, np.ndarray) and gapless_indices.dtype == SeqOrder.INDEX_TYPE:
+        if (isinstance(gapless_indices, np.ndarray)
+                and gapless_indices.dtype.names is not None
+                and 'index' in gapless_indices.dtype.names):
             remapped = []
             for oi in gapless_indices:
-                remapped.append((oi['index'] + shift[oi['index']], oi['ori']))
+                index = int(oi['index'])
+                remapped.append((index + shift[index], oi['ori']))
             return np.array(remapped, dtype=SeqOrder.INDEX_TYPE)
 
         # handle plain collection
         else:
             remapped = []
             for oi in gapless_indices:
-                remapped.append(oi + shift[oi])
+                index = int(oi)
+                remapped.append(index + shift[index])
             return np.array(remapped)
 
     def accepted_positions(self, copy=True):

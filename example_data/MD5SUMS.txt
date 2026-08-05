@@ -1,0 +1,4 @@
+b24e7ea9dd8762396d7437c8afb760b4  example_data/sg_R1.fastq.gz
+0ccd13d08b3835ddb31cfbd990966f79  example_data/sg_R2.fastq.gz
+18a8087e8fd6e5e83b97a2d7bbad9074  example_data/hic_R1.fastq.gz
+dab26debc9623ac82f12013bfe442156  example_data/hic_R2.fastq.gz

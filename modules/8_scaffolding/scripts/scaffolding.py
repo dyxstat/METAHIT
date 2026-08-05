@@ -22,6 +22,8 @@ import logging
 import sys
 import os
 import subprocess
+import shlex
+import shutil
 import warnings
 import gzip
 import pickle
@@ -133,35 +135,12 @@ def run_checkm2(fasta, outdir, threads=1, checkm2_db=None):
     return None, None
 
 
-def ensure_bam_indexed(bam):
-    idx = bam + ".bai"
-    if not os.path.exists(idx):
-        logger.info(f"Indexing BAM {bam}")
-        if os.system(f"samtools index {bam}") != 0:
-            logger.error(f"Failed to index {bam}")
-            return False
-    return True
-
-
-def create_coordinate_sorted_bam(bam_in, bam_out, threads=1):
-    if os.path.exists(bam_out):
-        logger.info(f"Sorted BAM exists: {bam_out}")
-        return True
-    logger.info(f"Sorting BAM {bam_in}")
-    if os.system(f"samtools sort -@ {threads} {bam_in} -o {bam_out}") != 0:
-        logger.error(f"Failed to sort {bam_in}")
-        return False
-    return True
-
-
 def calculate_hic_enrichment_contigs(bam, fasta):
     import pysam
-    if not ensure_bam_indexed(bam):
-        return None
     contigs = {l[1:].strip().split()[0] for l in open(fasta) if l.startswith(">")}
     within, across = 0, 0
     with pysam.AlignmentFile(bam, "rb") as bf:
-        for r in bf.fetch():
+        for r in bf.fetch(until_eof=True):
             if r.is_paired and not r.is_unmapped and not r.mate_is_unmapped:
                 c1, c2 = r.reference_name, r.next_reference_name
                 if c1 in contigs and c2 in contigs:
@@ -172,13 +151,11 @@ def calculate_hic_enrichment_contigs(bam, fasta):
 
 def calculate_hic_enrichment_scaffolds(bam, fasta):
     import pysam
-    if not ensure_bam_indexed(bam):
-        return None
     scaffs = {l[1:].strip().split()[0] for l in open(fasta) if l.startswith(">")}
     def sname(seg): return seg.split("_seg_")[0] if "_seg_" in seg else seg
     within, across = 0, 0
     with pysam.AlignmentFile(bam, "rb") as bf:
-        for r in bf.fetch():
+        for r in bf.fetch(until_eof=True):
             if r.is_paired and not r.is_unmapped and not r.mate_is_unmapped:
                 s1, s2 = sname(r.reference_name), sname(r.next_reference_name)
                 if s1 in scaffs and s2 in scaffs:
@@ -193,12 +170,14 @@ def calculating_metrics(filt_fa, genome, cm, segmap, args, outdir):
     n50_s, l50_s = calculate_n50_l50(genome)
     c_o = sum(1 for l in open(filt_fa) if l.startswith(">"))
     c_s = sum(1 for l in open(genome) if l.startswith(">"))
-    d1, d2 = os.path.join(outdir, "checkm2_original"), os.path.join(outdir, "checkm2_scaffolded")
-    make_dir(d1); make_dir(d2)
     t = int(args.t) if args.t else 1
-    db = getattr(args, "checkm2_db", None)
-    comp_o, cont_o = run_checkm2(filt_fa, d1, t, db)
-    comp_s, cont_s = run_checkm2(genome, d2, t, db)
+    comp_o = cont_o = comp_s = cont_s = None
+    if not args.skip_checkm2:
+        d1, d2 = os.path.join(outdir, "checkm2_original"), os.path.join(outdir, "checkm2_scaffolded")
+        make_dir(d1); make_dir(d2)
+        db = getattr(args, "checkm2_db", None)
+        comp_o, cont_o = run_checkm2(filt_fa, d1, t, db)
+        comp_s, cont_s = run_checkm2(genome, d2, t, db)
     enr_o, enr_s = None, None
     bam_o = os.path.join(outdir, "sorted_for_yahs.bam")
     bam_s = os.path.join(outdir, "realign_to_scaffold", "sorted_map.bam")
@@ -220,22 +199,71 @@ def save_metrics(metrics, outfile):
             f.write(f"{k}: {v if v is not None else 'N/A'}\n")
 
 
+def cleanup_temp_files(outdir):
+    for relpath in [
+        "initial_alignment/map.sam",
+        "realign_to_scaffold/map.sam",
+    ]:
+        path = os.path.join(outdir, relpath)
+        if os.path.exists(path):
+            os.remove(path)
+
+    for fasta_name in ["filtered_bin.fa", "segmented_scaffolds.fa"]:
+        for suffix in [".amb", ".ann", ".bwt", ".pac", ".sa"]:
+            path = os.path.join(outdir, fasta_name + suffix)
+            if os.path.exists(path):
+                os.remove(path)
+
+    for relpath in ["metacc/tmp", ".matplotlib"]:
+        path = os.path.join(outdir, relpath)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", help="Base metahit path")
-    parser.add_argument("--fasta", help="Bin FASTA")
+    parser.add_argument("-p", required=True, help="Base METAHICT modules path")
+    parser.add_argument("--fasta", required=True, help="Bin FASTA")
     parser.add_argument("--bam", help="Optional BAM")
-    parser.add_argument("--enzyme", help="Restriction enzyme list")
-    parser.add_argument("--outdir", help="Output directory")
-    parser.add_argument("--hic1", help="Hi-C forward read")
-    parser.add_argument("--hic2", help="Hi-C reverse read")
-    parser.add_argument("-t", help="Threads")
-    parser.add_argument("-m", help="Memory")
-    parser.add_argument("-r", help="Resolution (default 10kb)")
+    parser.add_argument("--enzyme", required=True, help="Restriction enzyme list")
+    parser.add_argument("--outdir", required=True, help="Output directory")
+    parser.add_argument("--hic1", required=True, help="Hi-C forward read")
+    parser.add_argument("--hic2", required=True, help="Hi-C reverse read")
+    parser.add_argument("-t", type=int, default=80, help="Threads")
+    parser.add_argument("-m", default=None, help="Memory")
+    parser.add_argument("-r", type=int, default=10000, help="Resolution (default 10000)")
+    parser.add_argument("--min-contig-len", type=int, default=5000, help="Minimum contig length retained for scaffolding")
+    parser.add_argument("--bwa-options", default="-5SP", help="BWA MEM options for internal alignments")
+    parser.add_argument("--samtools-filter", default="-F 0x900", help="samtools view filter for internal alignments")
+    parser.add_argument("--sort-memory", default="1G", help="Memory per samtools sort thread")
+    parser.add_argument("--metacc-min-mapq", type=int, default=30, help="Minimum MAPQ for MetaCC contact generation")
+    parser.add_argument("--metacc-min-len", type=int, default=1000, help="Minimum contig length for MetaCC contact generation")
+    parser.add_argument("--metacc-min-match", type=int, default=30, help="Minimum aligned match length for MetaCC contact generation")
+    parser.add_argument("--metacc-min-signal", type=int, default=2, help="Minimum signal for MetaCC contact generation")
+    parser.add_argument("--bin3c-min-mapq", type=int, default=60, help="Minimum MAPQ for bin3C-compatible contact generation")
+    parser.add_argument("--bin3c-min-len", type=int, default=1000, help="Minimum contig length for bin3C-compatible contact generation")
+    parser.add_argument("--bin3c-min-match", type=int, default=10, help="Minimum aligned match length for bin3C-compatible contact generation")
+    parser.add_argument("--bin3c-min-signal", type=int, default=5, help="Minimum signal for bin3C-compatible contact generation")
+    parser.add_argument("--yahs-resolutions", default="", help="YaHS scaffolding resolution list; empty uses YaHS automatic selection")
+    parser.add_argument("--yahs-min-mapq", type=int, default=10, help="YaHS minimum mapping quality")
+    parser.add_argument("--yahs-min-contig-len", type=int, default=0, help="YaHS minimum contig length to scaffold")
+    parser.add_argument("--yahs-rounds", type=int, default=1, help="YaHS rounds at each resolution level")
+    parser.add_argument("--yahs-no-contig-ec", action="store_true", help="Disable YaHS contig error correction")
+    parser.add_argument("--yahs-no-scaffold-ec", action="store_true", help="Disable YaHS scaffold error correction")
+    parser.add_argument("--yahs-no-mem-check", action="store_true", help="Disable YaHS runtime memory check")
+    parser.add_argument("--yahs-extra-args", default="", help="Additional options passed directly to YaHS")
+    parser.add_argument("--normcc-thres", type=float, default=0.05, help="NormCC denoising threshold")
+    parser.add_argument("--heatmap-max-image", type=int, default=5000, help="Maximum heatmap image dimension before downsampling")
+    parser.add_argument("--skip-checkm2", action="store_true", help="Skip CheckM2 quality evaluation")
     parser.add_argument("--checkm2_db", help="Path to custom CheckM2 database")
+    parser.add_argument("--tmp-dir", default=os.environ.get("METAHICT_TMP_ROOT", os.environ.get("TMPDIR", "/tmp")),
+                        help="Temporary directory root")
+    parser.add_argument("--keep-temp", action="store_true", help="Keep temporary files for debugging")
     args = parser.parse_args()
 
     make_dir(args.outdir)
+    make_dir(args.tmp_dir)
+    os.environ["TMPDIR"] = args.tmp_dir
     log_file = os.path.join(args.outdir, "scaffolding.log")
     logging.basicConfig(level=logging.INFO, format="%(levelname)-8s | %(asctime)s | %(message)s",
                         handlers=[logging.StreamHandler(), logging.FileHandler(log_file, mode="a")])
@@ -245,49 +273,84 @@ if __name__ == "__main__":
     try:
         # Step 1: filter
         filt_fa = os.path.join(args.outdir, "filtered_bin.fa")
-        kept = filter_fasta_by_length(args.fasta, filt_fa, 5000)
+        kept = filter_fasta_by_length(args.fasta, filt_fa, args.min_contig_len)
         if kept == 0:
-            logger.error("No contigs >5kb"); sys.exit(1)
+            logger.error(f"No contigs >= {args.min_contig_len} bp"); sys.exit(1)
         # Step 2: index
         if not os.path.exists(filt_fa + ".fai"):
-            os.system(f"samtools faidx {filt_fa}")
+            if os.system(f"samtools faidx {shlex.quote(filt_fa)}") != 0:
+                sys.exit(1)
         # Step 3: alignment or use BAM
         if args.bam:
             bam = os.path.join(args.outdir, "sorted_for_yahs.bam")
-            os.system(f"samtools sort -n {args.bam} -o {bam}")
+            sort_cmd = (
+                f"samtools sort -n -@ {args.t} -m {shlex.quote(args.sort_memory)} "
+                f"{shlex.quote(args.bam)} -o {shlex.quote(bam)}"
+            )
+            if os.system(sort_cmd) != 0: sys.exit(1)
         else:
             aln_dir = os.path.join(args.outdir, "initial_alignment"); make_dir(aln_dir)
             aln_cmd = (f"bash {os.path.dirname(__file__)}/alignment.sh -p {args.p} "
-                       f"-r {filt_fa} -1 {args.hic1} -2 {args.hic2} -o {aln_dir} -t {args.t}")
+                       f"-r {shlex.quote(filt_fa)} -1 {shlex.quote(args.hic1)} -2 {shlex.quote(args.hic2)} "
+                       f"-o {shlex.quote(aln_dir)} -t {args.t} "
+                       f"--bwa-options {shlex.quote(args.bwa_options)} "
+                       f"--samtools-filter {shlex.quote(args.samtools_filter)} "
+                       f"--sort-memory {shlex.quote(args.sort_memory)}")
             if os.system(aln_cmd) != 0: sys.exit(1)
             bam = os.path.join(aln_dir, "sorted_map.bam")
         # Step 4: YaHS
         yahs_pref = os.path.join(args.outdir, "yahs", "scaffold")
         make_dir(os.path.dirname(yahs_pref))
-        if os.system(f"yahs {filt_fa} {bam} -o {yahs_pref}") != 0: sys.exit(1)
+        yahs_cmd = [
+            "yahs",
+            shlex.quote(filt_fa),
+            shlex.quote(bam),
+            "-o", shlex.quote(yahs_pref),
+            "-q", str(args.yahs_min_mapq),
+            "-l", str(args.yahs_min_contig_len),
+            "-R", str(args.yahs_rounds),
+        ]
+        if args.yahs_resolutions:
+            yahs_cmd.extend(["-r", shlex.quote(args.yahs_resolutions)])
+        if args.yahs_no_contig_ec:
+            yahs_cmd.append("--no-contig-ec")
+        if args.yahs_no_scaffold_ec:
+            yahs_cmd.append("--no-scaffold-ec")
+        if args.yahs_no_mem_check:
+            yahs_cmd.append("--no-mem-check")
+        if args.yahs_extra_args:
+            yahs_cmd.extend(shlex.quote(part) for part in shlex.split(args.yahs_extra_args))
+        if os.system(" ".join(yahs_cmd)) != 0: sys.exit(1)
         genome = yahs_pref + "_scaffolds_final.fa"
         if not os.path.exists(genome): sys.exit(1)
         # Step 5: segment
-        seg_len = int(args.r) if args.r else 10000
+        seg_len = args.r if args.r else 10000
         seg_fa = os.path.join(args.outdir, "segmented_scaffolds.fa")
         segmap = cut_scaffolds_to_segments(genome, seg_fa, seg_len)
         # Step 6: realign
         real_dir = os.path.join(args.outdir, "realign_to_scaffold"); make_dir(real_dir)
         real_cmd = (f"bash {os.path.dirname(__file__)}/alignment.sh -p {args.p} "
-                    f"-r {seg_fa} -1 {args.hic1} -2 {args.hic2} -o {real_dir} -t {args.t}")
+                    f"-r {shlex.quote(seg_fa)} -1 {shlex.quote(args.hic1)} -2 {shlex.quote(args.hic2)} "
+                    f"-o {shlex.quote(real_dir)} -t {args.t} "
+                    f"--bwa-options {shlex.quote(args.bwa_options)} "
+                    f"--samtools-filter {shlex.quote(args.samtools_filter)} "
+                    f"--sort-memory {shlex.quote(args.sort_memory)}")
         if os.system(real_cmd) != 0: sys.exit(1)
         real_bam = os.path.join(real_dir, "sorted_map.bam")
         # Step 7: MetaCC
         metacc_dir = os.path.join(args.outdir, "metacc"); make_dir(metacc_dir)
+        make_dir(os.path.join(metacc_dir, "tmp"))
         cm = ContactMatrix(real_bam, args.enzyme.split(",") if args.enzyme else ["Sau3AI", "MluCI"],
-                           seg_fa, args.outdir, metacc_dir, None)
+                           seg_fa, args.outdir, metacc_dir, None, None, None,
+                           args.metacc_min_mapq, args.metacc_min_len, args.metacc_min_match, args.metacc_min_signal,
+                           args.bin3c_min_mapq, args.bin3c_min_len, args.bin3c_min_match, args.bin3c_min_signal)
         cm_path = os.path.join(metacc_dir, "contact_map.p.gz")
         with gzip.open(cm_path, "wb") as f: pickle.dump(cm, f)
         # Step 8: normalize
         contig_csv = os.path.join(metacc_dir, "tmp", "contig_info_metacc.csv")
         norm_res = normcc(contig_csv)
         df = pd.read_csv(contig_csv)
-        hz = NormCCMap(metacc_dir, df, cm.seq_map_metacc, norm_res, thres=0.05)
+        hz = NormCCMap(metacc_dir, df, cm.seq_map_metacc, norm_res, thres=args.normcc_thres)
         scisp.save_npz(os.path.join(metacc_dir, "Normalized_contact_matrix.npz"), hz.seq_map.tocsr())
         with gzip.open(os.path.join(metacc_dir, "NormCC_normalized_contact.gz"), "wb") as f: pickle.dump(hz, f)
         # Step 9: mapping
@@ -297,11 +360,14 @@ if __name__ == "__main__":
         figs = os.path.join(args.outdir, "figures"); make_dir(figs)
         heat_cmd = (f"python {args.p}/8_scaffolding/scripts/heatmap.py "
                     f"--contact-map {os.path.join(metacc_dir, 'Normalized_contact_matrix.npz')} "
-                    f"--ORDER {cm_path} --BIN {final_bins} --OUTDIR {figs}")
+                    f"--ORDER {cm_path} --BIN {final_bins} --OUTDIR {figs} "
+                    f"--max_image {args.heatmap_max_image}")
         if os.system(heat_cmd) != 0: sys.exit(1)
         # Step 11: metrics
         metrics = calculating_metrics(filt_fa, genome, cm, segmap, args, args.outdir)
         save_metrics(metrics, os.path.join(args.outdir, "scaffolding_metrics.txt"))
+        if not args.keep_temp:
+            cleanup_temp_files(args.outdir)
         logger.info("Scaffolding complete.")
     except Exception as e:
         logger.error(str(e)); sys.exit(1)

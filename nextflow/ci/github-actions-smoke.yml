@@ -1,0 +1,46 @@
+name: METAHICT Nextflow Smoke Test
+
+on:
+  push:
+    paths:
+      - "nextflow/**"
+  pull_request:
+    paths:
+      - "nextflow/**"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          mkdir -p "$HOME/.local/bin"
+          mv nextflow "$HOME/.local/bin/"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run DSL2 stub smoke test
+        run: |
+          nextflow run nextflow/main_dsl2.nf \
+            -profile local \
+            --samplesheet nextflow/assets/example_data_samplesheet.csv \
+            --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
+            --report_dir "$PWD/nextflow/reports/ci_smoke" \
+            -work-dir "$PWD/nextflow/work/ci_smoke" \
+            --threads 2 \
+            --clean true \
+            --chain true \
+            -stub-run \
+            -ansi-log false
+          python3 nextflow/bin/check_expected_outputs.py \
+            --root "$PWD/nextflow/test_runs/ci_smoke/results" \
+            --manifest nextflow/tests/expected/native_dsl2_stub_outputs.tsv

@@ -1,24 +1,53 @@
-# METAHIT
-METAHIT enables comprehensive and flexible genome-resolved microbiome analysis with metagenomic Hi-C.
+# METAHICT
+METAHICT enables comprehensive and flexible genome-resolved microbiome analysis with metagenomic Hi-C.
 
 ## Installation
-To install **METAHIT**, first clone the repository and navigate to the project directory:
+To install **METAHICT**, first clone the repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/dyxstat/METAHIT.git
-cd METAHIT
+git clone https://github.com/dyxstat/METAHICT.git
+cd METAHICT
 ```
 
 Once complete, you can proceed to set up dependencies and databases.
 
 ### Dependencies
-To install all dependencies required for **METAHIT**, run the setup script located in the `installation` folder:
+To install all dependencies required for **METAHICT**, run the setup script located in the `installation` folder:
 
 ```bash
 bash installation/run_setup_in_venv.sh
 ```
 
-This command will automatically create and activate a minimal Conda environment (`metahit_venv`) and then execute `setup.sh` inside it. During this process, all necessary tools and environments (e.g., BBTools, CheckM, CheckM2, GTDB-Tk, geNomad, CheckV) will be downloaded, configured, and installed into an `external/` directory within the repository. Once setup completes, you can optionally add `external/bin/` to your system `PATH` for easier access to the installed executables.
+This command creates a minimal bootstrap Conda environment (`metahict_venv`) and
+then executes `setup.sh`.  The scientific software is installed into the
+project-local `conda_envs/` environments from the exact Linux lock files.
+BBTools is the exception: it is downloaded to `external/bbmap/`, because the
+preprocessing and coverage scripts call its shell entry points directly.  Once
+setup completes, you can optionally add `external/bin/` to your system `PATH`.
+
+The Linux release installs each Conda environment from an exact package-artifact
+lock under `installation/locks/linux-64/`; it does not re-solve floating
+dependencies. `installation/env.yaml` and `installation/checkm2.yaml` are the
+human-readable specifications, while the lock files are the authoritative
+reproducible installation inputs.
+
+The release configuration installs the Python 3-compatible bin3C dependency
+from the separately maintained, AGPL-3.0-licensed
+`1001shiyuan/bin3C-python3` fork at the immutable commit pinned in
+`installation/env.yaml`. Its upstream provenance, licence, and citation are
+recorded in [THIRD_PARTY.md](THIRD_PARTY.md).
+
+### Nextflow workflow
+
+The native DSL2 Nextflow workflow is in [`nextflow/`](nextflow/).  It calls the
+same numbered METAHICT modules described below, while Nextflow controls their
+order, inputs, outputs, resources, provenance reports, and restart behavior.
+Users choose one dependency-execution profile: project-local Conda, Docker, or
+Apptainer.  Docker and Apptainer use a separately published container image
+once the tested release image is available; the image is not stored in this
+Git repository.  See [nextflow/README.md](nextflow/README.md) and
+[nextflow/REPRODUCIBILITY.md](nextflow/REPRODUCIBILITY.md) for exact workflow
+behavior, defaults, environments, and database requirements.
 
 ### Databases
 The folder `installation/db` contains five scripts to download and set up databases for **CheckM**, **CheckM2**, **GTDB-Tk**, **geNomad** and **CheckV**. By default, each script downloads the database into a `databases/` folder in your current working directory. You can optionally specify a custom path during installation. If you do, please make sure to provide the same custom path when running the corresponding modules — CheckM for module 6, CheckM2 for modules 7 and 8, GTDB-Tk for module 9, and geNomad and CheckV for module 10.
@@ -49,25 +78,25 @@ bash installation/db/checkv_db.sh [DB_DIR]
 ```
 
 ## Usage
-Once installation and database setup are complete, **METAHIT** can be run by executing each module independently. The framework consists of **10 modules**, each corresponding to a numbered folder in the repository: `1_preprocessing`, `2_assembly`, `3_alignment`, `4_coverage`, `5_contact`, `6_binning`, `7_reassembly`, `8_scaffolding`, `9_annotation`, and `10_MGE`. You can view the overall structure of METAHIT below:
+Once installation and database setup are complete, **METAHICT** can be run by executing each module independently. The framework consists of **10 modules**, each corresponding to a numbered folder in the repository: `1_preprocessing`, `2_assembly`, `3_alignment`, `4_coverage`, `5_contact`, `6_binning`, `7_reassembly`, `8_scaffolding`, `9_annotation`, and `10_MGE`. You can view the overall structure of METAHICT below:
 
-![METAHIT overview](images/Metahit_Overview.png)
+![METAHICT overview](images/METAHICT_Overview.png)
 
 ### Basic Usage
-`metahit.py` is the main command-line wrapper that controls all modules in the MetaHit pipeline. Each module can be executed individually using subcommands.
+`metahict.py` is the main command-line wrapper that controls all modules in the METAHICT pipeline. Each module can be executed individually using subcommands.
 
 ```bash
-conda activate metahit_env
-python metahit.py <module> [options]
+conda activate metahict_env
+python metahict.py <module> [options]
 ```
 
 ### 1. Preprocessing Module  
 ```bash
-python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahict.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<READ1>` — Forward shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
 - `<READ2>` — Reverse shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)  
 - `<OUTDIR>` — Output directory for preprocessed reads  
@@ -83,11 +112,11 @@ python metahit.py preprocessing -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTD
 
 ### 2. Assembly Module  
 ```bash
-python metahit.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahict.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<READ1>` — Forward preprocessed shotgun reads (.fastq or .fastq.gz)  
 - `<READ2>` — Reverse preprocessed shotgun reads (.fastq or .fastq.gz)  
 - `<OUTDIR>` — Output directory for assembled contigs  
@@ -102,11 +131,11 @@ python metahit.py assembly -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -o <OUTDIR> [
 
 ### 3. Alignment Module  
 ```bash
-python metahit.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
+python metahict.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ2> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<REFERENCE>` — Assembled contigs file (.fasta)  
 - `<READ1>` — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
 - `<READ2>` — Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)  
@@ -122,11 +151,11 @@ python metahit.py alignment -p <PROJECT_PATH> -r <REFERENCE> -1 <READ1> -2 <READ
 
 ### 4. Coverage Module  
 ```bash
-python metahit.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
+python metahict.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE> -o <OUTDIR> [options]
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<READ1>` — Forward shotgun reads (.fastq or .fastq.gz)  
 - `<READ2>` — Reverse shotgun reads (.fastq or .fastq.gz)  
 - `<REFERENCE>` — Assembled contigs file (.fasta)  
@@ -142,12 +171,12 @@ python metahit.py coverage -p <PROJECT_PATH> -1 <READ1> -2 <READ2> -r <REFERENCE
 
 ### 5. Contact Module  
 ```bash
-python metahit.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
+python metahict.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA> --out <OUTDIR> --enzyme <ENZYME>
 ```
 
 **Inputs**  
 - `<METHOD>` — Normalization method (`metator`, `hiczin`, `normcc`, etc.)  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<BAM>` — Hi-C read alignment file (.bam)  
 - `<FASTA>` — Assembled contigs file (.fasta)  
 - `<OUTDIR>` — Output directory for contact maps  
@@ -160,21 +189,21 @@ python metahit.py contact <METHOD> -p <PROJECT_PATH> --bam <BAM> --fasta <FASTA>
 
 ### 6. Binning Module  
 ```bash
-python metahit.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
+python metahict.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]  
 ```
 
 **Inputs**  
 - `<FASTA>` — Assembled contigs file (.fa or .fasta)  
 - `<BAM>` — Hi-C reads aligned to the contigs (.bam) 
 - `<OUTDIR>` — Output directory for binning results 
-- `<PROJECT_PATH>` — Path to the METAHIT project directory 
+- `<PROJECT_PATH>` — Path to the METAHICT project directory 
 
 **Outputs**  
 - `<OUTDIR>/bin3c/fasta/*.fna` — bin3C bins 
 - `<OUTDIR>/metacc/BIN/*.fa` — MetaCC bins 
 - `<OUTDIR>/imputecc/FINAL_BIN/*.fa` — ImputeCC bins 
-- `<OUTDIR>/metahit/metahit_50_10_bins/*.fa` — Integrated final bins produced by MetaHIT bin refinement  
-- `<OUTDIR>/metahit/figures/heatmap.png` — Heatmap of final bins  
+- `<OUTDIR>/metahict/metahict_50_10_bins/*.fa` — Integrated final bins produced by MetaHIT bin refinement  
+- `<OUTDIR>/metahict/figures/heatmap.png` — Heatmap of final bins  
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
@@ -182,11 +211,11 @@ python metahit.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 
 ### 7. Reassembly Module
 ```bash
-python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
+python metahict.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEMBLY> --hic1 <HIC_READ1> --hic2 <HIC_READ2> --sg1 <SHOTGUN_READ1> --sg2 <SHOTGUN_READ2> --bam <BAM> --outdir <OUTDIR> -t <THREADS> -m <MEMORY>
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<BIN_DIR>` — Directory containing input bins  
 - `<ASSEMBLY>` — Original assembly FASTA file (.fa or .fasta)  
 - `<HIC_READ1>` — Forward preprocessed Hi-C reads (.fastq or .fastq.gz)  
@@ -197,7 +226,8 @@ python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEM
 - `<OUTDIR>` — Output directory for reassembly results  
 
 **Outputs**  
-- `<OUTDIR>/reassembled_bins/` — Final reassembled bins (.fa)  
+- `<OUTDIR>/reassembled_bins/` — Final selected bins as `.fa` files named with clean bin IDs, for example `bin113.fa`  
+- `<OUTDIR>/reassembled_bin_name_map.tsv` — Mapping from each clean final bin ID to the selected `.orig`, `.strict`, or `.permissive` candidate  
 - `<OUTDIR>/unmapped_assembly/final.contigs.fa` — Assembly of unmapped reads  
 - `<OUTDIR>/combined/combined_contigs.fa` — Combined contigs (bins and unmapped)  
 
@@ -209,11 +239,11 @@ python metahit.py reassembly -p <PROJECT_PATH> --bin <BIN_DIR> --assembly <ASSEM
 
 ### 8. Scaffolding Module  
 ```bash
-python metahit.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
+python metahict.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> --enzyme <ENZYME> --outdir <OUTDIR> --hic1 <HIC1> --hic2 <HIC2> -t <THREADS> -m <MEMORY> -r <RESOLUTION>
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<BIN_FASTA>` — Input bin file for scaffolding (.fa or .fasta)  
 - `<BAM>` — Optional Hi-C read alignments to the assembly (.bam) 
 - `<ENZYME>` — Restriction enzymes used in Hi-C library (e.g., Sau3AI,MluCI)  
@@ -234,11 +264,11 @@ python metahit.py scaffolding -p <PROJECT_PATH> --fasta <BIN_FASTA> --bam <BAM> 
 
 ### 9. Annotation Module
 ```bash
-python metahit.py annotation -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
+python metahict.py annotation -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR> -t <THREADS>  
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<BIN_DIR>` — Directory containing input bins 
 - `<OUTDIR>` — Output directory for annotation results  
 
@@ -252,17 +282,18 @@ python metahit.py annotation -p <PROJECT_PATH> --bin <BIN_DIR> --outdir <OUTDIR>
 
 ### 10. MGE Module  
 ```bash
-python metahit.py MGE -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>  
+python metahict.py mge -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <CONTACT_MATRIX> --raw-contact <RAW_CONTACT_MATRIX> --outdir <OUTDIR> -t <THREADS>
 ```
 
 **Inputs**  
-- `<PROJECT_PATH>` — Path to the METAHIT project directory  
+- `<PROJECT_PATH>` — Path to the METAHICT project directory  
 - `<COMBINED_FASTA>` — Combined contigs FASTA file (include both binned and unmapped contigs, .fa)  
-- `<CONTACT_MATRIX>` — Normalized contact matrix (.npz) 
+- `<CONTACT_MATRIX>` — Normalized contact matrix (.npz)
+- `<RAW_CONTACT_MATRIX>` — Raw Hi-C contact matrix (.npz), used to count raw read-pair support
 - `<OUTDIR>` — Output directory for MGE analysis results  
 
 **Outputs**  
-- `<OUTDIR>/virus_host_linkages.tsv` - Virus-host linkages table
+- `<OUTDIR>/candidate_mge_mag_associations_zscore_filtered.tsv` — Filtered candidate viral MGE-MAG association table
 - `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_virus_summary.tsv` — geNomad summary of viral contigs
 - `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_plasmid_summary.tsv` — geNomad summary of plasmid contigs
 - `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
@@ -273,7 +304,7 @@ python metahit.py MGE -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <C
 - `--checkv_db` - Custom path for the CheckV database
 
 ### Selective Execution
-Since the **METAHIT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
+Since the **METAHICT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
 
 For example, the **reassembly** module is computationally intensive and performs best with sufficient sequencing coverage. In practice, users may choose to reassemble only selected bins—such as those with higher contamination or of particular biological importance—to balance resource use and data quality. When resources are constrained, this step can be skipped, and analyses can proceed using the consolidated bins from the **binning** module, although our benchmarking indicates that reassembly substantially improves contiguity and reduces contamination.
 
@@ -285,12 +316,6 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
-
-
-
-
-
-
 
 
 

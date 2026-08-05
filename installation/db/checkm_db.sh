@@ -3,7 +3,7 @@
 # checkm_db.sh
 # Download and extract the CheckM database to a user-specified or default directory.
 
-# If user provides a directory, use it; otherwise default to two levels up (METAHIT/databases)
+# If user provides a directory, use it; otherwise default to two levels up (METAHICT/databases)
 if [ -n "$1" ]; then
     DB_DIR="$1"
 else

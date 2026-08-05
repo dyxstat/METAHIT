@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # gtdbtk_db.sh
-# Download and set up the GTDB-Tk database for MetaHit.
+# Download and set up the GTDB-Tk database for METAHICT.
 
 # Determine database directory
 if [ -n "${1-}" ]; then

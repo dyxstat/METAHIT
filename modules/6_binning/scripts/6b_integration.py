@@ -1,10 +1,12 @@
 '''
-Script for bin refinement using metahit
+Script for bin refinement using metahict
 '''
 import os
 import sys
 import logging
 import subprocess
+import argparse
+import shutil
 from MetaCC.Script.utils import save_object, gen_bins
 
 if __name__ == '__main__':
@@ -19,29 +21,97 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     
     try:
-        # Get input parameters - in a real implementation you'd parse these from command line
-        # For now, these would be defined based on the output from 5a_binning.py
-        metacc_folder = sys.argv[1]  # Path to metacc output folder
-        bin3c_folder = sys.argv[2]   # Path to bin3c output folder
-        imputecc_folder = sys.argv[3]  # Path to imputecc output folder
-        metahit_folder = sys.argv[4]  # Path to output folder
+        parser = argparse.ArgumentParser(description="Integrate MetaCC, bin3C, and ImputeCC bins with METAHICT.")
+        parser.add_argument("metacc_folder", help="MetaCC output folder")
+        parser.add_argument("bin3c_folder", help="bin3C output folder")
+        parser.add_argument("imputecc_folder", help="ImputeCC output folder")
+        parser.add_argument("metahict_folder", help="METAHICT integration output folder")
+        parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
+        parser.add_argument("--min-completeness", type=float, default=50, help="Final METAHICT minimum completeness (default=50)")
+        parser.add_argument("--max-contamination", type=float, default=10, help="Final METAHICT maximum contamination (default=10)")
+        parser.add_argument("--contamination-penalty", type=float, default=5, help="Penalty used in completeness - penalty * contamination (default=5)")
+        parser.add_argument("--min-input-bin-size", type=int, default=50000, help="Minimum input bin FASTA file size before refinement (default=50000 bytes)")
+        parser.add_argument("--max-input-bin-size", type=int, default=20000000, help="Maximum input bin FASTA file size before refinement (default=20000000 bytes)")
+        parser.add_argument("--binning-refiner-min-size", type=int, default=524288, help="Minimum refined bin size for Binning_refiner (default=524288 bp)")
+        parser.add_argument("--tmp-dir", default=None, help="Temporary directory root for CheckM2 working files (default=METAHICT_TMP_ROOT, TMPDIR, or /tmp)")
+        parser.add_argument("--keep-temp", action="store_true", help="Keep successful CheckM2 temporary directories")
+        parser.add_argument("--skip-checkm2", action="store_true", help="Skip CheckM2 during final bin refinement")
+        parser.add_argument("--skip-refinement", action="store_true", help="Skip Binning_refiner combinations")
+        parser.add_argument("--skip-consolidation", action="store_true", help="Skip final consolidation across bin sets")
+        parser.add_argument("--keep-ambiguous", action="store_true", help="Keep ambiguous contigs in all bins")
+        parser.add_argument("--remove-ambiguous", action="store_true", help="Remove ambiguous contigs from all bins")
+        args = parser.parse_args()
+
+        metacc_folder = args.metacc_folder
+        bin3c_folder = args.bin3c_folder
+        imputecc_folder = args.imputecc_folder
+        metahict_folder = args.metahict_folder
         
-        logger.info('Starting bin refinement with metahit')
+        logger.info('Starting bin refinement with metahict')
         
-        metahit = os.path.join(script_directory, 'bin_refinement.sh')
-        os.system("chmod 777 " + metahit)
+        metahict = os.path.join(script_directory, 'bin_refinement.sh')
+        os.system("chmod 777 " + metahict)
         
-        metahitCmd = metahit + " -t 80 -o "+metahit_folder + " -A " +os.path.join(metacc_folder,"BIN")+" -B "+ os.path.join(imputecc_folder , 'FINAL_BIN') + " -C " + os.path.join(bin3c_folder,"fasta")
-        logger.info("metahitCmd : " + metahitCmd)
-        output = os.popen(metahitCmd).read()
-        logger.info(output)
+        min_completeness = f"{args.min_completeness:g}"
+        max_contamination = f"{args.max_contamination:g}"
+
+        metahictCmd = [
+            metahict,
+            "-t", str(args.threads),
+            "-o", metahict_folder,
+            "-A", os.path.join(metacc_folder, "BIN"),
+            "-B", os.path.join(imputecc_folder, "FINAL_BIN"),
+            "-C", os.path.join(bin3c_folder, "fasta"),
+            "-c", min_completeness,
+            "-x", max_contamination,
+            "--contamination-penalty", str(args.contamination_penalty),
+            "--min-input-bin-size", str(args.min_input_bin_size),
+            "--max-input-bin-size", str(args.max_input_bin_size),
+            "--binning-refiner-min-size", str(args.binning_refiner_min_size),
+        ]
+        if args.tmp_dir:
+            metahictCmd.extend(["--tmp-dir", args.tmp_dir])
+        if args.keep_temp:
+            metahictCmd.append("--keep-temp")
+        if args.skip_checkm2:
+            metahictCmd.append("--skip-checkm2")
+        if args.skip_refinement:
+            metahictCmd.append("--skip-refinement")
+        if args.skip_consolidation:
+            metahictCmd.append("--skip-consolidation")
+        if args.keep_ambiguous:
+            metahictCmd.append("--keep-ambiguous")
+        if args.remove_ambiguous:
+            metahictCmd.append("--remove-ambiguous")
+
+        if os.path.isdir(metahict_folder):
+            logger.info("Removing previous METAHICT integration output: %s", metahict_folder)
+            shutil.rmtree(metahict_folder)
+        os.makedirs(metahict_folder, exist_ok=True)
+
+        final_bin_dir = os.path.join(
+            metahict_folder,
+            f"metahict_{min_completeness}_{max_contamination}_bins",
+        )
+        logger.info("metahictCmd : " + " ".join(metahictCmd))
+        try:
+            result = subprocess.run(
+                metahictCmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=True,
+            )
+            logger.info(result.stdout)
+        except subprocess.CalledProcessError as e:
+            logger.error(e.stdout)
+            raise
         
         logger.info('Bin refinement completed successfully')
         
         # Paths
-        final_bin_dir = os.path.join(metahit_folder, 'metahit_50_10_bins')
-        final_fasta = os.path.join(metahit_folder, 'metahit_50_10_bins.fa')
-        cluster_txt = os.path.join(metahit_folder, 'cluster.txt')
+        final_fasta = os.path.join(metahict_folder, 'metahict_50_10_bins.fa')
+        cluster_txt = os.path.join(metahict_folder, 'cluster.txt')
         
         # Manually create the merged .fa file
         with open(final_fasta, 'w') as outfile:
@@ -69,7 +139,7 @@ if __name__ == '__main__':
                 f.write(f"{contig}\t{bin_id}\n")
         
         # Save final_bins.p
-        save_object(os.path.join(metahit_folder, 'final_bins.p'), final_clustering)
+        save_object(os.path.join(metahict_folder, 'final_bins.p'), final_clustering)
         
     except Exception as e:
         logger.error(f'Error during bin refinement: {str(e)}')

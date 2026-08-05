@@ -2,25 +2,19 @@ import pandas as pd
 import argparse
 
 def merge_coverage(contig_info_path, coverage_path, output_path):
-    # Read raw coverage file with all columns
     coverage = pd.read_csv(coverage_path, sep="\t", header=0)
+    if 'contigName' not in coverage.columns or 'totalAvgDepth' not in coverage.columns:
+        raise ValueError("Coverage file must contain contigName and totalAvgDepth columns")
 
-    # Extract contig name from the composite field
-    coverage['name'] = coverage['contigName'].str.extract(r'^(k\d+_\d+)')
-
-    # Rename the coverage column
     coverage.rename(columns={'totalAvgDepth': 'coverage'}, inplace=True)
-
-    # Keep only name and coverage
+    coverage.rename(columns={'contigName': 'name'}, inplace=True)
     coverage = coverage[['name', 'coverage']]
 
-    # Read contig info
     contig_info = pd.read_csv(contig_info_path)
+    if 'name' not in contig_info.columns:
+        raise ValueError("Contig info file must contain a name column")
 
-    # Merge by contig name
     merged = contig_info.merge(coverage, on='name', how='left')
-
-    # Save
     merged.to_csv(output_path, index=False)
     print(f"[INFO] Merged contig info with coverage written to: {output_path}")
 

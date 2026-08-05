@@ -9,7 +9,7 @@ import pandas as pd
 # decides which one of the three is better for each bin.
 
 if len(sys.argv) < 4:
-    print("Usage: choose_best_bin.py <reassembled_bins.stats> <min_completion> <max_contamination>")
+    print("Usage: choose_best_bin.py <reassembled_bins.stats> <min_completion> <max_contamination> [contamination_penalty]")
     sys.exit(1)
 
 # Read stats file with pandas
@@ -19,6 +19,7 @@ try:
     # Set minimum completion and maximum contamination
     min_completion = float(sys.argv[2])
     max_contamination = float(sys.argv[3])
+    contamination_penalty = float(sys.argv[4]) if len(sys.argv) > 4 else 5.0
     
     # Dictionary to store the best version of each bin
     best_bins = {}
@@ -26,7 +27,7 @@ try:
     # Process each bin
     for _, row in stats_df.iterrows():
         # Skip header
-        if "completeness" in str(row[0]).lower():
+        if "completeness" in str(row.iloc[0]).lower():
             continue
             
         bin_name = row.iloc[0]
@@ -42,8 +43,7 @@ try:
         base_bin_name = ".".join(bin_name.split(".")[:-1])
         style = bin_name.split(".")[-1]
         
-        # Calculate score (completeness + (100-contamination)*5)
-        score = completeness + 5 * (100 - contamination)
+        score = completeness - contamination_penalty * contamination
         
         # Update best bin if this version is better
         if base_bin_name not in best_bins:

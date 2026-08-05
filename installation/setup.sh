@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # setup.sh
-# This script sets up the necessary dependencies for the MetaHit pipeline.
+# This script sets up the necessary dependencies for the METAHICT pipeline.
 # into the "external" directory within the repository.
 
 # Exit immediately if a command exits with a non-zero status
@@ -17,9 +17,41 @@ function echo_error() {
     echo -e "\033[1;31m[ERROR]\033[0m $1" >&2
 }
 
-# Define the external and bin directory paths
-EXTERNAL_DIR="$(pwd)/external"
+# Resolve all paths from this script, rather than from the caller's directory.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+LOCK_DIR="${SCRIPT_DIR}/locks/linux-64"
+EXTERNAL_DIR="${PROJECT_ROOT}/external"
 BIN_DIR="${EXTERNAL_DIR}/bin"
+
+if [[ "$(uname -s)" != "Linux" ]]; then
+    echo_error "The distributed release locks target Linux only. Use a tested platform-specific lock."
+    exit 1
+fi
+
+create_locked_environment() {
+    local env_name="$1"
+    local lock_file="${LOCK_DIR}/${env_name}.explicit.txt"
+    if [[ ! -s "$lock_file" ]]; then
+        echo_error "Missing lock file: $lock_file"
+        exit 1
+    fi
+    local env_prefix="${PROJECT_ROOT}/conda_envs/${env_name}"
+    if [[ -d "$env_prefix" ]]; then
+        local installed_sha256
+        local expected_sha256
+        installed_sha256="$(conda list --explicit -p "$env_prefix" | sha256sum | awk '{print $1}')"
+        expected_sha256="$(sha256sum "$lock_file" | awk '{print $1}')"
+        if [[ "$installed_sha256" != "$expected_sha256" ]]; then
+            echo_error "Existing '${env_name}' does not match ${lock_file##*/}. Remove that environment, then rerun this installer."
+            exit 1
+        fi
+        echo_info "Environment '${env_name}' matches ${lock_file##*/}. Skipping creation."
+    else
+        echo_info "Creating '${env_name}' from ${lock_file##*/}"
+        conda create -y -p "$env_prefix" --file "$lock_file"
+    fi
+}
 
 # Create the external and bin directories if they don't exist
 if [ ! -d "$EXTERNAL_DIR" ]; then
@@ -36,22 +68,19 @@ else
     echo_info "'bin' directory already exists inside 'external'."
 fi
 
-# Install dependencies via Conda
-echo_info "Installing dependencies using Conda..."
-conda install -y -c bioconda wget unzip openjdk perl git
-
-
-
 function install_bbtools() {
-    BBTOOLS_VERSION="39.10"  # Latest version as per user request
+    BBTOOLS_VERSION="39.10"
     BBTOOLS_TARBALL="Bbmap_${BBTOOLS_VERSION}.tar.gz"
-    BBTOOLS_URL="https://sourceforge.net/projects/bbmap/files/latest/download"
+    BBTOOLS_URL="https://sourceforge.net/projects/bbmap/files/BBMap_${BBTOOLS_VERSION}.tar.gz/download"
+    BBTOOLS_SHA256="ab5dfc0bbaa5be338596aec3558c7a7c891e8d8b186e9bd671552466215b9b15"
     if [ ! -f "${EXTERNAL_DIR}/${BBTOOLS_TARBALL}" ]; then
         echo_info "Downloading BBTools ${BBTOOLS_VERSION}..."
         wget -O "${EXTERNAL_DIR}/${BBTOOLS_TARBALL}" "${BBTOOLS_URL}"
     else
         echo_info "BBTools tarball already exists, skipping download."
     fi
+
+    printf '%s  %s\n' "$BBTOOLS_SHA256" "${EXTERNAL_DIR}/${BBTOOLS_TARBALL}" | sha256sum -c -
 
     if [ ! -f "${BIN_DIR}/bbmap.sh" ]; then
         echo_info "Extracting BBTools..."
@@ -78,60 +107,15 @@ echo_info "Verifying installations..."
 
 
 
-# Check if the gtdbtk-2.4.0 environment exists
-if ! conda info --envs | grep -q "gtdbtk-2.4.0"; then
-    echo "[INFO] Creating GTDB-Tk environment 'gtdbtk-2.4.0'"
-    conda create -n gtdbtk-2.4.0 -c bioconda -c conda-forge gtdbtk=2.4.0 python=3.9 -y
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to create GTDB-Tk environment."
-        exit 1
-    fi
-fi
+create_locked_environment "gtdbtk-2.4.0"
+create_locked_environment "metahict_env"
+create_locked_environment "checkm2"
+create_locked_environment "genomad"
+create_locked_environment "checkv_env"
 
-
-if ! conda info --envs | grep -q "metahit_env"; then
-    echo_info "Creating environment from env.yaml"
-    conda env create -f env.yaml
-else
-    echo_info "Environment 'metahit_env' already exists. Skipping."
-fi
-
-if ! conda info --envs | grep -q "checkm2"; then
-    echo_info "Creating environment from checkm2.yaml"
-    conda env create -f checkm2.yaml
-else
-    echo_info "Environment 'checkm2' already exists. Skipping."
-fi
-
-if ! conda info --envs | grep -q "genomad"; then
-    echo_info "Creating Genomad environment"
-    conda create -n genomad -c conda-forge -c bioconda genomad -y
-else
-    echo_info "Environment 'genomad' already exists. Skipping."
-fi
-
-# Create CheckV environment
-echo_info "Creating CheckV environment 'checkv_env'..."
-if ! conda info --envs | grep -q "checkv_env"; then
-    conda create -n checkv_env -y -c bioconda -c conda-forge \
-        checkv \
-        python=3.10 \
-        biopython \
-        pandas \
-        numpy \
-        h5py \
-        scipy \
-        prodigal \
-        hmmer \
-        diamond \
-        tqdm
-    if [ $? -ne 0 ]; then
-        echo_error "Failed to create CheckV environment."
-        exit 1
-    fi
-else
-    echo_info "Environment 'checkv_env' already exists. Skipping creation."
-fi
+echo_info "Installing pinned Pip dependencies for 'metahict_env'..."
+conda run -p "${PROJECT_ROOT}/conda_envs/metahict_env" python -m pip install --no-deps --upgrade --force-reinstall \
+    -r "${SCRIPT_DIR}/pip-requirements.txt"
 
 # Ensure all external binaries have execute permissions
 echo_info "Ensuring all external binaries have execute permissions."

@@ -1,1 +1,52 @@
 .DS_Store
+
+# Python/runtime cache
+__pycache__/
+*.py[cod]
+
+# Local environments and package caches
+conda_envs/
+conda_pkgs/
+.nextflow/
+nextflow/.nextflow/
+nextflow/containers/conda_envs/
+nextflow/containers/conda_pkgs/
+nextflow/containers/apptainer_cache/
+
+# Large local databases and raw data
+databases/
+raw_data/
+example_data/*.fastq.gz
+
+# Nextflow/local run outputs
+work/
+nextflow_work/
+nextflow_results/
+nextflow_reports/
+nextflow/work/
+nextflow/logs/
+nextflow/reports/
+nextflow/test_runs/
+
+# Container build outputs
+*.sif
+nextflow/containers/images/
+
+# Local benchmark/result folders
+baseline_results/
+hg/
+sheep/
+pig/
+cow/
+bovine/
+ww/
+mat/
+
+# Local third-party comparison checkouts
+Binning_refiner/
+CONCOCT/
+DAS_Tool/
+MetaBAT2/
+
+# Preserved old module copies should not be released
+modules/*_old/

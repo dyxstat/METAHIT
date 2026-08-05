@@ -6,15 +6,44 @@ import gzip
 import pickle
 import logging
 from collections import defaultdict
+from pathlib import Path
 
+import matplotlib
 import numpy as np
+from matplotlib import font_manager
 import matplotlib.pyplot as plt
 import seaborn
 from matplotlib import ticker
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.sparse import load_npz
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("main")
+LABEL_FONT_SIZE = 42
+FONT_FAMILY = "Arial"
+
+
+def require_arial():
+    root = Path(__file__).resolve().parents[3]
+    font_dir = root / "conda_envs" / "metahict_env" / "fonts"
+    arial_files = [font_dir / name for name in ("arial.ttf", "arialbd.ttf", "arialbi.ttf", "ariali.ttf")]
+    missing = [path for path in arial_files if not path.is_file()]
+    if missing:
+        raise RuntimeError(f"Arial font file is missing: {missing[0]}")
+    for path in arial_files:
+        font_manager.fontManager.addfont(str(path))
+    font_manager.findfont(FONT_FAMILY, fallback_to_default=False)
+    matplotlib.rcParams.update(
+        {
+            "font.family": [FONT_FAMILY],
+            "font.sans-serif": [FONT_FAMILY],
+            "pdf.fonttype": 42,
+            "ps.fonttype": 42,
+        }
+    )
+
+
+require_arial()
 
 def downsample(mat, factor):
     if factor <= 1:
@@ -59,7 +88,19 @@ def plot(sparse_mat, contig_to_bin, order, idx_to_name, outdir, max_image_size=5
     mat = np.log(mat + 0.01)
 
     fig, ax = plt.subplots(figsize=(width, height))
-    seaborn.heatmap(mat, square=True, cmap="rocket", ax=ax, cbar=True, linewidths=0)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.25)
+    heat = seaborn.heatmap(
+        mat,
+        square=True,
+        cmap="rocket",
+        ax=ax,
+        cbar=True,
+        cbar_ax=cax,
+        linewidths=0,
+    )
+    cbar = heat.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=LABEL_FONT_SIZE)
     ax.hlines(tick_locs, *ax.get_xlim(), color='grey', linewidth=0.5, linestyle='-.')
     ax.vlines(tick_locs, *ax.get_ylim(), color='grey', linewidth=0.5, linestyle='-.')
 
@@ -67,11 +108,14 @@ def plot(sparse_mat, contig_to_bin, order, idx_to_name, outdir, max_image_size=5
     ax.tick_params(axis='y', which='both', left=False, labelleft=False)
     ax.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
 
-    plt.tight_layout()
-    out_path = os.path.join(outdir, "heatmap.png")
-    plt.savefig(out_path, dpi=dpi)
+    plt.tight_layout(pad=1.5)
+    out_png = os.path.join(outdir, "heatmap.png")
+    out_pdf = os.path.join(outdir, "heatmap.pdf")
+    plt.savefig(out_png, dpi=dpi, bbox_inches="tight", pad_inches=0.25)
+    plt.savefig(out_pdf, dpi=dpi, bbox_inches="tight", pad_inches=0.25)
     plt.close()
-    logger.info(f"Saved heatmap to: {out_path}")
+    logger.info(f"Saved heatmap to: {out_png}")
+    logger.info(f"Saved heatmap to: {out_pdf}")
 
 def main():
     parser = argparse.ArgumentParser()

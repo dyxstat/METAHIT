@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # checkv_db.sh
-# Download and set up the CheckV database for MetaHit.
+# Download and set up the CheckV database for METAHICT.
 
 # Determine database directory
 if [ -n "${1-}" ]; then
@@ -38,6 +38,17 @@ CHECKV_DB="$DB_DIR/checkv-db-v1.5.tar.gz"
 
 download_file "$CHECKV_URL" "$CHECKV_DB"
 extract_tar_gz "$CHECKV_DB" "$DB_DIR"
+
+if command -v diamond >/dev/null 2>&1; then
+    if [ -f "$DB_DIR/checkv-db-v1.5/genome_db/checkv_reps.faa" ] && [ ! -f "$DB_DIR/checkv-db-v1.5/genome_db/checkv_reps.dmnd" ]; then
+        echo "[INFO] Building CheckV DIAMOND database..."
+        diamond makedb \
+            --in "$DB_DIR/checkv-db-v1.5/genome_db/checkv_reps.faa" \
+            --db "$DB_DIR/checkv-db-v1.5/genome_db/checkv_reps"
+    fi
+else
+    echo "[WARNING] diamond was not found in PATH; CheckV may build or require checkv_reps.dmnd at runtime."
+fi
 
 # Cleanup compressed archive
 echo "[INFO] Cleaning up compressed archive..."
