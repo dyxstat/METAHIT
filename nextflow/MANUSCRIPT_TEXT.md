@@ -30,7 +30,7 @@ The Linux release installs exact Conda package artifacts from explicit lock
 files for `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `checkv_env`.
 The Python-3-compatible bin3C implementation is installed from the attributed
 fork `1001shiyuan/bin3C-python3` at immutable commit
-`a18b4e2c01bfd8b6b9481a79e89056ede89f58b9`.  Sources, licences, versions, and
+`eb71dbf166e102e1c2fc2fa15f0112ad2fe60577`.  Sources, licences, versions, and
 citations for direct dependencies are listed in `THIRD_PARTY.md`.  Docker and
 Apptainer container recipes create the same locked environments.  GTDB-Tk,
 geNomad, CheckV, CheckM, and CheckM2 reference databases are user-configured

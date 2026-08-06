@@ -58,7 +58,7 @@ Nextflow, not by `default_params.yaml`.
 record.  It contains one explicit artifact lock for each runtime environment:
 `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `checkv_env`.
 `installation/pip-requirements.txt` pins the Python-3 bin3C fork to commit
-`a18b4e2c01bfd8b6b9481a79e89056ede89f58b9`.
+`eb71dbf166e102e1c2fc2fa15f0112ad2fe60577`.
 
 `THIRD_PARTY.md` records the upstream source, licence, version/build or
 commit, and citation for direct scientific dependencies.  The Dockerfile and

@@ -30,7 +30,7 @@ licence, and citation.
 | DIAMOND | https://github.com/bbuchfink/diamond | 2.1.11 in `checkm2`; 2.2.1 in `checkv_env` | GPL-3.0-or-later | Buchfink B *et al.* 2021. https://doi.org/10.1038/s41592-021-01101-x |
 | Prodigal | https://github.com/hyattpd/Prodigal | 2.6.3; the exact build differs by locked environment | GPL-3.0-or-later | Hyatt D *et al.* 2010. https://doi.org/10.1186/1471-2105-11-119 |
 | YaHS | https://github.com/c-zhou/yahs | `yahs` 1.2.2, Bioconda build `he4a0461_0` | MIT | Zhou C *et al.* 2023. https://doi.org/10.1093/bioinformatics/btac808 |
-| bin3C Python 3 port | https://github.com/1001shiyuan/bin3C-python3 (fork of https://github.com/cerebis/bin3C) | Git commit `a18b4e2c01bfd8b6b9481a79e89056ede89f58b9` | AGPL-3.0 | DeMaere MZ, Darling AE. 2019. https://doi.org/10.1186/s13059-019-1643-1 |
+| bin3C Python 3 port | https://github.com/1001shiyuan/bin3C-python3 (fork of https://github.com/cerebis/bin3C) | Git commit `eb71dbf166e102e1c2fc2fa15f0112ad2fe60577` | AGPL-3.0 | DeMaere MZ, Darling AE. 2019. https://doi.org/10.1186/s13059-019-1643-1 |
 
 ## Notes on METAHICT-owned code and data
 
