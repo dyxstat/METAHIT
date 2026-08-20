@@ -21,12 +21,10 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Nextflow
+      - name: Use bundled Nextflow launcher
         run: |
-          curl -s https://get.nextflow.io | bash
-          mkdir -p "$HOME/.local/bin"
-          mv nextflow "$HOME/.local/bin/"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          chmod +x nextflow/bin/nextflow
+          echo "$PWD/nextflow/bin" >> "$GITHUB_PATH"
 
       - name: Run DSL2 stub smoke test
         run: |
