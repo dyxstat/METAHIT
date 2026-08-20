@@ -1,4 +1,4 @@
-# METAHICT Nextflow Containers
+# METAHI-T Nextflow Containers
 
 This folder adds optional container support for the native DSL2 workflow. It
 does not replace or modify the METAHICT module scripts.
@@ -9,7 +9,7 @@ contains `metahict_env` and `checkm2`, so the existing reassembly script can
 still switch between those environments inside the container.
 
 Databases are not baked into the images. Large databases such as GTDB-Tk,
-geNomad, CheckV, and CheckM2 should stay on shared storage and be supplied with
+geNomad, and CheckM2 should stay on shared storage and be supplied with
 the usual METAHICT database path parameters.
 
 ## Build Docker Images

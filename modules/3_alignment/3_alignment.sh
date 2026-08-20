@@ -42,7 +42,7 @@ usage() {
 
 Usage: metahict alignment [options] -r reference.fa -1 reads_1.fastq -2 reads_2.fastq -o output_dir
 Options:
-  -p STR               METAHICT project path or modules path
+  -p STR               MetaHit project path or modules path
   -r, --reference STR  Reference FASTA (default=output/assembly/final_assembly.fasta)
   -1, --reads1 STR     First Hi-C FASTQ (default=output/readqc/hic/final_reads_1.fastq)
   -2, --reads2 STR     Second Hi-C FASTQ (default=output/readqc/hic/final_reads_2.fastq)

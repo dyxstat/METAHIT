@@ -1,0 +1,11 @@
+name: ccfind_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - blast=2.16.0
+  - fasta3=36.3.8i
+  - parallel=20260722
+  - prodigal=2.6.3
+  - ruby=3.4.8

@@ -127,7 +127,9 @@ while true; do
 done
 
 # Use the pinned BBTools package supplied by the selected runtime environment.
-bbduk_cmd="$(command -v bbduk.sh || true)"
+# Prefer bbdukOld.sh when present because some BBTools releases route bbduk.sh
+# to BBDukS, which can fail on large paired FASTQ streams.
+bbduk_cmd="$(command -v bbdukOld.sh || command -v bbduk.sh || true)"
 clumpify_cmd="$(command -v clumpify.sh || true)"
 if [[ -z "$bbduk_cmd" || -z "$clumpify_cmd" ]]; then
     echo "Error: BBTools (bbduk.sh and clumpify.sh) is not available on PATH"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # setup.sh
-# This script sets up the necessary dependencies for the METAHICT pipeline.
+# This script sets up the necessary dependencies for the MetaHit pipeline.
 # into the "external" directory within the repository.
 
 # Exit immediately if a command exits with a non-zero status
@@ -53,6 +53,22 @@ create_locked_environment() {
     fi
 }
 
+create_environment_from_yaml_if_needed() {
+    local env_name="$1"
+    local yaml_file="${SCRIPT_DIR}/${env_name}.yaml"
+    local env_prefix="${PROJECT_ROOT}/conda_envs/${env_name}"
+    if [[ -d "$env_prefix" ]]; then
+        echo_info "Environment '${env_name}' already exists. Skipping creation."
+        return
+    fi
+    if [[ ! -s "$yaml_file" ]]; then
+        echo_error "Missing environment specification: $yaml_file"
+        exit 1
+    fi
+    echo_info "Creating '${env_name}' from ${yaml_file##*/}"
+    conda env create -p "$env_prefix" -f "$yaml_file"
+}
+
 # Create the external and bin directories if they don't exist
 if [ ! -d "$EXTERNAL_DIR" ]; then
     echo_info "Creating 'external' directory."
@@ -100,8 +116,42 @@ function install_bbtools() {
     fi
 }
 
+function install_ccfind() {
+    CCFIND_VERSION="1.4.7"
+    CCFIND_COMMIT="674366b49dd31cb909c2e52834e4ec8ede8919e7"
+    CCFIND_TARBALL="ccfind-${CCFIND_VERSION}.tar.gz"
+    CCFIND_URL="https://github.com/yosuken/ccfind/archive/${CCFIND_COMMIT}.tar.gz"
+    CCFIND_DIR="${EXTERNAL_DIR}/ccfind-${CCFIND_COMMIT}"
+    CCFIND_LINK="${EXTERNAL_DIR}/ccfind"
+
+    if [ ! -f "${EXTERNAL_DIR}/${CCFIND_TARBALL}" ]; then
+        echo_info "Downloading ccfind ${CCFIND_VERSION} (${CCFIND_COMMIT})..."
+        wget -O "${EXTERNAL_DIR}/${CCFIND_TARBALL}" "${CCFIND_URL}"
+    else
+        echo_info "ccfind tarball already exists, skipping download."
+    fi
+
+    if [ ! -d "${CCFIND_DIR}" ]; then
+        echo_info "Extracting ccfind..."
+        tar -xzf "${EXTERNAL_DIR}/${CCFIND_TARBALL}" -C "$EXTERNAL_DIR"
+        mv "${EXTERNAL_DIR}/ccfind-${CCFIND_COMMIT}" "${CCFIND_DIR}" 2>/dev/null || true
+    else
+        echo_info "ccfind source directory already exists, skipping extraction."
+    fi
+
+    ln -sfn "${CCFIND_DIR}" "${CCFIND_LINK}"
+    chmod +x "${CCFIND_DIR}/ccfind"
+    cat > "${BIN_DIR}/ccfind" <<EOF
+#!/usr/bin/env bash
+exec "${CCFIND_DIR}/ccfind" "\$@"
+EOF
+    chmod +x "${BIN_DIR}/ccfind"
+    echo_info "ccfind installed at ${CCFIND_DIR}; executable linked to ${BIN_DIR}/ccfind."
+}
+
 # Install all dependencies
 install_bbtools 
+install_ccfind
 # Verify installations
 echo_info "Verifying installations..."
 
@@ -111,7 +161,11 @@ create_locked_environment "gtdbtk-2.4.0"
 create_locked_environment "metahict_env"
 create_locked_environment "checkm2"
 create_locked_environment "genomad"
-create_locked_environment "checkv_env"
+if [[ -s "${LOCK_DIR}/ccfind_env.explicit.txt" ]]; then
+    create_locked_environment "ccfind_env"
+else
+    create_environment_from_yaml_if_needed "ccfind_env"
+fi
 
 echo_info "Installing pinned Pip dependencies for 'metahict_env'..."
 conda run -p "${PROJECT_ROOT}/conda_envs/metahict_env" python -m pip install --no-deps --upgrade --force-reinstall \

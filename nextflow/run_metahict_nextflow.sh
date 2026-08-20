@@ -7,12 +7,12 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 export NXF_HOME="${SCRIPT_DIR}/.nextflow"
 export NXF_OFFLINE="${NXF_OFFLINE:-true}"
 export APPTAINER_CACHEDIR="${APPTAINER_CACHEDIR:-${SCRIPT_DIR}/containers/apptainer_cache}"
-export PATH="${SCRIPT_DIR}/containers/conda_envs/metahict_apptainer/bin:${PROJECT_DIR}/conda_envs/metahict_venv/bin:${PROJECT_DIR}/conda_envs/metahict_env/bin:${PATH}"
+export PATH="${SCRIPT_DIR}/bin:${SCRIPT_DIR}/containers/conda_envs/metahict_apptainer/bin:${PROJECT_DIR}/conda_envs/metahict_venv/bin:${PROJECT_DIR}/conda_envs/metahict_env/bin:${PATH}"
 
 mkdir -p "${SCRIPT_DIR}/logs"
 
 nss_wrapper_lib="${SCRIPT_DIR}/containers/conda_envs/metahict_apptainer/lib/libnss_wrapper.so"
-if ! getent passwd "$(id -u)" >/dev/null 2>&1 && [[ -s "${nss_wrapper_lib}" ]]; then
+if [[ -s "${nss_wrapper_lib}" ]]; then
     nss_dir="${SCRIPT_DIR}/containers/nss_wrapper"
     mkdir -p "${nss_dir}"
     user_name="${USER:-metahict}"

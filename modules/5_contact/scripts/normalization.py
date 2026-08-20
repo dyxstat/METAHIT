@@ -490,7 +490,7 @@ class Normalization:
         return X.T.dot(_orig.dot(X)), x
 
 def main():
-    parser = argparse.ArgumentParser(description="Normalization tool for METAHICT pipeline.")
+    parser = argparse.ArgumentParser(description="Normalization tool for MetaHit pipeline.")
     subparsers = parser.add_subparsers(dest='command', help='Available normalization commands')
 
     # Raw normalization

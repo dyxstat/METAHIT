@@ -68,7 +68,7 @@ def replace_in_file(file_path):
 if __name__ == '__main__':
     
     def mk_version():
-        return 'METAHICT v{}'.format(__version__)
+        return 'Metahit v{}'.format(__version__)
 
     def out_name(base, suffix):
         return '{}{}'.format(base, suffix)

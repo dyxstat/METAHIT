@@ -1,13 +1,13 @@
-# METAHICT Nextflow Release Checklist
+# METAHI-T Nextflow Release Checklist
 
 This checklist is for releasing the native DSL2 workflow layer. It does not
-change METAHICT module behavior.
+change METAHI-T module behavior.
 
 ## Release identity
 
 1. Add the completed changes to `nextflow/CHANGELOG.md`.
 2. Record the immutable container image digest or SIF filename used for the release.
-3. Record the METAHICT commit or archive that the workflow was tested against.
+3. Record the METAHI-T commit or archive that the workflow was tested against.
 4. Create an annotated Git tag on that exact commit.  The release identifier is
    chosen by the maintainers at release time; do not create or change one while
    work is still in progress.

@@ -24,7 +24,7 @@ command -v conda >/dev/null 2>&1 || {
     exit 1
 }
 
-for env_name in metahict_env checkm2 gtdbtk-2.4.0 genomad checkv_env; do
+for env_name in metahict_env checkm2 gtdbtk-2.4.0 genomad ccfind_env; do
     lock_file="${lock_dir}/${env_name}.explicit.txt"
     env_prefix="${env_dir}/${env_name}"
     if [[ ! -s "$lock_file" ]]; then

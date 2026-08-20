@@ -1,4 +1,4 @@
-# METAHICT Nextflow test assets
+# METAHI-T Nextflow test assets
 
 `expected/native_dsl2_stub_outputs.tsv` is used by the CI smoke test. It
 asserts that every native DSL2 process publishes its declared result artifact,

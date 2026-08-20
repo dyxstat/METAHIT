@@ -30,6 +30,7 @@ params.binning_dir = null
 params.reassembly_dir = null
 params.mge_alignment_dir = null
 params.mge_contact_dir = null
+params.preprocessing_libraries = 'sg,hic'
 params.report_dir = "${baseDir}/reports_dsl2"
 params.metahict_conda = "${baseDir}/../installation/env.yaml"
 params.conda_envs_path = "${baseDir}/../conda_envs"
@@ -49,7 +50,7 @@ params.container_images = [
     mge: 'metahict-module10:local'
 ]
 
-include { CONDA_BUNDLE; PREPROCESSING; ASSEMBLY; ALIGNMENT; COVERAGE; CONTACT; BINNING; REASSEMBLY; ANNOTATION; SCAFFOLDING; MGE_ALIGNMENT; MGE_CONTACT; MGE } from './modules/local/metahict_modules'
+include { CONDA_BUNDLE; PREPROCESSING as PREPROCESSING_SG; PREPROCESSING as PREPROCESSING_HIC; ASSEMBLY; ALIGNMENT; COVERAGE; CONTACT; BINNING; REASSEMBLY; ANNOTATION; SCAFFOLDING; MGE_ALIGNMENT; MGE_CONTACT; MGE } from './modules/local/metahict_modules'
 
 def normaliseRow(row) {
     row.collectEntries { key, value ->
@@ -88,7 +89,6 @@ def resolveDatabaseParams() {
     params.checkm2_db = databasePath(params.checkm2_db, 'checkm2_db', 'file')
     params.gtdbtk_db = databasePath(params.gtdbtk_db, 'gtdbtk_db', 'directory')
     params.genomad_db = databasePath(params.genomad_db, 'genomad_db', 'directory')
-    params.checkv_db = databasePath(params.checkv_db, 'checkv_db', 'directory')
 }
 
 def samplesheetRows() {
@@ -122,13 +122,38 @@ def samplesWithReads() {
         }
 }
 
+def selectedPreprocessingLibraries() {
+    def selected = (params.preprocessing_libraries ?: 'sg,hic')
+        .toString()
+        .split(',')
+        .collect { it.trim().toLowerCase() }
+        .findAll { it }
+    if (!selected) {
+        error "At least one preprocessing library is required: --preprocessing_libraries sg,hic|sg|hic"
+    }
+    selected.each { library ->
+        if (!(library in ['sg', 'hic'])) {
+            error "Invalid --preprocessing_libraries value '${library}'. Use sg, hic, or sg,hic."
+        }
+    }
+    return selected.unique()
+}
+
 def preprocessingLibraries() {
-    samplesWithReads()
-        .flatMap { sample, row, sg1, sg2, hic1, hic2 ->
-            [
-                tuple(sample, row, 'sg', sg1, sg2),
-                tuple(sample, row, 'hic', hic1, hic2)
-            ]
+    def selected = selectedPreprocessingLibraries()
+    samplesheetRows()
+        .flatMap { sample, row ->
+            selected.collect { library ->
+                def read1_key = library == 'sg' ? 'sg1' : 'hic1'
+                def read2_key = library == 'sg' ? 'sg2' : 'hic2'
+                tuple(
+                    sample,
+                    row,
+                    library,
+                    inputFile(row[read1_key], "${sample}:${read1_key}"),
+                    inputFile(row[read2_key], "${sample}:${read2_key}")
+                )
+            }
         }
 }
 
@@ -225,7 +250,13 @@ workflow RUN_ALL {
     // Apptainer profiles; users never need to export container variables.
     resolveDatabaseParams()
 
-    /* One input tuple per sample; PREPROCESSING fans it out to SG and Hi-C. */
+    def selected_libraries = selectedPreprocessingLibraries()
+    if (!(selected_libraries.contains('sg') && selected_libraries.contains('hic'))) {
+        error "Full workflow requires both SG and Hi-C preprocessing libraries. Use --preprocessing_libraries sg,hic."
+    }
+
+    /* Run SG preprocessing first, then Hi-C preprocessing.  This prevents
+     * large SG and Hi-C libraries from competing for memory and disk I/O. */
     libraries = preprocessingLibraries()
 
     if (params.require_conda_bundle) {
@@ -237,13 +268,18 @@ workflow RUN_ALL {
     gated_libraries = libraries.combine(conda_bundle_gate)
         .map { sample, row, library, read1, read2, bundle_marker -> tuple(sample, row, library, read1, read2) }
 
-    PREPROCESSING(gated_libraries)
+    sg_libraries = gated_libraries.filter { sample, row, library, read1, read2 -> library == 'sg' }
+    hic_libraries = gated_libraries.filter { sample, row, library, read1, read2 -> library == 'hic' }
 
-    sg_preprocessed = PREPROCESSING.out.results
-        .filter { sample, row, library, directory -> library == 'sg' }
+    PREPROCESSING_SG(sg_libraries)
+    hic_after_sg = hic_libraries
+        .combine(PREPROCESSING_SG.out.results.collect())
+        .map { values -> tuple(values[0], values[1], values[2], values[3], values[4]) }
+    PREPROCESSING_HIC(hic_after_sg)
+
+    sg_preprocessed = PREPROCESSING_SG.out.results
         .map { sample, row, library, directory -> tuple(sample, row, directory) }
-    hic_preprocessed = PREPROCESSING.out.results
-        .filter { sample, row, library, directory -> library == 'hic' }
+    hic_preprocessed = PREPROCESSING_HIC.out.results
         .map { sample, row, library, directory -> tuple(sample, row, directory) }
 
     ASSEMBLY(sg_preprocessed)
@@ -264,9 +300,8 @@ workflow RUN_ALL {
 
     contact_input = ASSEMBLY.out.results
         .join(ALIGNMENT.out.results)
-        .join(COVERAGE.out.results)
-        .map { sample, assembly_row, assembly_directory, alignment_row, alignment_directory, coverage_row, coverage_directory ->
-            tuple(sample, assembly_row, assembly_directory, alignment_directory, coverage_directory)
+        .map { sample, assembly_row, assembly_directory, alignment_row, alignment_directory ->
+            tuple(sample, assembly_row, assembly_directory, alignment_directory)
         }
     CONTACT(contact_input)
 
@@ -322,6 +357,7 @@ workflow RUN_ALL {
 }
 
 workflow MODULE1_PREPROCESSING {
+    def selected_libraries = selectedPreprocessingLibraries()
     libraries = preprocessingLibraries()
 
     if (params.require_conda_bundle) {
@@ -333,7 +369,20 @@ workflow MODULE1_PREPROCESSING {
     gated_libraries = libraries.combine(conda_bundle_gate)
         .map { sample, row, library, read1, read2, bundle_marker -> tuple(sample, row, library, read1, read2) }
 
-    PREPROCESSING(gated_libraries)
+    if (selected_libraries.contains('sg')) {
+        sg_libraries = gated_libraries.filter { sample, row, library, read1, read2 -> library == 'sg' }
+        PREPROCESSING_SG(sg_libraries)
+    }
+
+    if (selected_libraries.contains('hic')) {
+        hic_libraries = gated_libraries.filter { sample, row, library, read1, read2 -> library == 'hic' }
+        if (selected_libraries.contains('sg')) {
+            hic_libraries = hic_libraries
+                .combine(PREPROCESSING_SG.out.results.collect())
+                .map { values -> tuple(values[0], values[1], values[2], values[3], values[4]) }
+        }
+        PREPROCESSING_HIC(hic_libraries)
+    }
 }
 
 workflow MODULE2_ASSEMBLY {
@@ -361,9 +410,8 @@ workflow MODULE4_COVERAGE {
 workflow MODULE5_CONTACT {
     contact_input = assemblyStageChannel()
         .join(alignmentStageChannel())
-        .join(coverageStageChannel())
-        .map { sample, assembly_row, assembly_directory, alignment_row, alignment_directory, coverage_row, coverage_directory ->
-            tuple(sample, assembly_row, assembly_directory, alignment_directory, coverage_directory)
+        .map { sample, assembly_row, assembly_directory, alignment_row, alignment_directory ->
+            tuple(sample, assembly_row, assembly_directory, alignment_directory)
         }
     CONTACT(contact_input)
 }

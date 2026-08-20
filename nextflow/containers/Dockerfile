@@ -47,8 +47,8 @@ RUN conda config --set channel_priority flexible && \
                 conda create -y -n gtdbtk-2.4.0 --file /tmp/metahict-locks/gtdbtk-2.4.0.explicit.txt ;; \
             genomad) \
                 conda create -y -n genomad --file /tmp/metahict-locks/genomad.explicit.txt ;; \
-            checkv_env) \
-                conda create -y -n checkv_env --file /tmp/metahict-locks/checkv_env.explicit.txt ;; \
+            ccfind_env) \
+                conda create -y -n ccfind_env --file /tmp/metahict-locks/ccfind_env.explicit.txt ;; \
             *) \
                 echo "Unknown METAHICT env requested: ${env_name}" >&2; exit 1 ;; \
         esac; \
@@ -66,8 +66,7 @@ RUN printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/module && \
     for spec in \
         checkm2:checkm2 \
         gtdbtk:gtdbtk-2.4.0 \
-        genomad:genomad \
-        checkv:checkv_env; do \
+        genomad:genomad; do \
         tool="${spec%%:*}"; env_name="${spec##*:}"; \
         printf '#!/usr/bin/env bash\nexec conda run -n %s %s "$@"\n' "${env_name}" "${tool}" > "/usr/local/bin/${tool}"; \
         chmod +x "/usr/local/bin/${tool}"; \

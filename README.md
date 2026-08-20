@@ -50,7 +50,7 @@ Git repository.  See [nextflow/README.md](nextflow/README.md) and
 behavior, defaults, environments, and database requirements.
 
 ### Databases
-The folder `installation/db` contains five scripts to download and set up databases for **CheckM**, **CheckM2**, **GTDB-Tk**, **geNomad** and **CheckV**. By default, each script downloads the database into a `databases/` folder in your current working directory. You can optionally specify a custom path during installation. If you do, please make sure to provide the same custom path when running the corresponding modules — CheckM for module 6, CheckM2 for modules 7 and 8, GTDB-Tk for module 9, and geNomad and CheckV for module 10.
+The folder `installation/db` contains scripts to download and set up databases for **CheckM**, **CheckM2**, **GTDB-Tk**, and **geNomad**. By default, each script downloads the database into a `databases/` folder in your current working directory. You can optionally specify a custom path during installation. If you do, please make sure to provide the same custom path when running the corresponding modules — CheckM for module 6, CheckM2 for modules 7 and 8, GTDB-Tk for module 9, and geNomad for module 10.
 
 **CheckM database downloading:**  
 ```bash
@@ -72,18 +72,13 @@ bash installation/db/gtdbtk_db.sh [DB_DIR]
 bash installation/db/genomad_db.sh [DB_DIR]
 ```
 
-**CheckV database downloading:**  
-```bash
-bash installation/db/checkv_db.sh [DB_DIR]
-```
-
 ## Usage
 Once installation and database setup are complete, **METAHICT** can be run by executing each module independently. The framework consists of **10 modules**, each corresponding to a numbered folder in the repository: `1_preprocessing`, `2_assembly`, `3_alignment`, `4_coverage`, `5_contact`, `6_binning`, `7_reassembly`, `8_scaffolding`, `9_annotation`, and `10_MGE`. You can view the overall structure of METAHICT below:
 
-![METAHICT overview](images/METAHICT_Overview.png)
+![METAHICT overview](images/Metahit_Overview.png)
 
 ### Basic Usage
-`metahict.py` is the main command-line wrapper that controls all modules in the METAHICT pipeline. Each module can be executed individually using subcommands.
+`metahict.py` is the main command-line wrapper that controls all modules in the MetaHit pipeline. Each module can be executed individually using subcommands.
 
 ```bash
 conda activate metahict_env
@@ -202,7 +197,7 @@ python metahict.py binning <FASTA> <BAM> <OUTDIR> <PROJECT_PATH> [options]
 - `<OUTDIR>/bin3c/fasta/*.fna` — bin3C bins 
 - `<OUTDIR>/metacc/BIN/*.fa` — MetaCC bins 
 - `<OUTDIR>/imputecc/FINAL_BIN/*.fa` — ImputeCC bins 
-- `<OUTDIR>/metahict/metahict_50_10_bins/*.fa` — Integrated final bins produced by MetaHIT bin refinement  
+- `<OUTDIR>/metahict/metahict_50_10_bins/*.fa` — Integrated final bins produced by METAHICT bin refinement  
 - `<OUTDIR>/metahict/figures/heatmap.png` — Heatmap of final bins  
 
 **Parameters**  
@@ -293,15 +288,18 @@ python metahict.py mge -p <PROJECT_PATH> --combined <COMBINED_FASTA> --contact <
 - `<OUTDIR>` — Output directory for MGE analysis results  
 
 **Outputs**  
-- `<OUTDIR>/candidate_mge_mag_associations_zscore_filtered.tsv` — Filtered candidate viral MGE-MAG association table
+- `<OUTDIR>/candidate_mge_mag_associations_zscore_filtered.tsv` — Filtered candidate MGE-MAG association table
 - `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_virus_summary.tsv` — geNomad summary of viral contigs
 - `<OUTDIR>/genomad_output/combined_contigs_summary/combined_contigs_plasmid_summary.tsv` — geNomad summary of plasmid contigs
-- `<OUTDIR>/checkv_output/virus/quality_summary.tsv` — CheckV QC summary of viral contigs  
+- `<OUTDIR>/mge_reports/virus_no_provirus.fna` — Viral contigs retained after removing geNomad provirus annotations  
+- `<OUTDIR>/sequence_topology.tsv` — Sequence-level topology report for all combined contigs, indicating whether each contig is an MGE contig, whether ccfind reports circularity, and whether geNomad reports circularity for MGE contigs
 
 **Parameters**  
 - `-t, --threads` — Number of CPU threads (default 80)
 - `--genomad_db` - Custom path for the geNomad database
-- `--checkv_db` - Custom path for the CheckV database
+- `--ccfind-terminal-fragment-size` — ccfind terminal fragment size (default 500)
+- `--ccfind-min-identity` — ccfind minimum terminal-alignment percent identity (default 94)
+- `--ccfind-min-aligned-length` — ccfind minimum terminal-alignment length (default 50)
 
 ### Selective Execution
 Since the **METAHICT** modules can be executed independently, each step is optional and can be skipped depending on computational resources and analysis needs.
@@ -316,10 +314,6 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
-
-
-
-
 
 
 

@@ -21,7 +21,7 @@ def main() -> None:
         "checkm2.explicit.txt",
         "gtdbtk-2.4.0.explicit.txt",
         "genomad.explicit.txt",
-        "checkv_env.explicit.txt",
+        "ccfind_env.explicit.txt",
     ]:
         if not (lock_dir / name).is_file():
             raise FileNotFoundError(f"Missing Conda lock: {lock_dir / name}")

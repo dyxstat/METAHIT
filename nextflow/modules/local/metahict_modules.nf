@@ -186,7 +186,7 @@ process CONTACT {
     publishDir { "${params.out_root}/${sample}/5_contact" }, mode: 'copy', overwrite: true
 
     input:
-    tuple val(sample), val(row), path(assembly_dir), path(alignment_dir), path(coverage_dir)
+    tuple val(sample), val(row), path(assembly_dir), path(alignment_dir)
 
     output:
     tuple val(sample), val(row), path('contact'), emit: results
@@ -234,6 +234,9 @@ process BINNING {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
+    if [ -d "${params.project_path}/../bin3C-python3" ]; then
+      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
+    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -d "${params.checkm_db}"
     test -s "${params.checkm2_db}"
@@ -274,6 +277,9 @@ process REASSEMBLY {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
+    if [ -d "${params.project_path}/../bin3C-python3" ]; then
+      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
+    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -s "${params.checkm2_db}"
     sg1=\$(find -L "${sg_dir}" -name 'final_*_1.fastq.gz' -print -quit)
@@ -356,6 +362,9 @@ process SCAFFOLDING {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
+    if [ -d "${params.project_path}/../bin3C-python3" ]; then
+      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
+    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -s "${params.checkm2_db}"
     hic1=\$(find -L "${hic_dir}" -name 'final_*_1.fastq.gz' -print -quit)
@@ -473,16 +482,15 @@ process MGE {
     """
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
-    export PATH="${params.conda_envs_path}/metahict_env/bin:${params.conda_envs_path}/genomad/bin:${params.conda_envs_path}/checkv_env/bin:\$PATH"
+    export PATH="${params.conda_envs_path}/metahict_env/bin:${params.conda_envs_path}/genomad/bin:\$PATH"
     test -d "${params.genomad_db}"
-    test -d "${params.checkv_db}"
     mkdir -p mge
     python "${params.project_path}/metahict.py" mge \\
       -p "${params.project_path}" --combined "${reassembly_dir}/combined_contigs.fa" \\
       --contact "${mge_contact_dir}/denoised_contact_matrix_normcc.npz" \\
       --raw-contact "${mge_contact_dir}/Raw_contact_matrix.npz" \\
       --outdir mge -t "${task.cpus}" --genomad_db "${params.genomad_db}" \\
-      --checkv_db "${params.checkv_db}" ${extra}
+      ${extra}
     test -d mge
     """
 

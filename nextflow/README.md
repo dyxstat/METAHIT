@@ -1,12 +1,12 @@
-# METAHICT native Nextflow DSL2 workflow
+# METAHI-T native Nextflow DSL2 workflow
 
-`main_dsl2.nf` is the METAHICT workflow entry point. It is a native DSL2
+`main_dsl2.nf` is the METAHI-T workflow entry point. It is a native DSL2
 implementation: each analysis stage is a named Nextflow process with declared
 inputs, outputs, compute resources, Conda environment, container image, and
 published result directory. It does **not** use the retired generic
 `metahict_nextflow_driver.py` execution path.
 
-The established METAHICT module commands remain the scientific implementation
+The established METAHI-T module commands remain the scientific implementation
 run inside their corresponding processes. This keeps their analytical behavior
 while Nextflow owns the dependency graph, task isolation, restart support, and
 execution provenance.
@@ -67,27 +67,26 @@ nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
 ```
 
 The sample sheet must include `sample`, `sg1`, `sg2`, `hic1`, and `hic2`.
-Paths may be absolute or relative to the METAHICT repository. The optional
+Paths may be absolute or relative to the METAHI-T repository. The optional
 `*_extra_args` columns in the distributed example sample sheet are passed to
 their matching module process.
 
-Large databases (GTDB-Tk release 220, geNomad, CheckV database v1.5, and
+Large databases (GTDB-Tk release 220, geNomad, and
 CheckM/CheckM2) are external configuration/data requirements; they are not
 embedded in the workflow or container image.
 
 Their paths are regular workflow parameters shared by every profile:
-`--checkm_db`, `--checkm2_db`, `--gtdbtk_db`, `--genomad_db`, and
-`--checkv_db`.  The distributed defaults point to the corresponding directories
+`--checkm_db`, `--checkm2_db`, `--gtdbtk_db`, and `--genomad_db`.  The distributed defaults point to the corresponding directories
 under `<project>/databases/`.  Override them for a custom database location;
 do not export Docker or Apptainer environment variables.
 
 ## Execution profiles
 
-- `local`: runs against the installed local METAHICT environments.
+- `local`: runs against the installed local METAHI-T environments.
 - `conda`: verifies the complete, exact locked METAHICT environment bundle in
   `<project>/conda_envs/` before starting. Run
   `bash installation/run_setup_in_venv.sh` first; the profile requires
-  `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `checkv_env`.
+  `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, and `genomad`.
 - `docker`: uses the configured container image references.  Development can
   use locally built module images; a release run uses one tested all-tools
   image supplied with `--container_image_override`.

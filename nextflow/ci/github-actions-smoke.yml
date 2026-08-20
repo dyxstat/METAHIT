@@ -1,4 +1,4 @@
-name: METAHICT Nextflow Smoke Test
+name: METAHI-T Nextflow Smoke Test
 
 on:
   push:

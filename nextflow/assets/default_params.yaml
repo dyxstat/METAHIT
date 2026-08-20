@@ -192,7 +192,6 @@ modules:
 
   mge:
     genomad_db: null
-    checkv_db: null
     genomad_splits: 8
     genomad_sensitivity: 4.2
     genomad_cleanup: true
@@ -201,18 +200,14 @@ modules:
     genomad_min_score: 0.7
     genomad_max_fdr: 0.1
     genomad_extra_args: ""
-    checkv_remove_tmp: false
-    checkv_restart: false
-    checkv_trimming: default
-    checkv_extra_args: ""
     association_filter: zscore
     zscore_threshold: 0.5
     fixed_contact_threshold: 0
     top_percent: 50
     min_raw_contacts: 2
-    viral_quality_levels: "Complete,High-quality,Medium-quality,Low-quality"
-    min_terminal_overlap: 50
-    max_terminal_overlap: 1000
+    ccfind_terminal_fragment_size: 500
+    ccfind_min_identity: 94
+    ccfind_min_aligned_length: 50
     min_contact_strength: 0
     tmp_dir: null
 

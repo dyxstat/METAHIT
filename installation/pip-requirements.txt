@@ -1,2 +1,2 @@
 # Pinned non-Conda dependency for the METAHICT release.
-bin3c-python3-metahict @ git+https://github.com/1001shiyuan/bin3C-python3.git@eb71dbf166e102e1c2fc2fa15f0112ad2fe60577
+bin3c-python3-metahict @ git+https://github.com/1001shiyuan/bin3C-python3.git@d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28

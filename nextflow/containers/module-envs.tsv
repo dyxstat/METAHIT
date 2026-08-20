@@ -1,5 +1,5 @@
 container_key	image	envs
-all	metahict-all	metahict_env checkm2 gtdbtk-2.4.0 genomad checkv_env
+all	metahict-all	metahict_env checkm2 gtdbtk-2.4.0 genomad
 preprocessing_sg	metahict-module1	metahict_env
 preprocessing_hic	metahict-module1	metahict_env
 assembly	metahict-module2	metahict_env
@@ -10,4 +10,4 @@ binning	metahict-module6	metahict_env checkm2
 reassembly	metahict-module7	metahict_env checkm2
 scaffolding	metahict-module8	metahict_env checkm2
 annotation	metahict-module9	gtdbtk-2.4.0 metahict_env
-mge	metahict-module10	genomad checkv_env metahict_env
+mge	metahict-module10	genomad metahict_env

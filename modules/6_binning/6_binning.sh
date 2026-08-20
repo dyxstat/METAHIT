@@ -195,12 +195,12 @@ OUTDIR_METAHICT="${OUTDIR}/metahict"
 
 mkdir -p "$OUTDIR_METAHICT"
 
-echo "[INFO] Running MetaHIT bin integration..."
+echo "[INFO] Running METAHICT bin integration..."
 python "$METAHICT_SCRIPT" "$OUTDIR_METACC" "$OUTDIR_BIN3C" "$OUTDIR_IMPUTECC" "$OUTDIR_METAHICT" "${INTEGRATION_ARGS[@]}" || {
-    echo "[ERROR] MetaHIT bin integration failed."
+    echo "[ERROR] METAHICT bin integration failed."
     exit 1
 }
-echo "[INFO] MetaHIT bin integration completed successfully."
+echo "[INFO] METAHICT bin integration completed successfully."
 
 # ---- Part 3: Plot Heatmap of Final Bins ----
 HEATMAP_SCRIPT="${PROJECT_PATH}/6_binning/scripts/heatmap.py"
@@ -210,7 +210,7 @@ CLUSTERING="${OUTDIR_METAHICT}/final_bins.p.gz"
 PLOT_OUTDIR="${OUTDIR_METAHICT}/figures"
 mkdir -p "$PLOT_OUTDIR"
 
-echo "[INFO] Plotting heatmap of MetaHIT final bins..."
+echo "[INFO] Plotting heatmap of METAHICT final bins..."
 python "$HEATMAP_SCRIPT" \
     --contact-map "$CONTACT_MATRIX" \
     --ORDER "$CONTACT_MAP" \

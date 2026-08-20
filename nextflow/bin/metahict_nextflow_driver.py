@@ -41,7 +41,7 @@ MODULE_DIRS = {
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Nextflow driver for existing METAHICT module commands."
+        description="Nextflow driver for existing METAHI-T module commands."
     )
     parser.add_argument("--project-path", required=True)
     parser.add_argument("--sample-json", required=True)
@@ -199,7 +199,6 @@ SPECIAL_FLAGS = {
     "checkm2_db": "--checkm2_db",
     "gtdbtk_db": "--gtdbtk-db",
     "genomad_db": "--genomad-db",
-    "checkv_db": "--checkv-db",
 }
 
 NEGATIVE_FLAGS = {

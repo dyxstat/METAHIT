@@ -26,11 +26,11 @@ licence, and citation.
 | CheckM2 | https://github.com/chklovski/CheckM2 | `checkm2` 1.1.0, Bioconda build `pyh7e72e81_1` | GPL-3.0-only | Chklovski A *et al.* 2023. https://doi.org/10.1038/s41592-023-01940-w |
 | GTDB-Tk | https://github.com/Ecogenomics/GTDBTk | `gtdbtk` 2.4.0, Bioconda build `pyhdfd78af_2` | GPL-3.0 | Chaumeil PA *et al.* 2022. https://doi.org/10.1093/bioinformatics/btac672 |
 | geNomad | https://github.com/apcamargo/genomad | `genomad` 1.12.0, Bioconda build `pyhdfd78af_0` | BSD-4-Clause | Camargo AP *et al.* 2023. https://doi.org/10.1038/s41587-023-01953-y |
-| CheckV | https://bitbucket.org/berkeleylab/checkv | `checkv` 1.1.1, Bioconda build `pyh106432d_0` | BSD-3-Clause-LBNL | Nayfach S *et al.* 2021. https://doi.org/10.1038/s41587-020-00774-7 |
-| DIAMOND | https://github.com/bbuchfink/diamond | 2.1.11 in `checkm2`; 2.2.1 in `checkv_env` | GPL-3.0-or-later | Buchfink B *et al.* 2021. https://doi.org/10.1038/s41592-021-01101-x |
-| Prodigal | https://github.com/hyattpd/Prodigal | 2.6.3; the exact build differs by locked environment | GPL-3.0-or-later | Hyatt D *et al.* 2010. https://doi.org/10.1186/1471-2105-11-119 |
+| ccfind | https://github.com/yosuken/ccfind | `ccfind` v1.4.7, Git commit `674366b49dd31cb909c2e52834e4ec8ede8919e7`; runtime dependencies in `ccfind_env` include `ruby` 3.4.8, `fasta3` 36.3.8i, BLAST 2.16.0, Prodigal 2.6.3, and GNU parallel 20260722 | MIT | Nishimura Y *et al.* 2017. https://doi.org/10.1128/mSphere.00359-16 |
+| DIAMOND | https://github.com/bbuchfink/diamond | 2.1.11 in `checkm2` | GPL-3.0-or-later | Buchfink B *et al.* 2021. https://doi.org/10.1038/s41592-021-01101-x |
+| Prodigal | https://github.com/hyattpd/Prodigal | 2.6.3 | GPL-3.0-or-later | Hyatt D *et al.* 2010. https://doi.org/10.1186/1471-2105-11-119 |
 | YaHS | https://github.com/c-zhou/yahs | `yahs` 1.2.2, Bioconda build `he4a0461_0` | MIT | Zhou C *et al.* 2023. https://doi.org/10.1093/bioinformatics/btac808 |
-| bin3C Python 3 port | https://github.com/1001shiyuan/bin3C-python3 (fork of https://github.com/cerebis/bin3C) | Git commit `eb71dbf166e102e1c2fc2fa15f0112ad2fe60577` | AGPL-3.0 | DeMaere MZ, Darling AE. 2019. https://doi.org/10.1186/s13059-019-1643-1 |
+| bin3C Python 3 port | https://github.com/1001shiyuan/bin3C-python3 (fork of https://github.com/cerebis/bin3C) | Git commit `d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28` | AGPL-3.0 | DeMaere MZ, Darling AE. 2019. https://doi.org/10.1186/s13059-019-1643-1 |
 
 ## Notes on METAHICT-owned code and data
 
@@ -41,7 +41,7 @@ repository.
 Large reference databases are not distributed in the repository or container
 image.  Users obtain them with the scripts in `installation/db/` and provide
 their paths at run time.  The explicitly selected database releases are GTDB
-release 220 and CheckV database v1.5.  The geNomad and CheckM2 download tools
+release 220.  The geNomad and CheckM2 download tools
 record the database version in the downloaded database directory.
 
 The bin3C fork retains upstream Git history and its AGPL-3.0 licence.  The

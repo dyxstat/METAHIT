@@ -6,7 +6,7 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Check expected output files for a METAHICT Nextflow run."
+        description="Check expected output files for a METAHI-T Nextflow run."
     )
     parser.add_argument("--root", required=True, help="Repository or output root")
     parser.add_argument("--manifest", required=True, help="TSV expected-output manifest")

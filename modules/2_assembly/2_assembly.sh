@@ -49,7 +49,7 @@ help_message() {
 
 Usage: metahict assembly [options] -1 reads_1.fastq -2 reads_2.fastq -o output_dir
 Options:
-    -p STR              METAHICT project path or modules path
+    -p STR              MetaHit project path or modules path
     -1 STR              Forward FASTQ reads
     -2 STR              Reverse FASTQ reads
     -o STR              Output directory

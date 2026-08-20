@@ -17,6 +17,19 @@ echo_error() {
 }
 
 available_memory_mb() {
+    local cgroup_path cgroup_limit_bytes
+
+    if [[ -r /proc/self/cgroup ]]; then
+        cgroup_path="$(awk -F: '$2 == "" {print $3; exit}' /proc/self/cgroup 2>/dev/null || true)"
+        if [[ -n "${cgroup_path}" && -r "/sys/fs/cgroup${cgroup_path}/memory.max" ]]; then
+            cgroup_limit_bytes="$(cat "/sys/fs/cgroup${cgroup_path}/memory.max" 2>/dev/null || true)"
+            if [[ "${cgroup_limit_bytes}" =~ ^[0-9]+$ ]]; then
+                awk -v bytes="${cgroup_limit_bytes}" 'BEGIN {printf "%d\n", bytes / 1024 / 1024}'
+                return
+            fi
+        fi
+    fi
+
     free -m | awk '/^Mem:/{print $2}'
 }
 

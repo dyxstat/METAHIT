@@ -56,22 +56,22 @@ Nextflow, not by `default_params.yaml`.
 
 `installation/locks/linux-64/` is the authoritative exact Linux dependency
 record.  It contains one explicit artifact lock for each runtime environment:
-`metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `checkv_env`.
+`metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `ccfind_env`.
 `installation/pip-requirements.txt` pins the Python-3 bin3C fork to commit
-`eb71dbf166e102e1c2fc2fa15f0112ad2fe60577`.
+`d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28`.
 
 `THIRD_PARTY.md` records the upstream source, licence, version/build or
 commit, and citation for direct scientific dependencies.  The Dockerfile and
 Apptainer definition create the same named environments from these locks.
 
 External databases are never baked into the container image.  The distributed
-database scripts select GTDB release 220 and CheckV database v1.5.  geNomad,
+database scripts select GTDB release 220.  geNomad,
 CheckM, and CheckM2 database versions are recorded by their official download
 tools in the installed database directories.
 
 All five external database locations are ordinary Nextflow parameters:
 `--checkm_db`, `--checkm2_db`, `--gtdbtk_db`, `--genomad_db`, and
-`--checkv_db`.  The supplied defaults resolve to `<project>/databases/`; a
+The supplied defaults resolve to `<project>/databases/`; a
 custom location is supplied by overriding the relevant parameter.  The
 workflow forwards each value to the modules that need it, including CheckM2,
 so users do not export container-specific environment variables.

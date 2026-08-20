@@ -52,7 +52,7 @@ if [[ "${command}" == "build" ]]; then
     echo "[INFO] Building ${image}"
     docker build \
         --file "${containers_dir}/Dockerfile" \
-        --build-arg 'METAHICT_ENVS=metahict_env checkm2 gtdbtk-2.4.0 genomad checkv_env' \
+        --build-arg 'METAHICT_ENVS=metahict_env checkm2 gtdbtk-2.4.0 genomad ccfind_env' \
         --build-arg "METAHICT_VERSION=${tag}" \
         --build-arg "VCS_REF=${vcs_ref}" \
         --build-arg "SOURCE_REPOSITORY=${source_repository}" \

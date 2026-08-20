@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # genomad_db.sh
-# Download and set up the geNomad database for METAHICT.
-# By default, installs into "databases/genomad_db" under the METAHICT root.
+# Download and set up the geNomad database for MetaHit.
+# By default, installs into "databases/genomad_db" under the MetaHit root.
 
 # Determine database directory
 if [ -n "${1-}" ]; then

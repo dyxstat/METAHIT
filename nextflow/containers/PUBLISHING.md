@@ -1,8 +1,8 @@
 # Publishing the METAHICT release container
 
 The released workflow will use one all-tools image.  It contains the exact
-locked Conda environments `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`,
-and `checkv_env`.  Large reference databases remain external user-configured
+locked Conda environments `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, and
+`genomad`.  Large reference databases remain external user-configured
 paths and are not included in the image.
 
 The planned registry location is:

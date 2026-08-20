@@ -211,7 +211,6 @@ def mge_defaults_text():
     return """Module 10 MGE defaults:
 threads=80
 genomad_db=<project_path>/databases/genomad_db/genomad_db
-checkv_db=<project_path>/databases/checkv_db/checkv-db-v1.5
 genomad_splits=8
 genomad_sensitivity=4.2
 genomad_cleanup=true
@@ -220,18 +219,14 @@ genomad_preset=default
 genomad_min_score=0.7
 genomad_max_fdr=0.1
 genomad_extra_args=
-checkv_remove_tmp=false
-checkv_restart=false
-checkv_trimming=default
-checkv_extra_args=
 association_filter=zscore
 zscore_threshold=0.5
 fixed_contact_threshold=0
 top_percent=50
 min_raw_contacts=2
-viral_quality_levels=Complete,High-quality,Medium-quality,Low-quality
-min_terminal_overlap=50
-max_terminal_overlap=1000
+ccfind_terminal_fragment_size=500
+ccfind_min_identity=94
+ccfind_min_aligned_length=50
 min_contact_strength=0
 tmp_dir=METAHICT_TMP_ROOT, TMPDIR, or /tmp"""
 
@@ -708,23 +703,20 @@ def mge(args):
 
     if args.genomad_db:
         command += f' --genomad_db "{absolute_path(args.genomad_db)}"'
-    if args.checkv_db:
-        command += f' --checkv_db "{absolute_path(args.checkv_db)}"'
     command += (
         f' --genomad-splits {args.genomad_splits}'
         f' --genomad-sensitivity {args.genomad_sensitivity}'
         f' --genomad-preset "{args.genomad_preset}"'
         f' --genomad-min-score {args.genomad_min_score}'
         f' --genomad-max-fdr {args.genomad_max_fdr}'
-        f' --checkv-trimming "{args.checkv_trimming}"'
         f' --association-filter "{args.association_filter}"'
         f' --zscore-threshold {args.zscore_threshold}'
         f' --fixed-contact-threshold {args.fixed_contact_threshold}'
         f' --top-percent {args.top_percent}'
         f' --min-raw-contacts {args.min_raw_contacts}'
-        f' --viral-quality-levels "{args.viral_quality_levels}"'
-        f' --min-terminal-overlap {args.min_terminal_overlap}'
-        f' --max-terminal-overlap {args.max_terminal_overlap}'
+        f' --ccfind-terminal-fragment-size {args.ccfind_terminal_fragment_size}'
+        f' --ccfind-min-identity {args.ccfind_min_identity}'
+        f' --ccfind-min-aligned-length {args.ccfind_min_aligned_length}'
         f' --min-contact-strength {args.min_contact_strength}'
     )
     if args.genomad_cleanup:
@@ -735,12 +727,6 @@ def mge(args):
         command += " --genomad-restart"
     if args.genomad_extra_args:
         command += f' --genomad-extra-args "{args.genomad_extra_args}"'
-    if args.checkv_remove_tmp:
-        command += " --checkv-remove-tmp"
-    if args.checkv_restart:
-        command += " --checkv-restart"
-    if args.checkv_extra_args:
-        command += f' --checkv-extra-args "{args.checkv_extra_args}"'
     if args.tmp_dir:
         command += f' --tmp-dir "{absolute_path(args.tmp_dir)}"'
 
@@ -775,12 +761,12 @@ def main():
         print(mge_defaults_text())
         return
 
-    parser = argparse.ArgumentParser(description="METAHICT Pipeline Wrapper")
+    parser = argparse.ArgumentParser(description="MetaHit Pipeline Wrapper")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Preprocessing subcommand 
     pre_parser = subparsers.add_parser("preprocessing", help="Run preprocessing of shotgun or Hi-C reads")
-    pre_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    pre_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     pre_parser.add_argument("-1", dest="r1", required=True, help="Forward shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)")
     pre_parser.add_argument("-2", dest="r2", required=True, help="Reverse shotgun or Hi-C FASTQ reads (.fastq or .fastq.gz)")
     pre_parser.add_argument("-o", "--output", required=True, help="Output directory for preprocessed reads")
@@ -805,7 +791,7 @@ def main():
 
     # Assembly subcommand
     asm_parser = subparsers.add_parser("assembly", help="Run assembly module to generate contigs")
-    asm_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    asm_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     asm_parser.add_argument("-1", dest="r1", required=True, help="Forward preprocessed reads (.fastq or .fastq.gz)")
     asm_parser.add_argument("-2", dest="r2", required=True, help="Reverse preprocessed reads (.fastq or .fastq.gz)")
     asm_parser.add_argument("-o", "--output", required=True, help="Output directory for assembled contigs")
@@ -830,7 +816,7 @@ def main():
 
     # Alignment subcommand
     aln_parser = subparsers.add_parser("alignment", help="Run alignment module for Hi-C read mapping")
-    aln_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    aln_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     aln_parser.add_argument("-r", "--reference", required=True, help="Assembled contigs file (.fasta)")
     aln_parser.add_argument("-1", dest="r1", required=True, help="Forward preprocessed Hi-C reads (.fastq or .fastq.gz)")
     aln_parser.add_argument("-2", dest="r2", required=True, help="Reverse preprocessed Hi-C reads (.fastq or .fastq.gz)")
@@ -850,7 +836,7 @@ def main():
     
     # Coverage subcommand
     cov_parser = subparsers.add_parser("coverage", help="Run coverage module for read mapping and coverage estimation")
-    cov_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    cov_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     cov_parser.add_argument("-1", dest="r1", required=True, help="Forward shotgun reads (.fastq or .fastq.gz)")
     cov_parser.add_argument("-2", dest="r2", required=True, help="Reverse shotgun reads (.fastq or .fastq.gz)")
     cov_parser.add_argument("-r", "--reference", required=True, help="Assembled contigs file (.fasta)")
@@ -874,7 +860,7 @@ def main():
     # Contact subcommand
     con_parser = subparsers.add_parser("contact", help="Run contact module to generate contact matrices")
     con_parser.add_argument("method", choices=["raw", "normcc", "hiczin", "bin3c", "metator"], help="Normalization method")
-    con_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    con_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     con_parser.add_argument("--bam", required=True, help="Hi-C read alignment file (.bam)")
     con_parser.add_argument("--fasta", required=True, help="Assembled contigs file (.fasta)")
     con_parser.add_argument("--out", dest="output", required=True, help="Output directory for contact maps")
@@ -896,7 +882,7 @@ def main():
     bin_parser.add_argument("--fasta", help="Assembled contigs file (.fa or .fasta)")
     bin_parser.add_argument("--bam", help="Hi-C reads aligned to the contigs (.bam)")
     bin_parser.add_argument("--output", help="Output directory for binning results")
-    bin_parser.add_argument("--project_path", help="Path to the METAHICT project directory")
+    bin_parser.add_argument("--project_path", help="Path to the MetaHit project directory")
     bin_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
     bin_parser.add_argument("--checkm_db", help="Path to CheckM database (if not using default environment variable)")
     bin_parser.add_argument("--enzyme", default="Sau3AI,MluCI", help="Comma-separated restriction enzymes (default=Sau3AI,MluCI)")
@@ -934,7 +920,7 @@ def main():
     
     # Reassembly subcommand
     reas_parser = subparsers.add_parser("reassembly", help="Run reassembly module to reconstruct bins and unmapped reads")
-    reas_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    reas_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     reas_parser.add_argument("--bin", required=True, help="Directory containing input bins")
     reas_parser.add_argument("--assembly", required=True, help="Original assembly FASTA file (.fa or .fasta)")
     reas_parser.add_argument("--hic1", required=True, help="Forward preprocessed Hi-C reads (.fastq or .fastq.gz)")
@@ -968,7 +954,7 @@ def main():
 
     # Scaffolding subcommand
     scaf_parser = subparsers.add_parser("scaffolding", help="Run scaffolding module to generate scaffolded genomes and heatmaps")
-    scaf_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    scaf_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     scaf_parser.add_argument("--fasta", required=True, help="Input bin FASTA file for scaffolding (.fa or .fasta)")
     scaf_parser.add_argument("--bam", help="Optional Hi-C read alignments to the assembly (.bam)")
     scaf_parser.add_argument("--enzyme", required=True, help="Restriction enzymes used in the Hi-C library (e.g., Sau3AI,MluCI)")
@@ -1009,7 +995,7 @@ def main():
 
     # Annotation subcommand
     anno_parser = subparsers.add_parser("annotation", help="Run annotation module using GTDB-Tk for taxonomic classification")
-    anno_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    anno_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     anno_parser.add_argument("--bin", required=True, help="Directory containing input bins")
     anno_parser.add_argument("--outdir", required=True, help="Output directory for annotation results")
     anno_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
@@ -1036,14 +1022,13 @@ def main():
 
     # MGE subcommand
     mge_parser = subparsers.add_parser("mge", help="Run MGE module for viral/plasmid detection and candidate MGE-MAG association analysis")
-    mge_parser.add_argument("-p", "--project_path", required=True, help="Path to the METAHICT project directory")
+    mge_parser.add_argument("-p", "--project_path", required=True, help="Path to the MetaHit project directory")
     mge_parser.add_argument("--combined", required=True, help="Combined contigs FASTA file (includes binned and unmapped contigs)")
     mge_parser.add_argument("--contact", required=True, help="Normalized contact matrix (.npz)")
     mge_parser.add_argument("--raw-contact", dest="raw_contact", required=True, help="Raw contact matrix (.npz) used for raw Hi-C support")
     mge_parser.add_argument("--outdir", required=True, help="Output directory for MGE analysis results")
     mge_parser.add_argument("-t", "--threads", type=int, default=80, help="Number of CPU threads (default=80)")
     mge_parser.add_argument("--genomad_db", "--genomad-db", dest="genomad_db", help="Path to geNomad database (default=<project_path>/databases/genomad_db/genomad_db)")
-    mge_parser.add_argument("--checkv_db", "--checkv-db", dest="checkv_db", help="Path to CheckV database (default=<project_path>/databases/checkv_db/checkv-db-v1.5)")
     mge_parser.add_argument("--genomad-splits", type=int, default=8, help="geNomad MMseqs2 split count (default=8)")
     mge_parser.add_argument("--genomad-sensitivity", type=float, default=4.2, help="geNomad MMseqs2 sensitivity (default=4.2)")
     mge_parser.add_argument("--genomad-cleanup", dest="genomad_cleanup", action="store_true", help="Delete geNomad intermediate files (default=true)")
@@ -1054,19 +1039,15 @@ def main():
     mge_parser.add_argument("--genomad-min-score", type=float, default=0.7, help="geNomad minimum virus/plasmid score when preset is default (default=0.7)")
     mge_parser.add_argument("--genomad-max-fdr", type=float, default=0.1, help="geNomad maximum FDR when preset is default (default=0.1)")
     mge_parser.add_argument("--genomad-extra-args", default="", help="Additional native options passed to genomad end-to-end (default=empty)")
-    mge_parser.add_argument("--checkv-remove-tmp", action="store_true", help="Delete CheckV intermediate files")
-    mge_parser.add_argument("--checkv-restart", action="store_true", help="Overwrite existing CheckV intermediate files")
-    mge_parser.add_argument("--checkv-trimming", choices=["default", "conservative", "aggressive"], default="default", help="CheckV trimming mode (default=default)")
-    mge_parser.add_argument("--checkv-extra-args", default="", help="Additional native options passed to checkv end_to_end (default=empty)")
     mge_parser.add_argument("--association-filter", choices=["zscore", "fixed", "percentage", "raw-support-only"], default="zscore", help="Association filter method (default=zscore)")
-    mge_parser.add_argument("--zscore-threshold", type=float, default=0.5, help="Minimum Z-score for filtered viral MGE-MAG associations (default=0.5)")
+    mge_parser.add_argument("--zscore-threshold", type=float, default=0.5, help="Minimum Z-score for filtered MGE-MAG associations (default=0.5)")
     mge_parser.add_argument("--fixed-contact-threshold", type=float, default=0, help="Minimum contact strength for fixed association filtering (default=0)")
     mge_parser.add_argument("--top-percent", type=float, default=50, help="Top percent of association contact strengths retained by percentage filtering (default=50)")
     mge_parser.add_argument("--min-raw-contacts", type=float, default=2, help="Minimum raw Hi-C read-pair support for candidate associations (default=2)")
-    mge_parser.add_argument("--viral-quality-levels", default="Complete,High-quality,Medium-quality,Low-quality", help="Comma-separated CheckV quality levels used for candidate viral MGE-MAG association")
-    mge_parser.add_argument("--min-terminal-overlap", type=int, default=50, help="Minimum terminal overlap length for circularity evidence (default=50)")
-    mge_parser.add_argument("--max-terminal-overlap", type=int, default=1000, help="Maximum terminal overlap length for circularity evidence (default=1000)")
-    mge_parser.add_argument("--min-contact-strength", type=float, default=0, help="Minimum positive contact strength counted for viral MGE-MAG associations (default=0)")
+    mge_parser.add_argument("--ccfind-terminal-fragment-size", type=int, default=500, help="ccfind terminal fragment size (default=500)")
+    mge_parser.add_argument("--ccfind-min-identity", type=int, default=94, help="ccfind minimum terminal-alignment percent identity (default=94)")
+    mge_parser.add_argument("--ccfind-min-aligned-length", type=int, default=50, help="ccfind minimum terminal-alignment length (default=50)")
+    mge_parser.add_argument("--min-contact-strength", type=float, default=0, help="Minimum positive contact strength counted for MGE-MAG associations (default=0)")
     mge_parser.add_argument("--tmp-dir", help="Temporary directory root (default=METAHICT_TMP_ROOT, TMPDIR, or /tmp)")
     mge_parser.add_argument("--print-defaults", action="store_true", help="Print MGE defaults and exit")
     mge_parser.set_defaults(func=mge)

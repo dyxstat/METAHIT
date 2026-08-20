@@ -3,7 +3,7 @@
 # Shared module logging and lightweight resource tracking for METAHICT modules.
 # Each module writes:
 #   - module.log: stdout/stderr from the module run
-#   - resources.txt: peak RSS memory and elapsed wall time
+#   - resources.txt: peak memory and elapsed wall time
 
 metahict_detect_outdir() {
     local script_name
@@ -50,13 +50,27 @@ _metahict_resource_monitor() {
     local root_pid="$1"
     local peak_file="$2"
     local interval="${METAHICT_RESOURCE_INTERVAL:-5}"
-    local pids rss
+    local pids rss cgroup_current_kb
 
     printf '0\n' > "$peak_file"
     while kill -0 "$root_pid" 2>/dev/null; do
-        pids="$(_metahict_resource_descendants "$root_pid" | sort -n -u | paste -sd, -)"
-        if [[ -n "$pids" ]]; then
-            rss="$(ps -o rss= -p "$pids" 2>/dev/null | awk '{sum += $1} END {print sum + 0}')"
+        cgroup_current_kb=0
+        if [[ -n "${METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT:-}" && -r "${METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT}" ]]; then
+            cgroup_current_kb="$(awk '{printf "%d", $1 / 1024}' "${METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT}" 2>/dev/null || printf '0')"
+        fi
+
+        if [[ "${cgroup_current_kb}" =~ ^[0-9]+$ ]] && (( cgroup_current_kb > 0 )); then
+            rss="${cgroup_current_kb}"
+        else
+            pids="$(_metahict_resource_descendants "$root_pid" | sort -n -u | paste -sd, -)"
+            if [[ -n "$pids" ]]; then
+                rss="$(ps -o rss= -p "$pids" 2>/dev/null | awk 'BEGIN {max = 0} {if ($1 > max) max = $1} END {print max + 0}')"
+            else
+                rss=0
+            fi
+        fi
+
+        if [[ "${rss}" =~ ^[0-9]+$ ]]; then
             awk -v rss="$rss" 'NR == 1 {if (rss > $1) print rss; else print $1}' "$peak_file" > "${peak_file}.tmp"
             mv "${peak_file}.tmp" "$peak_file"
         fi
@@ -111,11 +125,20 @@ metahict_resource_start() {
     export METAHICT_RESOURCE_PEAK_FILE
     export METAHICT_LOG_FILE
     export METAHICT_RESOURCE_MONITOR_PID
+    export METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT
 
     METAHICT_RESOURCE_START_EPOCH="$(date +%s)"
     METAHICT_RESOURCE_FILE="${outdir}/resources.txt"
     METAHICT_RESOURCE_PEAK_FILE="${outdir}/.resources_peak.$$"
     METAHICT_LOG_FILE="${outdir}/module.log"
+    METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT=""
+    if [[ -r /proc/self/cgroup ]]; then
+        local cgroup_path
+        cgroup_path="$(awk -F: '$2 == "" {print $3; exit}' /proc/self/cgroup 2>/dev/null || true)"
+        if [[ "$cgroup_path" == */app.slice/*.service && -r "/sys/fs/cgroup${cgroup_path}/memory.current" ]]; then
+            METAHICT_RESOURCE_CGROUP_MEMORY_CURRENT="/sys/fs/cgroup${cgroup_path}/memory.current"
+        fi
+    fi
 
     : > "$METAHICT_LOG_FILE"
     exec > >(tee -a "$METAHICT_LOG_FILE") 2>&1
