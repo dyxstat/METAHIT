@@ -28,12 +28,20 @@ jobs:
 
       - name: Run DSL2 stub smoke test
         run: |
+          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm_db"
+          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db"
+          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db"
+          touch "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd"
           nextflow run nextflow/main_dsl2.nf \
             -profile local \
             --samplesheet nextflow/assets/example_data_samplesheet.csv \
             --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
             --report_dir "$PWD/nextflow/reports/ci_smoke" \
             -work-dir "$PWD/nextflow/work/ci_smoke" \
+            --checkm_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm_db" \
+            --checkm2_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd" \
+            --gtdbtk_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db" \
+            --genomad_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db" \
             --threads 2 \
             --clean true \
             --chain true \
