@@ -1,4 +1,4 @@
-name: METAHI-T Nextflow Smoke Test
+name: METAHICT Nextflow Smoke Test
 
 on:
   push:
@@ -32,8 +32,17 @@ jobs:
           mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db"
           mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db"
           touch "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd"
+          cat > "$PWD/nextflow/test_runs/ci_smoke/ci_resources.config" <<'EOF'
+          process {
+            withName: '.*' {
+              cpus = 2
+              memory = '4 GB'
+            }
+          }
+          EOF
           nextflow run nextflow/main_dsl2.nf \
             -profile local \
+            -c "$PWD/nextflow/test_runs/ci_smoke/ci_resources.config" \
             --samplesheet nextflow/assets/example_data_samplesheet.csv \
             --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
             --report_dir "$PWD/nextflow/reports/ci_smoke" \
