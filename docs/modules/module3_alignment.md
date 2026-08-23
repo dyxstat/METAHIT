@@ -5,7 +5,7 @@ Alignment maps cleaned Hi-C reads to assembled contigs with BWA-MEM and filters 
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--assembly_dir` | Nextflow selected-module run | Assembly output directory containing the contig FASTA |
 | `--hic_preprocessing_dir` | Nextflow selected-module run | Hi-C preprocessing output directory |
 | `-p`, `--project_path` | module wrapper | METAHICT project path |

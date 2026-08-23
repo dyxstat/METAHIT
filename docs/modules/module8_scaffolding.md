@@ -5,7 +5,7 @@ Scaffolding uses Hi-C contacts to scaffold MAG contigs with YaHS and produces co
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--reassembly_dir` | Nextflow selected-module run | Reassembly output directory |
 | `--alignment_dir` | Nextflow selected-module run | Hi-C alignment output directory |
 | `--hic_preprocessing_dir` | Nextflow selected-module run | Cleaned Hi-C reads |

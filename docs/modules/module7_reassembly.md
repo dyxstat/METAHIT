@@ -5,7 +5,7 @@ Reassembly selects short-insert, shotgun-like intra-contig Hi-C read pairs using
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--binning_dir` | Nextflow selected-module run | Binning output directory with consolidated bins |
 | `--assembly_dir` | Nextflow selected-module run | Original assembly directory |
 | `--alignment_dir` | Nextflow selected-module run | Hi-C alignment directory |

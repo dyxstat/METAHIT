@@ -5,7 +5,7 @@ Annotation classifies MAGs with GTDB-Tk using GTDB release 220 by default.
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--reassembly_dir` | Nextflow selected-module run | Reassembly output directory containing reassembled bins |
 | `-p`, `--project_path` | module wrapper | METAHICT project path |
 | `--bin` | module wrapper | Directory containing input bins |

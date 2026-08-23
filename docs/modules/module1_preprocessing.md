@@ -5,7 +5,7 @@ Preprocessing cleans paired-end shotgun and Hi-C reads with BBTools/BBDuk and pr
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `sg1`, `sg2` | Nextflow sample sheet | Shotgun paired-end FASTQ files |
 | `hic1`, `hic2` | Nextflow sample sheet | Hi-C paired-end FASTQ files |
 | `-p`, `--project_path` | module wrapper | METAHICT project path |

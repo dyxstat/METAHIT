@@ -5,7 +5,7 @@ The MGE module identifies viral and plasmid contigs with geNomad, reports candid
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--reassembly_dir` | Nextflow selected-module run | Reassembly output directory containing `combined_contigs.fa` |
 | `--hic_preprocessing_dir` | Nextflow selected-module run | Cleaned Hi-C reads if MGE-specific alignment/contact steps are needed |
 | `--mge_alignment_dir` | Nextflow selected-module run | Optional pre-existing MGE alignment output |

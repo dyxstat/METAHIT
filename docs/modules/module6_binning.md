@@ -5,7 +5,7 @@ Binning runs Hi-C-aware binners, generates hybrid bin sets, evaluates candidate 
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--assembly_dir` | Nextflow selected-module run | Assembly output directory containing the contig FASTA |
 | `--alignment_dir` | Nextflow selected-module run | Hi-C alignment output directory |
 | `enzyme` | Nextflow sample sheet | Restriction enzyme list |

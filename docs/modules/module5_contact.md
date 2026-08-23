@@ -5,7 +5,7 @@ The contact module builds raw Hi-C contact matrices from Hi-C alignments and nor
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--assembly_dir` | Nextflow selected-module run | Assembly output directory containing the contig FASTA |
 | `--alignment_dir` | Nextflow selected-module run | Hi-C alignment output directory |
 | `enzyme` | Nextflow sample sheet | Restriction enzyme list |

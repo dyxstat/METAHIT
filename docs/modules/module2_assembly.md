@@ -5,7 +5,7 @@ Assembly constructs contigs from cleaned shotgun reads. MEGAHIT is the default s
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--sg_preprocessing_dir` | Nextflow selected-module run | Shotgun preprocessing output directory |
 | `-p`, `--project_path` | module wrapper | METAHICT project path |
 | `-1` | module wrapper | Forward preprocessed read file |

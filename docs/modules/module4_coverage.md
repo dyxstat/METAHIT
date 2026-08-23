@@ -5,7 +5,7 @@ Coverage maps shotgun reads to assembled contigs and summarizes contig depth for
 ## Required parameters
 
 | Parameter | Used by | Meaning |
-| --- | --- |
+| --- | --- | --- |
 | `--assembly_dir` | Nextflow selected-module run | Assembly output directory containing the contig FASTA |
 | `--sg_preprocessing_dir` | Nextflow selected-module run | Shotgun preprocessing output directory |
 | `-p`, `--project_path` | module wrapper | METAHICT project path |
