@@ -36,7 +36,7 @@ Run the bundled smoke test:
 bash nextflow/ci/run_smoke_ci.sh
 ```
 
-For a full tutorial run, download the example FASTQ files from Zenodo and run the example sample sheet:
+Download the example FASTQ files from Zenodo before running the example sample sheet:
 
 ```text
 https://doi.org/10.5281/zenodo.21695166

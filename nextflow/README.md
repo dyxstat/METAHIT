@@ -52,7 +52,13 @@ Nextflow processes. The MGE-specific contact output is handled separately by
 `--mge_contact_dir`. For multi-sample runs, direct paths may include
 `{sample}`, which is replaced with the sample name.
 
-## Run the bundled example
+## Run the example dataset
+
+Download the example FASTQ files from Zenodo before running the example sample sheet:
+
+```text
+https://doi.org/10.5281/zenodo.21695166
+```
 
 From the repository root:
 
@@ -86,7 +92,7 @@ do not export Docker or Apptainer environment variables.
 - `conda`: verifies the complete, exact locked METAHICT environment bundle in
   `<project>/conda_envs/` before starting. Run
   `bash installation/run_setup_in_venv.sh` first; the profile requires
-  `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, and `genomad`.
+  `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `ccfind_env`.
 - `docker`: uses the configured container image references.  Development can
   use locally built module images; a release run uses one tested all-tools
   image supplied with `--container_image_override`.

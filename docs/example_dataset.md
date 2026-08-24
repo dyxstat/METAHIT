@@ -1,6 +1,6 @@
 # Example dataset
 
-The METAHICT example dataset is a 5% subset of the human-gut benchmark dataset. It contains paired-end shotgun reads and paired-end metagenomic Hi-C reads for installation checks, tutorial runs, and workflow smoke testing.
+The METAHICT example dataset is a 5% subset of the human-gut benchmark dataset. The repository provides metadata, checksums, and a Nextflow sample sheet for this dataset; the paired-end shotgun and metagenomic Hi-C FASTQ files are archived externally and must be downloaded from Zenodo before running the example workflow.
 
 The example FASTQ files are archived at:
 
@@ -26,7 +26,7 @@ The repository includes:
 | `example_data/MD5SUMS.txt` | Checksums for downloaded example files |
 | `nextflow/assets/example_data_samplesheet.csv` | Nextflow sample sheet for the example run |
 
-## Run the bundled smoke test
+## Run the smoke test
 
 ```bash
 bash nextflow/ci/run_smoke_ci.sh
