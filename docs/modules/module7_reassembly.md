@@ -40,7 +40,7 @@ Reassembly selects short-insert, shotgun-like intra-contig Hi-C read pairs using
 | `--memory` | 80% of available memory | Memory limit |
 | `--skip-residual-assembly` | `false` | Skip assembly of residual reads |
 | `--skip-checkm2` | `false` | Skip CheckM2 quality evaluation |
-| `--checkm2_db`, `--checkm2-db` | `databases/checkm2_db/CheckM2_database/uniref100.KO.1.dmnd` | CheckM2 database path |
+| `--checkm2_db` | `databases/checkm2_db/CheckM2_database/uniref100.KO.1.dmnd` | CheckM2 database path |
 | `--tmp-dir` | system temporary directory | Temporary directory root |
 | `--keep-temp` | `false` | Keep successful SPAdes and CheckM2 temporary directories |
 

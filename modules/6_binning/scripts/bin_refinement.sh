@@ -280,7 +280,7 @@ if [ "$refine" == "true" ] && [[ ! -s work_files/binsA.stats ]]; then
 		comm "There is only one bin folder, so no refinement of bins possible. Moving on..."
 	elif [[ $n_binnings -eq 2 ]]; then
 		comm "There are two bin folders, so we can consolidate them into a third, more refined bin set."
-		${SOFT}/binning_refiner.py -1 binsA -2 binsB -o Refined_AB -ms "$binning_refiner_min_size"
+		${SOFT}/refine_bin_intersections.py -1 binsA -2 binsB -o Refined_AB -ms "$binning_refiner_min_size"
 		comm "there are $(ls Refined_AB/Refined | grep ".fa" | wc -l) refined bins in binsAB"
 		mv Refined_AB/Refined binsAB
 		if [[ $? -ne 0 ]]; then error "Bin_refiner did not finish correctly. Exiting..."; fi
@@ -288,10 +288,10 @@ if [ "$refine" == "true" ] && [[ ! -s work_files/binsA.stats ]]; then
 	elif [[ $n_binnings -eq 3 ]]; then
 		comm "There are three bin folders, so there 4 ways we can refine the bins (A+B, B+C, A+C, A+B+C). Will try all four in parallel!"
 		
-		python ${SOFT}/binning_refiner.py -1 binsA -2 binsB -3 binsC -o Refined_ABC -ms "$binning_refiner_min_size" &
-		python ${SOFT}/binning_refiner.py -1 binsA -2 binsB -o Refined_AB -ms "$binning_refiner_min_size" &
-		python ${SOFT}/binning_refiner.py -1 binsC -2 binsB -o Refined_BC -ms "$binning_refiner_min_size" &
-		python ${SOFT}/binning_refiner.py -1 binsA -2 binsC -o Refined_AC -ms "$binning_refiner_min_size" &
+		python ${SOFT}/refine_bin_intersections.py -1 binsA -2 binsB -3 binsC -o Refined_ABC -ms "$binning_refiner_min_size" &
+		python ${SOFT}/refine_bin_intersections.py -1 binsA -2 binsB -o Refined_AB -ms "$binning_refiner_min_size" &
+		python ${SOFT}/refine_bin_intersections.py -1 binsC -2 binsB -o Refined_BC -ms "$binning_refiner_min_size" &
+		python ${SOFT}/refine_bin_intersections.py -1 binsA -2 binsC -o Refined_AC -ms "$binning_refiner_min_size" &
 		
 		wait
 	

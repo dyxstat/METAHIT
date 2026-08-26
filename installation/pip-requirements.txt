@@ -1,2 +1,4 @@
-# Pinned non-Conda dependency for the METAHICT release.
-bin3c-python3-metahict @ git+https://github.com/1001shiyuan/bin3C-python3.git@d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28
+# Pinned non-Conda dependencies for the METAHICT release.
+bin3c-python3-metahict @ git+https://github.com/dyxstat/bin3C.git@181d80f4f7f4ab6fa70dc7036707483413ec7e97
+imputecc-metahict @ git+https://github.com/dyxstat/ImputeCC.git@9ad1119b385a69fa37decf8a732340a1333e39e0
+metacc-metahict @ git+https://github.com/dyxstat/MetaCC.git@026a18f732622595336214854e3549816e944d84

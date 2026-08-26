@@ -28,9 +28,9 @@ MGE branch.  The full resource and default record is in
 
 The Linux release installs exact Conda package artifacts from explicit lock
 files for `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `ccfind_env`.
-The Python-3-compatible bin3C implementation is installed from the attributed
-fork `1001shiyuan/bin3C-python3` at immutable commit
-`d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28`.  Sources, licences, versions, and
+The METAHICT-compatible bin3C, ImputeCC, and MetaCC code is installed from
+separately maintained GitHub repositories at immutable commits pinned in
+`installation/pip-requirements.txt`.  Sources, licences, versions, and
 citations for direct dependencies are listed in `THIRD_PARTY.md`.  Docker and
 Apptainer container recipes create the same locked environments.  GTDB-Tk,
 geNomad, CheckM, and CheckM2 reference databases are user-configured

@@ -20,7 +20,7 @@ Binning runs Hi-C-aware binners, generates hybrid bin sets, evaluates candidate 
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
-| `--checkm_db`, `--checkm-db` | `databases/checkm_db` | CheckM database path |
+| `--checkm_db` | `databases/checkm_db` | CheckM database path |
 | `--metacc-min-len` | `1000` | Minimum contig length for MetaCC-style filtering |
 | `--metacc-min-signal` | `2` | Minimum contact signal |
 | `--metacc-min-mapq` | `30` | Minimum MAPQ for MetaCC-style filtering |

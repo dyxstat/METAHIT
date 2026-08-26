@@ -8,7 +8,8 @@ re-solve dependency versions at installation time.
 The human-readable YAML files in `installation/` remain the declared package
 specifications. The explicit lock files are the reproducible installation
 inputs for the tagged Linux release. `../pip-requirements.txt` separately pins
-the non-Conda bin3C Python 3 fork at an immutable Git commit.
+the non-Conda METAHICT-compatible bin3C, ImputeCC, and MetaCC packages at
+immutable Git commits.
 
 The installer hashes an existing Conda environment's explicit package list
 before reusing it. If it does not match the release lock, installation stops

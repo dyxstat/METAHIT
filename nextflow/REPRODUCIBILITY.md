@@ -57,8 +57,8 @@ Nextflow, not by `default_params.yaml`.
 `installation/locks/linux-64/` is the authoritative exact Linux dependency
 record.  It contains one explicit artifact lock for each runtime environment:
 `metahict_env`, `checkm2`, `gtdbtk-2.4.0`, `genomad`, and `ccfind_env`.
-`installation/pip-requirements.txt` pins the Python-3 bin3C fork to commit
-`d68e85d39b6f16d857ef2e1f6fdd2495c1fc8b28`.
+`installation/pip-requirements.txt` pins the METAHICT-compatible bin3C,
+ImputeCC, and MetaCC code to immutable Git commits.
 
 `THIRD_PARTY.md` records the upstream source, licence, version/build or
 commit, and citation for direct scientific dependencies.  The Dockerfile and

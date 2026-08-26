@@ -234,9 +234,6 @@ process BINNING {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
-    if [ -d "${params.project_path}/../bin3C-python3" ]; then
-      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
-    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -d "${params.checkm_db}"
     test -s "${params.checkm2_db}"
@@ -277,9 +274,6 @@ process REASSEMBLY {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
-    if [ -d "${params.project_path}/../bin3C-python3" ]; then
-      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
-    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -s "${params.checkm2_db}"
     sg1=\$(find -L "${sg_dir}" -name 'final_*_1.fastq.gz' -print -quit)
@@ -362,9 +356,6 @@ process SCAFFOLDING {
     set -euo pipefail
     export CONDA_ENVS_PATH="${params.conda_envs_path}:\${CONDA_ENVS_PATH:-}"
     export PATH="${params.conda_envs_path}/metahict_env/bin:\$PATH"
-    if [ -d "${params.project_path}/../bin3C-python3" ]; then
-      export PYTHONPATH="${params.project_path}/../bin3C-python3:\${PYTHONPATH:-}"
-    fi
     export CHECKM2DB="${params.checkm2_db}"
     test -s "${params.checkm2_db}"
     hic1=\$(find -L "${hic_dir}" -name 'final_*_1.fastq.gz' -print -quit)

@@ -168,7 +168,7 @@ else
 fi
 
 echo_info "Installing pinned Pip dependencies for 'metahict_env'..."
-conda run -p "${PROJECT_ROOT}/conda_envs/metahict_env" python -m pip install --no-deps --upgrade --force-reinstall \
+conda run -p "${PROJECT_ROOT}/conda_envs/metahict_env" python -m pip install --no-deps --no-build-isolation --upgrade --force-reinstall \
     -r "${SCRIPT_DIR}/pip-requirements.txt"
 
 # Ensure all external binaries have execute permissions

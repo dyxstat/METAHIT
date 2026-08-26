@@ -47,7 +47,7 @@ Scaffolding uses Hi-C contacts to scaffold MAG contigs with YaHS and produces co
 | `--heatmap-max-image` | `5000` | Maximum rendered heatmap image size |
 | `--memory` | 80% of available memory | Memory limit |
 | `--skip-checkm2` | `false` | Skip CheckM2 quality evaluation |
-| `--checkm2_db`, `--checkm2-db` | `databases/checkm2_db/CheckM2_database/uniref100.KO.1.dmnd` | CheckM2 database path |
+| `--checkm2_db` | `databases/checkm2_db/CheckM2_database/uniref100.KO.1.dmnd` | CheckM2 database path |
 | `--tmp-dir` | system temporary directory | Temporary directory root |
 | `--keep-temp` | `false` | Keep temporary files for debugging |
 

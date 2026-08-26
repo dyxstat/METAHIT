@@ -67,6 +67,9 @@ tail -n +2 "$env_table" | while IFS=$'\t' read -r key image envs; do
             --build-arg "METAHICT_ENVS=${envs}" \
             -t "${image}:${tag}" \
             "$repo_root"
+        if [[ " ${envs} " == *" ccfind_env "* ]]; then
+            docker run --rm "${image}:${tag}" ccfind --version | grep -qx "1.4.7"
+        fi
     else
         build_def="${containers_dir}/.apptainer.${image}.${tag}.def"
         python3 "${containers_dir}/make_apptainer_def.py" \
@@ -82,5 +85,8 @@ tail -n +2 "$env_table" | while IFS=$'\t' read -r key image envs; do
             --build-arg "METAHICT_PIP_REQUIREMENTS=/tmp/metahict-installation/pip-requirements.txt" \
             "${image_dir}/${image}_${tag}.sif" \
             "$build_def"
+        if [[ " ${envs} " == *" ccfind_env "* ]]; then
+            "$runtime" exec "${image_dir}/${image}_${tag}.sif" ccfind --version | grep -qx "1.4.7"
+        fi
     fi
 done

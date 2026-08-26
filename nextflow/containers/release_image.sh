@@ -61,6 +61,8 @@ if [[ "${command}" == "build" ]]; then
 elif [[ "${command}" == "inspect" ]]; then
     docker image inspect "${image}" >/dev/null
     echo "[INFO] Local image exists: ${image}"
+    echo "[INFO] Checking ccfind executable:"
+    docker run --rm "${image}" ccfind --version | grep -qx "1.4.7"
     echo "[INFO] OCI metadata:"
     docker image inspect --format '{{ range $key, $value := .Config.Labels }}{{ printf "%s=%s\\n" $key $value }}{{ end }}' "${image}" | sort
 else

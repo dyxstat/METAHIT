@@ -56,9 +56,26 @@ RUN conda config --set channel_priority flexible && \
     conda clean -afy
 
 RUN if [ -x /opt/conda/envs/metahict_env/bin/python ]; then \
-        /opt/conda/envs/metahict_env/bin/python -m pip install --no-deps --no-cache-dir \
+        /opt/conda/envs/metahict_env/bin/python -m pip install --no-deps --no-build-isolation --no-cache-dir \
             -r /tmp/pip-requirements.txt && \
-        /opt/conda/envs/metahict_env/bin/python -c "import bin3c_python3"; \
+        /opt/conda/envs/metahict_env/bin/python -c "import bin3c_python3, ImputeCC, MetaCC"; \
+    fi
+
+RUN if [ -d /opt/conda/envs/ccfind_env ]; then \
+        CCFIND_VERSION="1.4.7"; \
+        CCFIND_COMMIT="674366b49dd31cb909c2e52834e4ec8ede8919e7"; \
+        CCFIND_ROOT="/opt/metahict/external"; \
+        mkdir -p "${CCFIND_ROOT}" && \
+        curl -L --fail \
+            "https://github.com/yosuken/ccfind/archive/${CCFIND_COMMIT}.tar.gz" \
+            -o /tmp/ccfind.tar.gz && \
+        tar -xzf /tmp/ccfind.tar.gz -C "${CCFIND_ROOT}" && \
+        ln -sfn "${CCFIND_ROOT}/ccfind-${CCFIND_COMMIT}" "${CCFIND_ROOT}/ccfind" && \
+        chmod +x "${CCFIND_ROOT}/ccfind/ccfind" && \
+        printf '#!/usr/bin/env bash\nexec conda run -n ccfind_env /opt/metahict/external/ccfind/ccfind "$@"\n' > /usr/local/bin/ccfind && \
+        chmod +x /usr/local/bin/ccfind && \
+        /usr/local/bin/ccfind --version | grep -qx "${CCFIND_VERSION}" && \
+        rm -f /tmp/ccfind.tar.gz; \
     fi
 
 RUN printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/module && \

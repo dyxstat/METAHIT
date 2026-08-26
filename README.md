@@ -90,10 +90,13 @@ Important workflow outputs include:
 
 Integrated software, versions, licenses, and citations are summarized in [THIRD_PARTY.md](THIRD_PARTY.md).
 
-The Python 3-compatible bin3C fork used by METAHICT is maintained separately:
+The METAHICT-compatible bin3C, ImputeCC, and MetaCC code used by METAHICT is
+maintained separately:
 
 ```text
-https://github.com/1001shiyuan/bin3C-python3/tree/metahict-python3-port
+https://github.com/dyxstat/bin3C/tree/bin3C-Python3
+https://github.com/dyxstat/ImputeCC/tree/ImputeCC-METAHICT
+https://github.com/dyxstat/MetaCC/tree/MetaCC-METAHICT
 ```
 
 ## License
