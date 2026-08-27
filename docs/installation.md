@@ -67,12 +67,18 @@ For Docker, Apptainer, or Singularity runs, use `--container_image_override` to 
 Example Apptainer command:
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+export JAVA_HOME="$PWD/conda_envs/metahict_venv"
+export PATH="$PWD/nextflow/bin:$PWD/conda_envs/metahict_venv/bin:$PWD/conda_envs/metahict_env/bin:$PWD/external/bin:$PATH"
+export NXF_HOME="$PWD/nextflow/.nextflow"
+```
+
+```bash
+nextflow run nextflow/main_dsl2.nf \
   -profile apptainer \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --out_root "$PWD/results/example_data" \
-  --report_dir "$PWD/results/example_data/nextflow_reports" \
-  -work-dir "$PWD/results/example_data/nextflow_work" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --out_root "$PWD/results/test_data" \
+  --report_dir "$PWD/results/test_data/nextflow_reports" \
+  -work-dir "$PWD/results/test_data/nextflow_work" \
   --container_image_override "$PWD/nextflow/containers/images/metahict-all_local.sif" \
   -ansi-log false
 ```

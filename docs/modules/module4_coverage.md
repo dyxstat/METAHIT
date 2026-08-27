@@ -42,12 +42,12 @@ Coverage maps shotgun reads to assembled contigs and summarizes contig depth for
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module4 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --assembly_dir "$PWD/results/example_data/example_data/2_assembly" \
-  --sg_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/sg" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --assembly_dir "$PWD/results/test_data/test_data/2_assembly" \
+  --sg_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/sg" \
   --out_root "$PWD/results/module4" \
   --report_dir "$PWD/results/module4/nextflow_reports" \
   -work-dir "$PWD/results/module4/nextflow_work" \

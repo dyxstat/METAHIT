@@ -7,9 +7,12 @@ PROJECT_DIR="$(cd "${NEXTFLOW_DIR}/.." && pwd)"
 
 cd "$PROJECT_DIR"
 
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+export PATH="${NEXTFLOW_DIR}/bin:${PROJECT_DIR}/conda_envs/metahict_venv/bin:${PATH}"
+export NXF_HOME="${NEXTFLOW_DIR}/.nextflow"
+
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
   --out_root "${NEXTFLOW_DIR}/test_runs/ci_smoke/results" \
   --report_dir "${NEXTFLOW_DIR}/reports/ci_smoke" \
   -work-dir "${NEXTFLOW_DIR}/work/ci_smoke" \

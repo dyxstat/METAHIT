@@ -43,7 +43,7 @@ jobs:
           nextflow run nextflow/main_dsl2.nf \
             -profile local \
             -c "$PWD/nextflow/test_runs/ci_smoke/ci_resources.config" \
-            --samplesheet nextflow/assets/example_data_samplesheet.csv \
+            --samplesheet nextflow/assets/test_data_samplesheet.csv \
             --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
             --report_dir "$PWD/nextflow/reports/ci_smoke" \
             -work-dir "$PWD/nextflow/work/ci_smoke" \

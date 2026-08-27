@@ -56,15 +56,15 @@ Reassembly selects short-insert, shotgun-like intra-contig Hi-C read pairs using
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module7 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --binning_dir "$PWD/results/example_data/example_data/6_binning" \
-  --assembly_dir "$PWD/results/example_data/example_data/2_assembly" \
-  --alignment_dir "$PWD/results/example_data/example_data/3_alignment" \
-  --sg_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/sg" \
-  --hic_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/hic" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --binning_dir "$PWD/results/test_data/test_data/6_binning" \
+  --assembly_dir "$PWD/results/test_data/test_data/2_assembly" \
+  --alignment_dir "$PWD/results/test_data/test_data/3_alignment" \
+  --sg_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/sg" \
+  --hic_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/hic" \
   --out_root "$PWD/results/module7" \
   --report_dir "$PWD/results/module7/nextflow_reports" \
   -work-dir "$PWD/results/module7/nextflow_work" \

@@ -52,5 +52,5 @@ example data, and workflow tests.
 Report the following values together: `[FINAL COMMIT]`, `[FINAL TAG]`,
 `[PERMANENT DOI]`, `[PUBLIC IMAGE REFERENCE@sha256:DIGEST]`, the Nextflow
 version used for testing, the selected execution profile, external database
-releases/paths, and the complete example-data test result.  Do not replace
+releases/paths, and the complete test-data test result.  Do not replace
 these fields with untested values or a mutable image tag.

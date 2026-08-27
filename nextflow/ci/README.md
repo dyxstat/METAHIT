@@ -1,12 +1,12 @@
-# METAHI-T Nextflow CI Templates
+# METAHICT Nextflow CI Templates
 
-This directory keeps CI templates for the native METAHI-T Nextflow workflow.
+This directory keeps CI templates for the native METAHICT Nextflow workflow.
 They are stored under `nextflow/` so the workflow can be reviewed without
 changing the root repository layout.
 
 ## Local CI Smoke Test
 
-Run the local smoke test from the METAHI-T repository root:
+Run the local smoke test from the METAHICT repository root:
 
 ```bash
 bash nextflow/ci/run_smoke_ci.sh
@@ -25,6 +25,6 @@ it active in a GitHub repository, copy it to:
 .github/workflows/metahict-nextflow-smoke.yml
 ```
 
-Full biological tests should be run on a machine with the METAHI-T databases
+Full biological tests should be run on a machine with the METAHICT databases
 and container runtime available. The GitHub Actions template is intentionally a
 lightweight orchestration check.

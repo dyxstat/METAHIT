@@ -41,7 +41,7 @@ MODULE_DIRS = {
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Nextflow driver for existing METAHI-T module commands."
+        description="Nextflow driver for existing METAHICT module commands."
     )
     parser.add_argument("--project-path", required=True)
     parser.add_argument("--sample-json", required=True)

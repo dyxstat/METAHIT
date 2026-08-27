@@ -1,4 +1,4 @@
-# METAHI-T Nextflow Containers
+# METAHICT Nextflow Containers
 
 This folder adds optional container support for the native DSL2 workflow. It
 does not replace or modify the METAHICT module scripts.
@@ -45,13 +45,13 @@ nextflow/containers/images/
 Docker:
 
 ```bash
-nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf -profile docker ...
+nextflow run nextflow/main_dsl2.nf -profile docker ...
 ```
 
 Apptainer:
 
 ```bash
-nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf -profile apptainer ...
+nextflow run nextflow/main_dsl2.nf -profile apptainer ...
 ```
 
 The default `local` profile does not use containers and preserves the existing

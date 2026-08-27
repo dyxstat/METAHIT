@@ -55,12 +55,12 @@ The MGE module identifies viral and plasmid contigs with geNomad, reports candid
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module10 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --reassembly_dir "$PWD/results/example_data/example_data/7_reassembly/reassembly" \
-  --hic_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/hic" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --reassembly_dir "$PWD/results/test_data/test_data/7_reassembly/reassembly" \
+  --hic_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/hic" \
   --out_root "$PWD/results/module10" \
   --report_dir "$PWD/results/module10/nextflow_reports" \
   -work-dir "$PWD/results/module10/nextflow_work" \
@@ -70,7 +70,7 @@ bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
 If MGE alignment and MGE contact results already exist, reuse them:
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module10 \
   --samplesheet nextflow/assets/hg_mge_samplesheet.csv \

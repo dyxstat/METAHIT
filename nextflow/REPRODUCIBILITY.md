@@ -37,7 +37,7 @@ scripts.  It does not silently substitute a second set of defaults.  The
 human-readable mirror is `assets/default_params.yaml`; the runtime authority
 is the invoked module script and its command-line help.
 
-The wrapper itself fixes the following stage-level choices:
+The Nextflow workflow fixes the following stage-level choices:
 
 - Module 1 runs without deduplication for shotgun reads and with `--dedup` for
   Hi-C reads.
@@ -69,8 +69,8 @@ database scripts select GTDB release 220.  geNomad,
 CheckM, and CheckM2 database versions are recorded by their official download
 tools in the installed database directories.
 
-All five external database locations are ordinary Nextflow parameters:
-`--checkm_db`, `--checkm2_db`, `--gtdbtk_db`, `--genomad_db`, and
+External database locations are ordinary Nextflow parameters:
+`--checkm_db`, `--checkm2_db`, `--gtdbtk_db`, and `--genomad_db`.
 The supplied defaults resolve to `<project>/databases/`; a
 custom location is supplied by overriding the relevant parameter.  The
 workflow forwards each value to the modules that need it, including CheckM2,
@@ -92,7 +92,7 @@ publication procedure are documented in `containers/PUBLISHING.md`.
 
 Every execution writes the Nextflow trace, timeline, report, directed acyclic
 graph, and parameter snapshot under the configured report directory.  The
-full 5% human-gut example dataset is documented in `../example_data/README.md`.
+5% human-gut test dataset is documented in `../docs/test_dataset.md`.
 
 ## Manuscript and Supplementary Information text
 

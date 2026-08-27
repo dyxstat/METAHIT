@@ -45,11 +45,11 @@ Annotation classifies MAGs with GTDB-Tk using GTDB release 220 by default.
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module9 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --reassembly_dir "$PWD/results/example_data/example_data/7_reassembly/reassembly" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --reassembly_dir "$PWD/results/test_data/test_data/7_reassembly/reassembly" \
   --out_root "$PWD/results/module9" \
   --report_dir "$PWD/results/module9/nextflow_reports" \
   -work-dir "$PWD/results/module9/nextflow_work" \

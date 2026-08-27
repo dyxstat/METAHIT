@@ -36,19 +36,27 @@ Run the bundled smoke test:
 bash nextflow/ci/run_smoke_ci.sh
 ```
 
-Download the example FASTQ files from Zenodo before running the example sample sheet:
+Prepare the shell for direct Nextflow execution:
+
+```bash
+export JAVA_HOME="$PWD/conda_envs/metahict_venv"
+export PATH="$PWD/nextflow/bin:$PWD/conda_envs/metahict_venv/bin:$PWD/conda_envs/metahict_env/bin:$PWD/external/bin:$PATH"
+export NXF_HOME="$PWD/nextflow/.nextflow"
+```
+
+Download the test FASTQ files from Zenodo before running the test sample sheet:
 
 ```text
 https://doi.org/10.5281/zenodo.21695166
 ```
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --out_root "$PWD/results/example_data" \
-  --report_dir "$PWD/results/example_data/nextflow_reports" \
-  -work-dir "$PWD/results/example_data/nextflow_work" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --out_root "$PWD/results/test_data" \
+  --report_dir "$PWD/results/test_data/nextflow_reports" \
+  -work-dir "$PWD/results/test_data/nextflow_work" \
   -ansi-log false
 ```
 
@@ -57,7 +65,7 @@ bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
 The detailed documentation is split into focused pages:
 
 - [Installation and databases](docs/installation.md)
-- [Example dataset](docs/example_dataset.md)
+- [Test dataset](docs/test_dataset.md)
 - [Nextflow workflow usage](docs/nextflow.md)
 - [Module documentation](docs/modules/README.md)
 

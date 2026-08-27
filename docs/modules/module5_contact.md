@@ -42,12 +42,12 @@ The contact module builds raw Hi-C contact matrices from Hi-C alignments and nor
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module5 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --assembly_dir "$PWD/results/example_data/example_data/2_assembly" \
-  --alignment_dir "$PWD/results/example_data/example_data/3_alignment" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --assembly_dir "$PWD/results/test_data/test_data/2_assembly" \
+  --alignment_dir "$PWD/results/test_data/test_data/3_alignment" \
   --out_root "$PWD/results/module5" \
   --report_dir "$PWD/results/module5/nextflow_reports" \
   -work-dir "$PWD/results/module5/nextflow_work" \

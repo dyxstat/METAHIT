@@ -23,15 +23,15 @@ nextflow/containers/release_image.sh build <test-tag>
 nextflow/containers/release_image.sh inspect <test-tag>
 ```
 
-Run the complete `example_data` workflow using the local image and the Docker
+Run the complete `test_data` workflow using the local image and the Docker
 profile.  The single-image override ensures that every process uses exactly
 the candidate release image:
 
 ```bash
-nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile docker \
   --container_image_override ghcr.io/1001shiyuan/metahict:<test-tag> \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv
+  --samplesheet nextflow/assets/test_data_samplesheet.csv
 ```
 
 After all Docker and Apptainer tests are successful, authenticate and publish:

@@ -63,13 +63,13 @@ Scaffolding uses Hi-C contacts to scaffold MAG contigs with YaHS and produces co
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module8 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --reassembly_dir "$PWD/results/example_data/example_data/7_reassembly/reassembly" \
-  --alignment_dir "$PWD/results/example_data/example_data/3_alignment" \
-  --hic_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/hic" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --reassembly_dir "$PWD/results/test_data/test_data/7_reassembly/reassembly" \
+  --alignment_dir "$PWD/results/test_data/test_data/3_alignment" \
+  --hic_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/hic" \
   --out_root "$PWD/results/module8" \
   --report_dir "$PWD/results/module8/nextflow_reports" \
   -work-dir "$PWD/results/module8/nextflow_work" \

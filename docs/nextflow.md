@@ -6,23 +6,23 @@ The main workflow entry point is:
 nextflow/main_dsl2.nf
 ```
 
-Use the wrapper script to run it:
-
-```text
-nextflow/run_metahict_nextflow.sh
-```
-
-The wrapper sets METAHICT-specific Nextflow paths and cache locations before launching Nextflow.
-
 ## Full workflow
 
+Prepare the shell from the METAHICT repository root:
+
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+export JAVA_HOME="$PWD/conda_envs/metahict_venv"
+export PATH="$PWD/nextflow/bin:$PWD/conda_envs/metahict_venv/bin:$PWD/conda_envs/metahict_env/bin:$PWD/external/bin:$PATH"
+export NXF_HOME="$PWD/nextflow/.nextflow"
+```
+
+```bash
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --out_root "$PWD/results/example_data" \
-  --report_dir "$PWD/results/example_data/nextflow_reports" \
-  -work-dir "$PWD/results/example_data/nextflow_work" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --out_root "$PWD/results/test_data" \
+  --report_dir "$PWD/results/test_data/nextflow_reports" \
+  -work-dir "$PWD/results/test_data/nextflow_work" \
   -ansi-log false
 ```
 
@@ -30,10 +30,10 @@ bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
 
 The sample sheet is a CSV file used by Nextflow to define sample names, raw read paths, restriction enzymes, optional pre-existing module outputs, and module-specific extra arguments.
 
-The example sample sheet is:
+The test sample sheet is:
 
 ```text
-nextflow/assets/example_data_samplesheet.csv
+nextflow/assets/test_data_samplesheet.csv
 ```
 
 For a raw short-read run, the essential columns are:

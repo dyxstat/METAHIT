@@ -1,4 +1,4 @@
-# METAHI-T Nextflow Changelog
+# METAHICT Nextflow Changelog
 
 ## Unreleased workflow refinement
 

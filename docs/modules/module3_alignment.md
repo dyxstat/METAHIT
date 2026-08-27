@@ -39,12 +39,12 @@ Alignment maps cleaned Hi-C reads to assembled contigs with BWA-MEM and filters 
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module3 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --assembly_dir "$PWD/results/example_data/example_data/2_assembly" \
-  --hic_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/hic" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --assembly_dir "$PWD/results/test_data/test_data/2_assembly" \
+  --hic_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/hic" \
   --out_root "$PWD/results/module3" \
   --report_dir "$PWD/results/module3/nextflow_reports" \
   -work-dir "$PWD/results/module3/nextflow_work" \

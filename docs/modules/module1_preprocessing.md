@@ -46,10 +46,10 @@ Preprocessing cleans paired-end shotgun and Hi-C reads with BBTools/BBDuk and pr
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module1 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
   --out_root "$PWD/results/module1" \
   --report_dir "$PWD/results/module1/nextflow_reports" \
   -work-dir "$PWD/results/module1/nextflow_work" \
@@ -61,8 +61,8 @@ bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
 ```bash
 python metahict.py preprocessing \
   -p "$PWD" \
-  -1 example_data/sg_R1.fastq.gz \
-  -2 example_data/sg_R2.fastq.gz \
+  -1 test_data/sg_R1.fastq.gz \
+  -2 test_data/sg_R2.fastq.gz \
   -o results/manual/module1_sg \
   -t 80
 ```
@@ -72,8 +72,8 @@ Run the wrapper a second time for the matched Hi-C reads:
 ```bash
 python metahict.py preprocessing \
   -p "$PWD" \
-  -1 example_data/hic_R1.fastq.gz \
-  -2 example_data/hic_R2.fastq.gz \
+  -1 test_data/hic_R1.fastq.gz \
+  -2 test_data/hic_R2.fastq.gz \
   -o results/manual/module1_hic \
   -t 80 \
   --dedup

@@ -44,11 +44,11 @@ Assembly constructs contigs from cleaned shotgun reads. MEGAHIT is the default s
 ## Nextflow command
 
 ```bash
-bash nextflow/run_metahict_nextflow.sh run nextflow/main_dsl2.nf \
+nextflow run nextflow/main_dsl2.nf \
   -profile local \
   --entry_module module2 \
-  --samplesheet nextflow/assets/example_data_samplesheet.csv \
-  --sg_preprocessing_dir "$PWD/results/example_data/example_data/1_preprocessing/sg" \
+  --samplesheet nextflow/assets/test_data_samplesheet.csv \
+  --sg_preprocessing_dir "$PWD/results/test_data/test_data/1_preprocessing/sg" \
   --out_root "$PWD/results/module2" \
   --report_dir "$PWD/results/module2/nextflow_reports" \
   -work-dir "$PWD/results/module2/nextflow_work" \
