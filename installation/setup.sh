@@ -88,7 +88,7 @@ function install_bbtools() {
     BBTOOLS_VERSION="39.10"
     BBTOOLS_TARBALL="Bbmap_${BBTOOLS_VERSION}.tar.gz"
     BBTOOLS_URL="https://sourceforge.net/projects/bbmap/files/BBMap_${BBTOOLS_VERSION}.tar.gz/download"
-    BBTOOLS_SHA256="ab5dfc0bbaa5be338596aec3558c7a7c891e8d8b186e9bd671552466215b9b15"
+    BBTOOLS_SHA256="996aff05765ba5e64547f8a34c56da396ce7b18db96ffe7f1076f2d2f49c6148"
     if [ ! -f "${EXTERNAL_DIR}/${BBTOOLS_TARBALL}" ]; then
         echo_info "Downloading BBTools ${BBTOOLS_VERSION}..."
         wget -O "${EXTERNAL_DIR}/${BBTOOLS_TARBALL}" "${BBTOOLS_URL}"
