@@ -5,18 +5,18 @@ package:
   name: {{ name }}
   version: {{ version }}
 
-# Local source keeps this recipe testable before the release archive exists.
-# Replace with the tagged archive URL and SHA-256 before submission to
-# bioconda-recipes; see ../README.md.
 source:
-  path: ../../..
+  url: https://github.com/dyxstat/METAHICT/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: REPLACE_WITH_SHA256_FROM_STEP_1
 
 build:
   number: 0
-  noarch: generic
+  skip: true  # [not linux64]
   script: bash "${RECIPE_DIR}/build.sh"
 
 requirements:
+  build:
+    - bash
   host:
     - python >=3.9
   run:
@@ -29,6 +29,7 @@ requirements:
 
 test:
   commands:
+    - metahict --version
     - metahict --help
     - metahict-nextflow -help
     - test -s "${PREFIX}/share/metahict/nextflow/main_dsl2.nf"
@@ -45,6 +46,6 @@ extra:
   recipe-maintainers:
     - dyxstat
   notes: |
-    This is the METAHICT workflow layer. Complete scientific execution uses
-    the exact project-local environment bundle installed by `metahict install`;
-    reference databases remain external.
+    This package installs the METAHICT workflow layer. Run `metahict install`
+    to create the exact locked scientific software environments. Reference
+    databases are installed separately and are not included in this package.
