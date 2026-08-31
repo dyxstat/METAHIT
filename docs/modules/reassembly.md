@@ -6,6 +6,10 @@ combines them with shotgun evidence, and runs per-bin SPAdes assemblies. It can
 improve continuity, but it can also introduce or reveal conflicts. METAHICT
 evaluates each candidate reassembly before selecting an output.
 
+The EM model describes short-insert, shotgun-like pairs with the N component
+and longer-range contact pairs with the C component. Their initialization and
+the EM stopping criteria can be changed in the configuration file.
+
 This stage is defined for paired short-read shotgun samples. The complete
 workflow skips it for long-read samples and sends the final binning MAGs to
 scaffolding, annotation, and MGE–host pair analysis.
@@ -35,8 +39,11 @@ database path through the top-level `--checkm2-db` option.
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
-| `read_selection.em_cutoff_quantile` | `0.95` | Quantile defining the short-insert cutoff |
 | `read_selection.em_top_contigs` | `100` | Longest contigs used for EM fitting |
+| `read_selection.em_initial_n_fraction` | `0.8` | Lower fraction of mapped insert sizes used to initialize the N component; the remainder initializes the C component |
+| `read_selection.em_convergence_tolerance` | `0.01` | Stop EM fitting when the absolute log-likelihood change is below this value |
+| `read_selection.em_max_iterations` | `100` | Maximum number of EM fitting iterations |
+| `read_selection.em_cutoff_quantile` | `0.95` | Quantile defining the short-insert cutoff |
 | `read_selection.min_mapping_quality` | `30` | Minimum MAPQ for insert-size extraction |
 | `read_selection.min_aligned_length` | `30` | Minimum aligned match length |
 | `read_selection.exclude_duplicate_alignments` | `false` | Exclude duplicate-marked alignments |

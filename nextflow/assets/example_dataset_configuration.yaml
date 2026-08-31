@@ -161,8 +161,11 @@ modules:
 
   reassembly:
     read_selection:
-      em_cutoff_quantile: 0.95
       em_top_contigs: 100
+      em_initial_n_fraction: 0.8
+      em_convergence_tolerance: 0.01
+      em_max_iterations: 100
+      em_cutoff_quantile: 0.95
       min_mapping_quality: 30
       min_aligned_length: 30
       exclude_duplicate_alignments: false
@@ -294,4 +297,3 @@ modules:
         # Required only when the generated MGE contact method is metator.
         coverage_file: null
         epsilon: 1
-

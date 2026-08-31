@@ -318,6 +318,33 @@ class BinningOutputLayoutTest(unittest.TestCase):
             self.assertIn("  keep_temp: false", text)
             self.assertIn("  seed: null", text)
 
+    def test_binning_refiner_minimum_size_default_is_consistent(self) -> None:
+        driver_args = BINNING_STAGE.build_parser().parse_args(
+            [
+                "--fasta", "assembly.fa",
+                "--bam", "alignment.bam",
+                "--outdir", "binning",
+                "--modules-path", "modules",
+            ]
+        )
+        refinement_args = REFINEMENT.build_parser().parse_args(
+            ["-o", "binning", "-A", "binsA"]
+        )
+        self.assertEqual(driver_args.binning_refiner_min_size, 500000)
+        self.assertEqual(refinement_args.binning_refiner_min_size, 500000)
+
+        integration_source = (
+            ROOT / "modules/6_binning/integrate_bins.py"
+        ).read_text()
+        self.assertIn(
+            '"--binning-refiner-min-size", type=int, default=500000',
+            integration_source,
+        )
+        production_configuration = (
+            ROOT / "nextflow/assets/metahict_configuration.yaml"
+        ).read_text()
+        self.assertIn("      binning_refiner_min_size: 500000", production_configuration)
+
 
 class PublicationContractTest(unittest.TestCase):
     def test_public_stage_parsers_explain_every_argument(self) -> None:
@@ -960,6 +987,88 @@ class ReassemblyStageTest(unittest.TestCase):
                 (output / "intermediates" / "reassembly" / "original_bins").is_dir()
             )
             self.assertTrue((output / "reassembled_bins" / "bin1.fa").is_file())
+
+    def test_em_controls_are_configurable_and_forwarded(self) -> None:
+        required = [
+            "-p", "modules",
+            "--bin", "bins",
+            "--assembly", "assembly.fa",
+            "--hic1", "hic_1.fastq.gz",
+            "--hic2", "hic_2.fastq.gz",
+            "--sg1", "sg_1.fastq.gz",
+            "--sg2", "sg_2.fastq.gz",
+            "--bam", "alignment.bam",
+            "--outdir", "reassembly",
+        ]
+        defaults = REASSEMBLY_DRIVER.build_parser().parse_args(required)
+        configured = REASSEMBLY_DRIVER.build_parser().parse_args(
+            [
+                *required,
+                "--em-initial-n-fraction", "0.7",
+                "--em-convergence-tolerance", "0.005",
+                "--em-max-iterations", "250",
+            ]
+        )
+        self.assertEqual(
+            (
+                defaults.em_initial_n_fraction,
+                defaults.em_convergence_tolerance,
+                defaults.em_max_iterations,
+            ),
+            (0.8, 0.01, 100),
+        )
+        self.assertEqual(
+            (
+                configured.em_initial_n_fraction,
+                configured.em_convergence_tolerance,
+                configured.em_max_iterations,
+            ),
+            (0.7, 0.005, 250),
+        )
+
+        processes = (ROOT / "nextflow/modules/local/metahict_modules.nf").read_text()
+        block = processes.split("process REASSEMBLY {", 1)[1].split("\nprocess ", 1)[0]
+        for key in (
+            "em_initial_n_fraction",
+            "em_convergence_tolerance",
+            "em_max_iterations",
+        ):
+            self.assertIn(key, block)
+
+        implementation = (
+            ROOT / "modules/7_reassembly/select_reassembly_reads.py"
+        ).read_text()
+        self.assertIn("init_frac=initial_n_fraction", implementation)
+        self.assertIn("tol=convergence_tolerance", implementation)
+        self.assertIn("max_iter=max_iterations", implementation)
+
+    def test_invalid_em_controls_are_rejected_before_execution(self) -> None:
+        required = [
+            "-p", "modules",
+            "--bin", "bins",
+            "--assembly", "assembly.fa",
+            "--hic1", "hic_1.fastq.gz",
+            "--hic2", "hic_2.fastq.gz",
+            "--sg1", "sg_1.fastq.gz",
+            "--sg2", "sg_2.fastq.gz",
+            "--bam", "alignment.bam",
+            "--outdir", "reassembly",
+        ]
+        invalid_cases = (
+            (["--em-initial-n-fraction", "1"], "initial-n-fraction"),
+            (["--em-convergence-tolerance", "0"], "convergence-tolerance"),
+            (["--em-max-iterations", "0"], "max-iterations"),
+        )
+        for options, message in invalid_cases:
+            with self.subTest(option=options[0]):
+                args = REASSEMBLY_DRIVER.build_parser().parse_args(
+                    [*required, *options]
+                )
+                with self.assertRaisesRegex(
+                    REASSEMBLY_DRIVER.ReassemblyLaunchError,
+                    message,
+                ):
+                    REASSEMBLY_DRIVER.command_main(args)
 
     def test_pipeline_process_arguments_are_normalized_to_strings(self) -> None:
         with mock.patch.object(REASSEMBLY.subprocess, "Popen") as popen:

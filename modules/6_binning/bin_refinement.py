@@ -362,7 +362,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--contamination-penalty", type=float, default=5)
     parser.add_argument("--min-input-bin-size", type=int, default=50000)
     parser.add_argument("--max-input-bin-size", type=int, default=20000000)
-    parser.add_argument("--binning-refiner-min-size", type=int, default=524288)
+    parser.add_argument("--binning-refiner-min-size", type=int, default=500000)
     parser.add_argument("--tmp-dir", default=os.environ.get("METAHICT_TMP_ROOT", os.environ.get("TMPDIR", "/tmp")))
     parser.add_argument(
         "--keep-temp",

@@ -211,6 +211,27 @@ settings. `refinement` controls quality evaluation and consolidation across
 their candidate bins. `output` controls reports and optional FASTA products.
 Changing a setting for one binner does not change the others.
 
+### Reassembly read selection
+
+The reassembly EM model treats the lower insert-size component as N and the
+upper component as C. Its initialization and stopping criteria are configured
+under `modules.reassembly.read_selection`:
+
+```yaml
+modules:
+  reassembly:
+    read_selection:
+      em_initial_n_fraction: 0.8
+      em_convergence_tolerance: 0.01
+      em_max_iterations: 100
+```
+
+With these defaults, the lower 80% of mapped insert sizes initializes N and
+the upper 20% initializes C. Fitting stops when the absolute change in
+log-likelihood is below `0.01`, or after `100` iterations. The effective
+values are recorded in `7_reassembly/run_parameters.yaml` and
+`7_reassembly/read_selection_summary.json`.
+
 ### MGE
 
 All MGE settings are under one `modules.mge` map and one `resources.mge` row.

@@ -79,7 +79,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--contamination-penalty", type=float, default=5, help="Contamination penalty in representative scoring")
     parser.add_argument("--min-input-bin-size", type=int, default=50000, help="Minimum candidate-bin FASTA size")
     parser.add_argument("--max-input-bin-size", type=int, default=20000000, help="Maximum candidate-bin FASTA size")
-    parser.add_argument("--binning-refiner-min-size", type=int, default=524288, help="Minimum size used by Binning_refiner")
+    parser.add_argument("--binning-refiner-min-size", type=int, default=500000, help="Minimum size used by Binning_refiner")
     parser.add_argument("--num-gene", type=int, help="MetaCC marker-gene count; auto-detected when omitted")
     parser.add_argument("--heatmap-max-image", type=int, default=5000, help="Maximum binning heatmap dimension")
     parser.add_argument("--imputecc-gene-coverage", type=float, default=0.9, help="ImputeCC marker-gene coverage threshold")

@@ -20,6 +20,9 @@ class ReassemblyLaunchError(RuntimeError):
 
 DEFAULT_THREADS = 16
 DEFAULT_MEMORY_GB = 51
+DEFAULT_EM_INITIAL_N_FRACTION = 0.8
+DEFAULT_EM_CONVERGENCE_TOLERANCE = 0.01
+DEFAULT_EM_MAX_ITERATIONS = 100
 METAHICT_VERSION = "1.1.0"
 
 
@@ -187,6 +190,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--cutoff-quantile", type=float, default=0.95, help="EM short-insert cutoff quantile")
     parser.add_argument("--top-k", type=int, default=100, help="Longest contigs used for EM fitting")
+    parser.add_argument(
+        "--em-initial-n-fraction",
+        type=float,
+        default=DEFAULT_EM_INITIAL_N_FRACTION,
+        help="Fraction of insert sizes used to initialize the lower N component",
+    )
+    parser.add_argument(
+        "--em-convergence-tolerance",
+        type=float,
+        default=DEFAULT_EM_CONVERGENCE_TOLERANCE,
+        help="Absolute log-likelihood change required for EM convergence",
+    )
+    parser.add_argument(
+        "--em-max-iterations",
+        type=int,
+        default=DEFAULT_EM_MAX_ITERATIONS,
+        help="Maximum number of EM fitting iterations",
+    )
     parser.add_argument("--min-mapq", type=int, default=30, help="Minimum MAPQ for insert-size extraction")
     parser.add_argument("--min-match-len", type=int, default=30, help="Minimum aligned match length")
     parser.add_argument("--exclude-duplicates", action="store_true", help="Exclude duplicate-marked alignments")
@@ -215,6 +236,16 @@ def build_parser() -> argparse.ArgumentParser:
 def command_main(args: argparse.Namespace) -> None:
     if args.threads < 1 or args.memory < 1:
         raise ReassemblyLaunchError("--threads and --memory must be at least 1")
+    if not 0 < args.cutoff_quantile < 1:
+        raise ReassemblyLaunchError("--cutoff-quantile must be greater than 0 and less than 1")
+    if not 0 < args.em_initial_n_fraction < 1:
+        raise ReassemblyLaunchError(
+            "--em-initial-n-fraction must be greater than 0 and less than 1"
+        )
+    if args.em_convergence_tolerance <= 0:
+        raise ReassemblyLaunchError("--em-convergence-tolerance must be greater than 0")
+    if args.em_max_iterations < 1:
+        raise ReassemblyLaunchError("--em-max-iterations must be at least 1")
     if not 0 <= args.min_completeness <= 100 or not 0 <= args.max_contamination <= 100:
         raise ReassemblyLaunchError("completeness and contamination thresholds must be between 0 and 100")
     modules_path = Path(args.modules_path).expanduser().resolve()
@@ -262,6 +293,9 @@ def command_main(args: argparse.Namespace) -> None:
         "--min-mapq", args.min_mapq,
         "--min-match-len", args.min_match_len,
         "--cutoff-quantile", args.cutoff_quantile,
+        "--em-initial-n-fraction", args.em_initial_n_fraction,
+        "--em-convergence-tolerance", args.em_convergence_tolerance,
+        "--em-max-iterations", args.em_max_iterations,
         "--min-contig-len", args.min_contig_len,
         "--strict-cut-off", args.strict_cut_off,
         "--permissive-cut-off", args.permissive_cut_off,

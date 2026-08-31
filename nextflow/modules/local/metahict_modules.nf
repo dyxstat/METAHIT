@@ -662,6 +662,9 @@ process REASSEMBLY {
         'reassembly', ['read_selection'], [], [],
         [
             em_cutoff_quantile: 'cutoff_quantile', em_top_contigs: 'top_k',
+            em_initial_n_fraction: 'em_initial_n_fraction',
+            em_convergence_tolerance: 'em_convergence_tolerance',
+            em_max_iterations: 'em_max_iterations',
             min_mapping_quality: 'min_mapq', min_aligned_length: 'min_match_len',
             exclude_duplicate_alignments: 'exclude_duplicates',
             write_nonselected_hic_reads: 'write_nonselected_hic',

@@ -154,7 +154,7 @@ modules:
       contamination_penalty: 5
       min_input_bin_size: 50000
       max_input_bin_size: 20000000
-      binning_refiner_min_size: 524288
+      binning_refiner_min_size: 500000
       run_checkm2: true
       run_refinement: true
       run_consolidation: true
@@ -171,8 +171,11 @@ modules:
 
   reassembly:
     read_selection:
-      em_cutoff_quantile: 0.95
       em_top_contigs: 100
+      em_initial_n_fraction: 0.8
+      em_convergence_tolerance: 0.01
+      em_max_iterations: 100
+      em_cutoff_quantile: 0.95
       min_mapping_quality: 30
       min_aligned_length: 30
       exclude_duplicate_alignments: false

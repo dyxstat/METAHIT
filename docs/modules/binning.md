@@ -60,7 +60,7 @@ database path through the top-level `--checkm-db` option.
 | `refinement.contamination_penalty` | `5` | Penalty used in representative-bin scoring |
 | `refinement.min_input_bin_size` | `50000` | Minimum input bin size considered during refinement |
 | `refinement.max_input_bin_size` | `20000000` | Maximum input bin size considered during refinement |
-| `refinement.binning_refiner_min_size` | `524288` | Minimum size passed to Binning_refiner |
+| `refinement.binning_refiner_min_size` | `500000` | Minimum size passed to Binning_refiner |
 | `refinement.run_checkm2` | `true` | Evaluate candidate bins with CheckM2 |
 | `refinement.run_refinement` | `true` | Run hybrid-bin refinement |
 | `refinement.run_consolidation` | `true` | Build the final non-redundant bin set |

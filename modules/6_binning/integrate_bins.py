@@ -32,7 +32,7 @@ if __name__ == '__main__':
         parser.add_argument("--contamination-penalty", type=float, default=5, help="Penalty used in completeness - penalty * contamination (default=5)")
         parser.add_argument("--min-input-bin-size", type=int, default=50000, help="Minimum input bin FASTA file size before refinement (default=50000 bytes)")
         parser.add_argument("--max-input-bin-size", type=int, default=20000000, help="Maximum input bin FASTA file size before refinement (default=20000000 bytes)")
-        parser.add_argument("--binning-refiner-min-size", type=int, default=524288, help="Minimum refined bin size for Binning_refiner (default=524288 bp)")
+        parser.add_argument("--binning-refiner-min-size", type=int, default=500000, help="Minimum refined bin size for Binning_refiner (default=500000 bp)")
         parser.add_argument("--tmp-dir", default=None, help="Temporary directory root for CheckM2 working files (default=METAHICT_TMP_ROOT, TMPDIR, or /tmp)")
         parser.add_argument("--keep-temp", action="store_true", help="Keep successful CheckM2 temporary directories")
         parser.add_argument("--skip-checkm2", action="store_true", help="Skip CheckM2 during final bin refinement")

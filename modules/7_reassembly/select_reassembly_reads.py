@@ -18,6 +18,9 @@ from scipy.stats import norm
 
 DEFAULT_THREADS = 16
 DEFAULT_MEMORY_GB = 51
+DEFAULT_EM_INITIAL_N_FRACTION = 0.8
+DEFAULT_EM_CONVERGENCE_TOLERANCE = 0.01
+DEFAULT_EM_MAX_ITERATIONS = 100
 
 
 # ============================================================
@@ -77,6 +80,30 @@ def parse_args():
         type=float,
         default=0.95,
         help="Cutoff quantile for N component. Default: 0.95",
+    )
+    parser.add_argument(
+        "--em-initial-n-fraction",
+        type=float,
+        default=DEFAULT_EM_INITIAL_N_FRACTION,
+        help=(
+            "Fraction of insert sizes assigned to the lower N component "
+            "during EM initialization. Default: 0.8"
+        ),
+    )
+    parser.add_argument(
+        "--em-convergence-tolerance",
+        type=float,
+        default=DEFAULT_EM_CONVERGENCE_TOLERANCE,
+        help=(
+            "Absolute log-likelihood change used as the EM convergence "
+            "threshold. Default: 0.01"
+        ),
+    )
+    parser.add_argument(
+        "--em-max-iterations",
+        type=int,
+        default=DEFAULT_EM_MAX_ITERATIONS,
+        help="Maximum number of EM fitting iterations. Default: 100",
     )
 
     parser.add_argument(
@@ -477,7 +504,25 @@ def load_insert_sizes_from_table(path, col="d"):
     return np.asarray(values, dtype=float)
 
 
-def init_params(data, init_frac=0.8):
+def validate_em_parameters(
+    cutoff_quantile,
+    initial_n_fraction,
+    convergence_tolerance,
+    max_iterations,
+):
+    if not 0 < cutoff_quantile < 1:
+        raise ValueError("--cutoff-quantile must be greater than 0 and less than 1")
+    if not 0 < initial_n_fraction < 1:
+        raise ValueError(
+            "--em-initial-n-fraction must be greater than 0 and less than 1"
+        )
+    if convergence_tolerance <= 0:
+        raise ValueError("--em-convergence-tolerance must be greater than 0")
+    if max_iterations < 1:
+        raise ValueError("--em-max-iterations must be at least 1")
+
+
+def init_params(data, init_frac=DEFAULT_EM_INITIAL_N_FRACTION):
     data = np.asarray(data, dtype=float)
     data = data[np.isfinite(data) & (data > 0)]
 
@@ -506,7 +551,17 @@ def init_params(data, init_frac=0.8):
     return mu_N, mu_C, sigma_N, sigma_C, pi_N, pi_C
 
 
-def em_mix(data, mu_N, mu_C, sigma_N, sigma_C, pi_N, pi_C, tol=1e-2, max_iter=100):
+def em_mix(
+    data,
+    mu_N,
+    mu_C,
+    sigma_N,
+    sigma_C,
+    pi_N,
+    pi_C,
+    tol=DEFAULT_EM_CONVERGENCE_TOLERANCE,
+    max_iter=DEFAULT_EM_MAX_ITERATIONS,
+):
     data = np.asarray(data, dtype=float)
     data = data[np.isfinite(data) & (data > 0)]
 
@@ -567,8 +622,23 @@ def em_mix(data, mu_N, mu_C, sigma_N, sigma_C, pi_N, pi_C, tol=1e-2, max_iter=10
     return mu_C, mu_N, sigma_C, sigma_N, pi_C, pi_N
 
 
-def fit_em(data, cutoff_quantile=0.95):
-    mu_N, mu_C, sigma_N, sigma_C, pi_N, pi_C = init_params(data)
+def fit_em(
+    data,
+    cutoff_quantile=0.95,
+    initial_n_fraction=DEFAULT_EM_INITIAL_N_FRACTION,
+    convergence_tolerance=DEFAULT_EM_CONVERGENCE_TOLERANCE,
+    max_iterations=DEFAULT_EM_MAX_ITERATIONS,
+):
+    validate_em_parameters(
+        cutoff_quantile,
+        initial_n_fraction,
+        convergence_tolerance,
+        max_iterations,
+    )
+    mu_N, mu_C, sigma_N, sigma_C, pi_N, pi_C = init_params(
+        data,
+        init_frac=initial_n_fraction,
+    )
 
     mu_C, mu_N, sigma_C, sigma_N, pi_C, pi_N = em_mix(
         data,
@@ -578,6 +648,8 @@ def fit_em(data, cutoff_quantile=0.95):
         sigma_C,
         pi_N,
         pi_C,
+        tol=convergence_tolerance,
+        max_iter=max_iterations,
     )
 
     cutoff = mu_N + norm.ppf(cutoff_quantile) * sigma_N
@@ -591,6 +663,9 @@ def fit_em(data, cutoff_quantile=0.95):
         "pi_C": float(pi_C),
         "cutoff": float(cutoff),
         "cutoff_quantile": float(cutoff_quantile),
+        "initial_n_fraction": float(initial_n_fraction),
+        "convergence_tolerance": float(convergence_tolerance),
+        "max_iterations": int(max_iterations),
     }
 
 
@@ -658,6 +733,12 @@ def write_selected_readnames_from_insert_table(insert_table, cutoff, out_readnam
 def main():
     args = parse_args()
 
+    validate_em_parameters(
+        args.cutoff_quantile,
+        args.em_initial_n_fraction,
+        args.em_convergence_tolerance,
+        args.em_max_iterations,
+    )
     os.makedirs(args.outdir, exist_ok=True)
 
     if args.checkm2_db:
@@ -725,6 +806,9 @@ def main():
     em_params = fit_em(
         top_insert_sizes,
         cutoff_quantile=args.cutoff_quantile,
+        initial_n_fraction=args.em_initial_n_fraction,
+        convergence_tolerance=args.em_convergence_tolerance,
+        max_iterations=args.em_max_iterations,
     )
 
     cutoff = em_params["cutoff"]
@@ -782,6 +866,9 @@ def main():
         "parameters": {
             "top_contigs": args.top_k,
             "cutoff_quantile": args.cutoff_quantile,
+            "em_initial_n_fraction": args.em_initial_n_fraction,
+            "em_convergence_tolerance": args.em_convergence_tolerance,
+            "em_max_iterations": args.em_max_iterations,
             "minimum_mapping_quality": args.min_mapq,
             "minimum_aligned_length": args.min_match_len,
             "exclude_duplicate_alignments": args.exclude_duplicates,
