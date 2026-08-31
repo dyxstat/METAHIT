@@ -1,0 +1,11 @@
+path	kind	absolute_tolerance	relative_tolerance	description
+2_assembly/final_assembly.fasta	fasta	0	0	Assembled contig identities and sequences
+4_coverage/coverage.txt	table	1e-8	1e-8	Per-contig shotgun coverage
+5_contact/denoised_contact_matrix_normcc.npz	sparse_npz	1e-10	1e-8	Normalized original-assembly contact matrix
+6_binning/metahict/final_bins_quality.tsv	table	1e-8	1e-8	Consolidated-bin quality summary
+6_binning/metahict/final_bins	fasta_dir	0	0	Final bin membership and sequences
+7_reassembly/reassembled_bins	fasta_dir	0	0	Reassembled genome bins
+7_reassembly/reassembled_bins_quality.tsv	table	1e-8	1e-8	Final reassembled-bin quality summary
+7_reassembly/combined_contigs.fa	fasta	0	0	Combined bin and residual contigs
+9_annotation/classify/gtdbtk.bac120.summary.tsv	table	0	0	GTDB-Tk bacterial taxonomy calls
+10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	table	1e-8	1e-8	Final MGE–host pairs

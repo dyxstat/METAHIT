@@ -27,16 +27,22 @@ def main():
         reader = csv.DictReader(handle, delimiter="\t")
         for row in reader:
             rel_path = row["path"]
-            path = root / rel_path
+            uses_glob = any(character in rel_path for character in "*?[")
+            paths = sorted(root.glob(rel_path)) if uses_glob else [root / rel_path]
             required = truthy(row.get("required", "1"))
             non_empty = truthy(row.get("non_empty", "0"))
             description = row.get("description", "")
 
-            if required and not path.exists():
+            existing = [path for path in paths if path.exists()]
+            if required and not existing:
                 failures.append(f"missing\t{rel_path}\t{description}")
                 continue
-            if path.exists() and non_empty and path.stat().st_size == 0:
-                failures.append(f"empty\t{rel_path}\t{description}")
+            if non_empty:
+                for path in existing:
+                    if path.stat().st_size == 0:
+                        failures.append(
+                            f"empty\t{path.relative_to(root)}\t{description}"
+                        )
 
     if failures:
         print("Expected-output check failed:")

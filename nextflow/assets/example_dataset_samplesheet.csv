@@ -1,0 +1,2 @@
+sample,sg1,sg2,hic1,hic2,enzyme,long_read_type
+example_dataset,example_dataset/sg_R1.fastq.gz,example_dataset/sg_R2.fastq.gz,example_dataset/hic_R1.fastq.gz,example_dataset/hic_R2.fastq.gz,"Sau3AI,MluCI",

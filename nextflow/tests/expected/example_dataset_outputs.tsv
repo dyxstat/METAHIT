@@ -1,0 +1,24 @@
+path	required	non_empty	description
+example_dataset/1_preprocessing/sg/final_sg_1.fastq.gz	1	1	Cleaned shotgun forward reads
+example_dataset/1_preprocessing/sg/final_sg_2.fastq.gz	1	1	Cleaned shotgun reverse reads
+example_dataset/1_preprocessing/hic/final_hic_1.fastq.gz	1	1	Cleaned Hi-C forward reads
+example_dataset/1_preprocessing/hic/final_hic_2.fastq.gz	1	1	Cleaned Hi-C reverse reads
+example_dataset/2_assembly/final_assembly.fasta	1	1	Assembled contigs
+example_dataset/3_alignment/sorted_map.bam	1	1	Original-assembly Hi-C alignment BAM
+example_dataset/4_coverage/coverage.txt	1	1	Contig coverage table
+example_dataset/5_contact/denoised_contact_matrix_normcc.npz	1	1	Normalized original-assembly contact matrix
+example_dataset/6_binning/metahict/final_bins/*.fa	1	1	At least one consolidated MAG
+example_dataset/6_binning/metahict/final_bins_quality.tsv	1	1	Final-bin quality table
+example_dataset/7_reassembly/combined_contigs.fa	1	1	Combined reassembly and residual contigs
+example_dataset/7_reassembly/reassembled_bins/*.fa	1	1	At least one reassembled MAG
+example_dataset/7_reassembly/reassembled_bins_quality.tsv	1	1	Final reassembled-bin quality table
+example_dataset/7_reassembly/read_selection_summary.json	1	1	Hi-C read-selection summary
+example_dataset/8_scaffolding/*/scaffolded_bin.fa	1	1	Final scaffold FASTA for each reassembled MAG
+example_dataset/8_scaffolding/*/scaffolded_bin.agp	1	1	Final scaffold structure for each reassembled MAG
+example_dataset/8_scaffolding/*/scaffolding_metrics.txt	1	1	Scaffolding quality metrics for each reassembled MAG
+example_dataset/8_scaffolding/*/figures/heatmap.pdf	1	1	Scaffolding contact heatmap for each reassembled MAG
+example_dataset/9_annotation/classify/gtdbtk.bac120.summary.tsv	1	1	GTDB-Tk bacterial taxonomy summary
+example_dataset/10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	1	1	Filtered candidate MGE–host pairs
+example_dataset/10_MGE/input_assembly/contig_to_host.tsv	1	1	Contig-to-host membership
+example_dataset/10_MGE/sequence_topology.tsv	1	1	MGE and circular-contig evidence
+example_dataset/10_MGE/mge_reports/MGE_summary.txt	1	1	MGE and pair-analysis summary

@@ -1,0 +1,36 @@
+#!/bin/sh
+# Minimal bootstrap only: Conda supplies the Python runtime used by the CLI.
+set -eu
+
+command -v conda >/dev/null 2>&1 || {
+    echo "[ERROR] Conda was not found in PATH. Install or initialize Conda first." >&2
+    exit 1
+}
+
+launcher_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+manager="${launcher_dir}/metahict_manager.py"
+if [ ! -f "${manager}" ]; then
+    manager="${launcher_dir}/../share/metahict/metahict_manager.py"
+fi
+if [ ! -f "${manager}" ]; then
+    echo "[ERROR] Could not locate metahict_manager.py." >&2
+    exit 1
+fi
+
+conda_base=$(conda info --base) || {
+    echo "[ERROR] Conda could not report its base installation path." >&2
+    exit 1
+}
+conda_python="${conda_base}/bin/python"
+if [ ! -x "${conda_python}" ]; then
+    echo "[ERROR] Conda's bundled Python was not found at ${conda_python}." >&2
+    exit 1
+fi
+if ! "${conda_python}" -c \
+    'import sys; raise SystemExit(0 if sys.version_info >= (3, 9) else 1)'
+then
+    echo "[ERROR] Conda must provide Python 3.9 or newer. Update the Conda base installation." >&2
+    exit 1
+fi
+
+exec "${conda_python}" "${manager}" "$@"

@@ -1,69 +1,105 @@
-# Test dataset
+# Testing METAHICT
 
-The METAHICT test dataset is a 5% subset of the human-gut benchmark dataset. The repository provides the Nextflow sample sheet and expected-output checks for this dataset; the paired-end shotgun and metagenomic Hi-C FASTQ files, metadata, and checksums are archived externally and must be downloaded from Zenodo before running the test workflow.
+METAHICT provides three levels of validation. Most users need the first two;
+the complete example is recommended before analyzing important datasets.
 
-The test FASTQ files are archived at:
+| Test | Command | What it checks |
+| --- | --- | --- |
+| Installed runtime | `./metahict verify` | Exact Conda packages and pinned artifacts |
+| Workflow stub | `./metahict test workflow` | Nextflow compilation, all stage connections, and output structure |
+| Bundled example | `./metahict run ... --check-outputs` | Real execution of every scientific stage and required database |
 
-```text
-https://doi.org/10.5281/zenodo.21695166
-```
+`./metahict test source` is a developer test for source code, interfaces,
+documentation, and policies. It is not required after an ordinary
+installation.
 
-Place the files under `test_data/` with these names:
+## 1. Test the installation
 
-```text
-test_data/sg_R1.fastq.gz
-test_data/sg_R2.fastq.gz
-test_data/hic_R1.fastq.gz
-test_data/hic_R2.fastq.gz
-```
-
-The repository includes:
-
-| File | Purpose |
-| --- | --- |
-| `nextflow/assets/test_data_samplesheet.csv` | Nextflow sample sheet for the test run |
-| `nextflow/tests/expected/test_data_outputs.tsv` | Expected-output checks for the test run |
-
-The Zenodo archive includes `README.md`, `manifest.tsv`, `MD5SUMS.txt`, and the four FASTQ files.
-
-## Run the smoke test
+Run immediately after `./metahict install`:
 
 ```bash
-bash nextflow/ci/run_smoke_ci.sh
+./metahict verify
+./metahict test workflow
 ```
 
-## Run the test dataset
+The workflow test generates temporary synthetic paired reads and dummy
+database paths. Nextflow runs every process in stub mode and validates the
+published files. It does not execute the bioinformatics programs on real data,
+so the reference databases are not needed.
+
+The test passes when both Nextflow stub profiles and the expected-output check
+end with `[PASS]`.
+
+## 2. Install and check the databases
 
 ```bash
-nextflow run nextflow/main_dsl2.nf \
-  -profile local \
-  --samplesheet nextflow/assets/test_data_samplesheet.csv \
-  --out_root "$PWD/results/test_data" \
-  --report_dir "$PWD/results/test_data/nextflow_reports" \
-  -work-dir "$PWD/results/test_data/nextflow_work" \
-  -ansi-log false
+./metahict database all
+./metahict doctor --runtime --databases
 ```
 
-## Expected output layout
+Resolve every failed environment or database check before running the bundled
+example.
 
-For a sample named `test_data`, the output is written under:
+## 3. Run the bundled example
+
+The repository includes synchronized paired shotgun and Hi-C reads under
+`example_dataset/`. They are a compact functional test, not an unbiased
+biological benchmark.
+
+Run every stage and validate the documented outputs:
+
+```bash
+./metahict run \
+  --samplesheet nextflow/assets/example_dataset_samplesheet.csv \
+  --config nextflow/assets/example_dataset_configuration.yaml \
+  --outdir results \
+  --check-outputs
+```
+
+This command runs the actual scientific programs and databases. It can require
+substantial time, memory, and temporary storage even though the FASTQ files are
+small.
+
+The main results are written under:
 
 ```text
-results/test_data/test_data/
+results/example_dataset/
 ```
 
-Main subdirectories:
+The directory should contain all ten numbered stages. Logs and provenance are
+under `results/nextflow_reports/`. A successful run ends with:
 
-| Directory | Content |
-| --- | --- |
-| `1_preprocessing/sg/` | Cleaned shotgun reads and QC reports |
-| `1_preprocessing/hic/` | Cleaned Hi-C reads and QC reports |
-| `2_assembly/` | Assembled contigs |
-| `3_alignment/` | Hi-C alignments and alignment diagnostics |
-| `4_coverage/` | Shotgun coverage table |
-| `5_contact/` | Raw and normalized Hi-C contact matrices |
-| `6_binning/` | Hi-C binner outputs and consolidated MAGs |
-| `7_reassembly/` | Reassembled bins and combined contig set |
-| `8_scaffolding/` | Hi-C-guided scaffold outputs and contact heatmaps |
-| `9_annotation/` | GTDB-Tk annotations |
-| `10_MGE/` | MGE calls, candidate MGE-MAG associations, and sequence topology |
+```text
+[PASS] METAHICT workflow completed
+```
+
+`--check-outputs` then verifies that the required files exist and are
+non-empty. This confirms functional execution; it is not a scientific accuracy
+benchmark.
+
+## If a test fails
+
+For a workflow or example failure, inspect:
+
+```bash
+tail -n 150 results/nextflow_reports/run.log
+cat results/nextflow_reports/failure_summary.txt
+```
+
+The stub test uses a temporary directory, so its failing work path is printed
+directly in the terminal. For the example run, follow the instructions in
+[Troubleshooting](troubleshooting.md). After correcting the problem, repeat the
+example command with `--resume` and keep `results/nextflow_work/`.
+
+## Developer validation
+
+After changing source code, workflow interfaces, configuration contracts,
+tests, or manuals, run:
+
+```bash
+./metahict test source
+./metahict test workflow
+```
+
+Changes that may affect scientific results should also run the bundled example
+and compare its results with an accepted baseline using `./metahict compare`.

@@ -1,30 +1,30 @@
-# METAHICT Nextflow CI Templates
+# METAHICT continuous integration
 
-This directory keeps CI templates for the native METAHICT Nextflow workflow.
-They are stored under `nextflow/` so the workflow can be reviewed without
-changing the root repository layout.
+This directory contains the source, interface, and workflow-stub checks used
+to validate METAHICT.
 
 ## Local CI Smoke Test
 
 Run the local smoke test from the METAHICT repository root:
 
 ```bash
-bash nextflow/ci/run_smoke_ci.sh
+./metahict test workflow
 ```
 
 The smoke test uses Nextflow stub mode. It checks workflow parsing, module
 ordering, profile loading, report generation, and sample-sheet handling without
-requiring large reference databases.
+requiring sequencing data or large reference databases. Tiny valid paired
+short-read and single-file long-read FASTQs and their samplesheet are created
+in the temporary test directory.
 
-## GitHub Actions Template
+## GitHub Actions
 
-`github-actions-smoke.yml` is a ready-to-enable GitHub Actions workflow. To make
-it active in a GitHub repository, copy it to:
+The active workflow is stored at:
 
 ```text
-.github/workflows/metahict-nextflow-smoke.yml
+.github/workflows/metahict-smoke.yml
 ```
 
-Full biological tests should be run on a machine with the METAHICT databases
-and container runtime available. The GitHub Actions template is intentionally a
-lightweight orchestration check.
+It runs the source-policy, unit, syntax, lock-checksum, and Nextflow stub tests.
+Full biological validation uses the bundled example dataset on a Linux system
+with the locked environments and reference databases installed.

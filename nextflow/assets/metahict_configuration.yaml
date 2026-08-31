@@ -1,0 +1,306 @@
+# METAHICT runtime configuration.
+#
+# Create an editable copy with:
+#   ./metahict config
+#
+# The samplesheet contains sample-specific input paths and the Hi-C restriction
+# enzyme. Algorithm options and task resources belong here.
+
+# `threads` and `memory` are the normal allocation for each task. Explicit
+# `./metahict run -t/--threads` and `-m/--memory` values override every selected
+# module for that invocation; when omitted, these per-module values are used.
+# Requests above detected local host or cgroup capacity are capped automatically.
+resources:
+  preprocessing: {threads: 8, memory: "32 GB"}
+  assembly: {threads: 16, memory: "64 GB"}
+  alignment: {threads: 16, memory: "32 GB"}
+  coverage: {threads: 16, memory: "32 GB"}
+  contact: {threads: 1, memory: "32 GB"}
+  binning: {threads: 16, memory: "64 GB"}
+  reassembly: {threads: 16, memory: "64 GB"}
+  scaffolding: {threads: 8, memory: "32 GB"}
+  annotation: {threads: 8, memory: "64 GB"}
+  mge: {threads: 16, memory: "32 GB"}
+
+modules:
+  preprocessing:
+    libraries:
+      shotgun:
+        enabled: true
+        deduplicate: false
+      hic:
+        enabled: true
+        deduplicate: true
+    output_prefix: null
+    trimming:
+      min_read_length: 50
+      quality_trim_threshold: 10
+      quality_trim_ends: r
+      force_trim_left: 10
+      length_modulo: 5
+      adapter_trim_end: r
+      adapter_kmer_length: 23
+      min_adapter_kmer_length: 11
+      adapter_hamming_distance: 1
+      adapter_reference: null
+    quality_control:
+      run_before_trimming: true
+      run_after_trimming: true
+
+  assembly:
+    assembler: megahit
+    min_contig_length: 1000
+    temporary_directory: null
+    keep_temporary_files: false
+    quality_control:
+      run_quast: true
+    megahit:
+      min_kmer_length: 21
+      max_kmer_length: 141
+      kmer_step: 12
+      merge_level: "20,0.95"
+      extra_args: ""
+    metaspades:
+      kmer_lengths: "21,33,55"
+      extra_args: ""
+    metaflye:
+      extra_args: ""
+
+  alignment:
+    bwa:
+      options: "-5SP"
+    filtering:
+      samtools_filter: "-F 0x900"
+      min_mapping_quality: 30
+      min_intra_contig_distance: 10000
+      min_aligned_length: 30
+    sorting:
+      memory_per_thread: 1G
+      temporary_directory: null
+      keep_sam: false
+    metrics:
+      enabled: true
+
+  coverage:
+    mapping:
+      min_percent_identity: 97
+      long_read_min_percent_identity: 0
+      bbmap_extra_args: ""
+    depth:
+      min_mapping_quality: 0
+      mapping_quality_weight: 0
+      include_edge_bases: false
+      max_excluded_edge_bases: 75
+      min_contig_length: 0
+      min_contig_depth: 0
+    temporary_directory: null
+    keep_sam: false
+    keep_temporary_files: false
+
+  contact:
+    method: normcc
+    raw_contacts:
+      min_contact_signal: 1
+      min_contig_length: 1000
+      min_mapping_quality: 30
+      min_aligned_length: 30
+    denoising:
+      spurious_contact_percent: 5
+    normcc:
+      epsilon: 1
+    hiczin:
+      # Must identify the same contigs as the selected assembly; use an absolute path.
+      coverage_file: null
+      epsilon: 1
+    bin3c:
+      epsilon: 1
+      max_iterations: 1000
+      convergence_tolerance: 1e-6
+    metator:
+      # Must identify the same contigs as the selected assembly; use an absolute path.
+      coverage_file: null
+      epsilon: 1
+
+  binning:
+    metacc:
+      min_contig_length: 1000
+      min_contact_signal: 2
+      min_mapping_quality: 30
+      min_aligned_length: 30
+      min_bin_size: 150000
+      normcc_discard_fraction: 0.05
+      marker_gene_count: null
+    bin3c:
+      min_contig_length: 1000
+      min_contact_signal: 5
+      min_mapping_quality: 60
+      min_aligned_length: 10
+      min_cluster_extent: 50000
+    imputecc:
+      gene_coverage: 0.9
+      random_walk_restart_probability: 0.5
+      random_walk_threshold: 80
+      max_markers: 8000
+      intra_bin_threshold: 50
+      inter_bin_threshold: 0
+      min_bin_size: 100000
+      contamination_weight: 2
+      min_completeness: 50
+      max_contamination: 10
+      report_quality_threshold: 10
+    refinement:
+      min_completeness: 50
+      max_contamination: 10
+      contamination_penalty: 5
+      min_input_bin_size: 50000
+      max_input_bin_size: 20000000
+      binning_refiner_min_size: 524288
+      run_checkm2: true
+      run_refinement: true
+      run_consolidation: true
+      ambiguous_contigs: best
+    output:
+      generate_bin3c_fasta: true
+      generate_bin3c_report: true
+      input_assembly_is_spades: false
+      only_large_bin3c_clusters: false
+      heatmap_max_image_size: 5000
+    random_seed: null
+    temporary_directory: null
+    keep_temporary_files: false
+
+  reassembly:
+    read_selection:
+      em_cutoff_quantile: 0.95
+      em_top_contigs: 100
+      min_mapping_quality: 30
+      min_aligned_length: 30
+      exclude_duplicate_alignments: false
+      write_nonselected_hic_reads: false
+    read_recruitment:
+      strict_mismatch_cutoff: 2
+      permissive_mismatch_cutoff: 5
+    assembly:
+      min_contig_length: 500
+      spades_mode: careful
+      phred_offset: null
+      extra_args: ""
+      assemble_residual_reads: true
+    quality_control:
+      min_completeness: 50
+      max_contamination: 10
+      contamination_penalty: 5
+      run_checkm2: true
+    temporary_directory: null
+    keep_temporary_files: false
+
+  scaffolding:
+    input_filter:
+      min_contig_length: 5000
+    alignment:
+      bwa_options: "-5SP"
+      samtools_filter: "-F 0x900"
+      sort_memory_per_thread: 1G
+    contacts:
+      min_mapping_quality: 30
+      min_contig_length: 1000
+      min_aligned_length: 30
+      min_contact_signal: 2
+      normcc_discard_fraction: 0.05
+    yahs:
+      resolutions: ""
+      min_mapping_quality: 10
+      min_contig_length: 0
+      rounds: 1
+      contig_error_correction: true
+      scaffold_error_correction: true
+      memory_check: true
+      extra_args: ""
+    heatmap:
+      segment_resolution: 10000
+      max_image_size: 5000
+    quality_control:
+      run_checkm2: true
+    temporary_directory: null
+    keep_temporary_files: false
+
+  annotation:
+    pplacer_threads: null
+    genome_extension: fa
+    output_prefix: gtdbtk
+    ani_screen:
+      enabled: false
+      mash_database: null
+    classification:
+      min_amino_acid_percent: 10
+      min_alignment_fraction: 0.5
+      use_full_tree: false
+    scratch_directory: null
+    temporary_directory: null
+    continue_on_genome_error: false
+    keep_intermediates: false
+    debug: false
+    write_single_copy_genes: false
+    extra_args: ""
+
+  mge:
+    keep_intermediates: false
+    genomad:
+      splits: 8
+      sensitivity: 4.2
+      cleanup: true
+      restart: false
+      preset: default
+      min_score: 0.7
+      max_false_discovery_rate: 0.1
+      extra_args: ""
+    ccfind:
+      terminal_fragment_size: 500
+      min_percent_identity: 94
+      min_aligned_length: 50
+    pairs:
+      filter_method: zscore
+      zscore_threshold: 0.5
+      fixed_contact_threshold: 0
+      top_percent: 50
+      min_raw_contacts: 2
+      min_contact_strength: 0
+    temporary_directory: null
+    alignment:
+      bwa:
+        options: "-5SP"
+      filtering:
+        samtools_filter: "-F 0x900"
+        min_mapping_quality: 30
+        min_intra_contig_distance: 10000
+        min_aligned_length: 30
+      sorting:
+        memory_per_thread: 1G
+        temporary_directory: null
+        keep_sam: false
+      metrics:
+        enabled: true
+    contact:
+      method: normcc
+      raw_contacts:
+        min_contact_signal: 1
+        min_contig_length: 1000
+        min_mapping_quality: 30
+        min_aligned_length: 30
+      denoising:
+        spurious_contact_percent: 5
+      normcc:
+        epsilon: 1
+      hiczin:
+        # Required only when the generated MGE contact method is hiczin.
+        coverage_file: null
+        epsilon: 1
+      bin3c:
+        # Required only when the generated MGE contact method is bin3c.
+        epsilon: 1
+        max_iterations: 1000
+        convergence_tolerance: 1e-6
+      metator:
+        # Required only when the generated MGE contact method is metator.
+        coverage_file: null
+        epsilon: 1

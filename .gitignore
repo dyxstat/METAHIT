@@ -1,52 +1,57 @@
+# Operating-system and editor metadata
 .DS_Store
+._*
+__MACOSX/
+*~
 
 # Python/runtime cache
 __pycache__/
 *.py[cod]
+*.log
 
-# Local environments and package caches
-conda_envs/
-conda_pkgs/
+# Installed environments, tools, and package caches
+/conda_envs/
+/conda_pkgs/
+/external/
 .nextflow/
 nextflow/.nextflow/
-nextflow/containers/conda_envs/
-nextflow/containers/conda_pkgs/
-nextflow/containers/apptainer_cache/
 
 # Large local databases and raw data
-databases/
-raw_data/
-example_data/*.fastq.gz
+/databases/
+/raw_data/
+/test_data/
+
+# User-created input files
+/metahict_configuration.yaml
+/samplesheet.csv
 
 # Nextflow/local run outputs
-work/
-nextflow_work/
-nextflow_results/
-nextflow_reports/
+/results*/
+/validation/
+/work/
+/nextflow_work/
+/nextflow_results/
+/nextflow_reports/
 nextflow/work/
 nextflow/logs/
 nextflow/reports/
 nextflow/test_runs/
 
-# Container build outputs
-*.sif
-nextflow/containers/images/
-
 # Local benchmark/result folders
-baseline_results/
-hg/
-sheep/
-pig/
-cow/
-bovine/
-ww/
-mat/
+/baseline_results/
+/hg/
+/sheep/
+/pig/
+/cow/
+/bovine/
+/ww/
+/mat/
 
 # Local third-party comparison checkouts
-Binning_refiner/
-CONCOCT/
-DAS_Tool/
-MetaBAT2/
+/Binning_refiner/
+/CONCOCT/
+/DAS_Tool/
+/MetaBAT2/
 
 # Preserved old module copies should not be released
 modules/*_old/

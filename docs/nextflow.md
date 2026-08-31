@@ -1,101 +1,223 @@
-# Nextflow workflow usage
+# Running the workflow
 
-The main workflow entry point is:
+METAHICT uses Nextflow to connect stages, reserve resources, isolate
+dependencies, publish outputs, cache successful work, and generate reports.
+`./metahict run` is the command-line interface for complete and selected-stage
+analyses.
 
-```text
-nextflow/main_dsl2.nf
-```
-
-## Full workflow
-
-Prepare the shell from the METAHICT repository root:
+## Complete workflow
 
 ```bash
-export JAVA_HOME="$PWD/conda_envs/metahict_venv"
-export PATH="$PWD/nextflow/bin:$PWD/conda_envs/metahict_venv/bin:$PWD/conda_envs/metahict_env/bin:$PWD/external/bin:$PATH"
-export NXF_HOME="$PWD/nextflow/.nextflow"
+./metahict run \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --outdir results
 ```
+
+The default entry is `all`. The launcher validates the configuration,
+required database paths, and exact environments before Nextflow starts.
+
+## Output and work directories
+
+`--outdir` is the publication root. With sample `sample_01`, the structure is:
+
+```text
+results/
+├── sample_01/
+│   ├── 1_preprocessing/
+│   ├── 2_assembly/
+│   ├── 3_alignment/
+│   ├── 4_coverage/
+│   ├── 5_contact/
+│   ├── 6_binning/
+│   ├── 7_reassembly/
+│   ├── 8_scaffolding/
+│   ├── 9_annotation/
+│   └── 10_MGE/
+├── nextflow_reports/
+└── nextflow_work/
+```
+
+Published scientific results and work files have different roles:
+
+- keep the numbered sample directories as analysis results;
+- keep `nextflow_reports/runs/<RUN_ID>/` as provenance;
+- keep `nextflow_work/` while the run may need `--resume`;
+- remove work files only after results and provenance have been validated and
+  no resume is needed.
+
+For long-read shotgun samples, stage 1 contains only `hic/` and stage 7 is
+absent. The complete workflow uses the original long reads for stages 2 and 4,
+then supplies stage 6 MAGs directly to stages 8–10.
+
+
+## Run one module
+
+Use a descriptive entry name and provide its upstream results. The table lists
+the input contract for each entry.
+
+| Entry | Required input beyond samplesheet/config | Typical source |
+| --- | --- | --- |
+| `preprocessing` | Raw reads already listed in samplesheet | Sequencing files |
+| `assembly` | `--preprocessing-dir` for short reads; no upstream directory for long reads | Short reads use `1_preprocessing/sg`; long reads use samplesheet `sg1` |
+| `alignment` | `--assembly-dir`, `--preprocessing-dir` | `2_assembly`, `1_preprocessing`; alignment uses `hic/` |
+| `coverage` | `--assembly-dir`; also `--preprocessing-dir` for short reads | Coverage maps cleaned short reads or samplesheet long reads |
+| `contact` | `--assembly-dir`, `--alignment-dir`; enzyme in samplesheet | `2_assembly`, `3_alignment` |
+| `binning` | `--assembly-dir`, `--alignment-dir`; enzyme and databases | `2_assembly`, `3_alignment` |
+| `reassembly` | `--binning-dir`, `--assembly-dir`, `--alignment-dir`, `--preprocessing-dir` | Paired short-read samples only; stages 1, 2, 3, and 6 are used |
+| `scaffolding` | `--scaffolding-bin`, `--preprocessing-dir`; enzyme | One MAG FASTA and the `hic/` child of preprocessing |
+| `annotation` | `--mag-dir` | Directory directly containing MAG FASTAs |
+| `mge` | `--fasta`, `--host-dir`, and either cleaned Hi-C reads or reusable MGE contact/alignment results | Matching sequences, host genomes, and Hi-C evidence for MGE detection, circular-contig discovery, and MGE–host pairs |
+
+Example alignment run:
 
 ```bash
-nextflow run nextflow/main_dsl2.nf \
-  -profile local \
-  --samplesheet nextflow/assets/test_data_samplesheet.csv \
-  --out_root "$PWD/results/test_data" \
-  --report_dir "$PWD/results/test_data/nextflow_reports" \
-  -work-dir "$PWD/results/test_data/nextflow_work" \
-  -ansi-log false
+./metahict run \
+  --entry-module alignment \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --preprocessing-dir results/sample_01/1_preprocessing \
+  --assembly-dir results/sample_01/2_assembly \
+  --outdir results/alignment
 ```
 
-## Sample sheet
+Get the full command, inputs, parameters, resource behavior, and outputs for
+any stage:
 
-The sample sheet is a CSV file used by Nextflow to define sample names, raw read paths, restriction enzymes, optional pre-existing module outputs, and module-specific extra arguments.
-
-The test sample sheet is:
-
-```text
-nextflow/assets/test_data_samplesheet.csv
+```bash
+./metahict run --entry-module reassembly --help
 ```
 
-For a raw short-read run, the essential columns are:
 
-| Column | Description |
-| --- | --- |
-| `sample` | Sample name |
-| `sg1`, `sg2` | Shotgun paired-end FASTQ files |
-| `hic1`, `hic2` | Hi-C paired-end FASTQ files |
-| `enzyme` | Restriction enzyme list, for example `Sau3AI,MluCI` |
+## Special input rules
 
-Additional columns in the distributed sample sheets demonstrate how to provide optional inputs and module-specific extra arguments.
+### Scaffolding accepts one bin
 
-## Selected-module execution
+The selected scaffolding entry operates on the FASTA supplied with
+`--scaffolding-bin`. It aligns cleaned Hi-C reads to that bin unless
+`--scaffolding-bam` supplies a BAM aligned to exactly the same reference
+sequences and lengths. The complete workflow automatically creates one
+scaffolding task for every reassembled bin.
 
-Use `--entry_module` to run one workflow module at a time. Valid values are:
+### Annotation accepts a MAG directory
 
-```text
-all, module1, module2, module3, module4, module5, module6, module7, module8, module9, module10
+`--mag-dir` must directly contain `.fa`, `.fasta`, or `.fna` MAG files.
+Annotation needs a samplesheet for sample identity, but it does not consume
+read data or infer an extra `reassembled_bins` directory.
+
+For multiple samples, `{sample}` is replaced with each sample identifier:
+
+```bash
+./metahict run \
+  --entry-module annotation \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --mag-dir results/reassembly/{sample}/7_reassembly/reassembled_bins \
+  --outdir results/annotation
 ```
 
-Each module page gives a module-specific Nextflow command:
+### MGE accepts generic metagenome FASTAs
 
-| Entry module | Page |
-| --- | --- |
-| `module1` | [Preprocessing](modules/module1_preprocessing.md) |
-| `module2` | [Assembly](modules/module2_assembly.md) |
-| `module3` | [Alignment](modules/module3_alignment.md) |
-| `module4` | [Coverage](modules/module4_coverage.md) |
-| `module5` | [Contact generation and normalization](modules/module5_contact.md) |
-| `module6` | [Binning and consolidation](modules/module6_binning.md) |
-| `module7` | [Reassembly](modules/module7_reassembly.md) |
-| `module8` | [Scaffolding](modules/module8_scaffolding.md) |
-| `module9` | [Annotation](modules/module9_annotation.md) |
-| `module10` | [MGE analysis](modules/module10_mge.md) |
+`--fasta` can be a short-read, long-read, hybrid, or reassembled metagenome.
+`--host-dir` supplies the matching host MAGs, and Hi-C evidence must use the
+same contig identifiers. Every run detects MGEs, finds circular contigs, and
+reports candidate MGE–host pairs.
 
-## Reusing outputs from previous modules
+## Resource overrides
 
-Selected-module runs can receive previous outputs through direct path parameters:
+Normal per-stage resources belong in `metahict_configuration.yaml`. A one-run
+`-t` or `-m` value has highest precedence and replaces every selected stage's
+configured value:
 
-| Parameter | Expected content |
-| --- | --- |
-| `--sg_preprocessing_dir` | Shotgun preprocessing output directory |
-| `--hic_preprocessing_dir` | Hi-C preprocessing output directory |
-| `--assembly_dir` | Assembly output directory |
-| `--alignment_dir` | Alignment output directory |
-| `--coverage_dir` | Coverage output directory |
-| `--contact_dir` | Contact output directory |
-| `--binning_dir` | Binning output directory |
-| `--reassembly_dir` | Reassembly output directory |
-| `--mge_alignment_dir` | MGE alignment output directory |
-| `--mge_contact_dir` | MGE contact output directory |
+```bash
+./metahict run \
+  --entry-module binning \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --assembly-dir results/sample_01/2_assembly \
+  --alignment-dir results/sample_01/3_alignment \
+  --outdir results/binning \
+  -t 24 \
+  -m 112G
+```
 
-## Common workflow options
+For a complete run, edit the relevant YAML row so that each stage retains an
+appropriate allocation.
+
+On the supported local executor, `./metahict` detects the CPUs and memory
+available to the process and supplies them as Nextflow `resourceLimits`. If a
+configured or command-line request is larger, Nextflow warns, caps the task,
+and passes the effective `task.cpus` and `task.memory` values to the module.
+
+## Preview without running
+
+```bash
+./metahict run \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --outdir results \
+  --show-command
+```
+
+This prints the generated Nextflow command after path resolution and exits.
+It checks command construction; compatibility between independently generated
+scientific files still requires review.
+
+## Resume
+
+After correcting an error, repeat the same inputs, configuration, output root,
+and work directory with `--resume`:
+
+```bash
+./metahict run \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --outdir results \
+  --resume
+```
+
+Nextflow reuses compatible successful tasks from `nextflow_work/` and reruns
+failed or invalidated work. Changing an input, parameter, script, or command
+may invalidate downstream cache entries.
+
+## Run outside the source directory
+
+METAHICT can be started from any directory. Use the launcher's absolute path
+and absolute analysis paths:
+
+```bash
+/path/to/METAHICT/metahict run \
+  --samplesheet /path/to/analysis/samplesheet.csv \
+  --config /path/to/analysis/metahict_configuration.yaml \
+  --outdir /path/to/analysis/results
+```
+
+The launcher locates its own workflow and environments. Relative command-line
+paths are resolved from the current directory, so absolute paths are safest
+for saved server commands.
+
+## Common run options
 
 | Option | Meaning |
 | --- | --- |
-| `-profile` | Nextflow execution profile: `local`, `conda`, `docker`, `apptainer`, `singularity`, or `slurm` |
-| `--samplesheet` | CSV file describing sample inputs |
-| `--entry_module` | Workflow entry point; default is `all` |
-| `--out_root` | Output root directory |
-| `--report_dir` | Nextflow reports and provenance directory |
-| `-work-dir` | Nextflow working directory |
-| `--container_image_override` | Path or image name for the METAHICT all-tools container used by Docker, Apptainer, or Singularity profiles |
-| `-ansi-log false` | Plain log output, useful for saved logs |
+| `--samplesheet` | Sample identities, raw-read paths, and enzymes |
+| `--config` | All-module YAML resources and scientific settings |
+| `--entry-module` | `all` or one descriptive stage name |
+| `--outdir` | Published result root |
+| `--report-dir` | Override the immutable report root |
+| `--work-dir` | Override the Nextflow cache/work root |
+| `-t`, `--threads` | Run-wide thread override |
+| `-m`, `--memory` | Run-wide memory override, such as `112G` |
+| `--resume` | Reuse compatible successful tasks |
+| `--verbose-preflight` | Print every environment verification line |
+| `--show-command` | Print the generated Nextflow command and exit |
+
+Run `./metahict run --help` for database, scaffolding, annotation, and MGE
+options.
+
+## Direct Nextflow use
+
+Workflow developers can inspect `nextflow/main_dsl2.nf`,
+`nextflow/modules/local/metahict_modules.nf`, and the command emitted by
+`--show-command`. Direct Nextflow invocation bypasses parts of CLI validation
+and run-record management.

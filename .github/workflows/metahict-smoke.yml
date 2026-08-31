@@ -3,12 +3,65 @@ name: METAHICT Nextflow Smoke Test
 on:
   push:
     paths:
+      - ".github/workflows/metahict-smoke.yml"
+      - "README.md"
+      - "docs/**"
+      - "example_dataset/**"
+      - "metahict"
+      - "metahict_manager.py"
+      - "modules/**"
+      - "installation/**"
       - "nextflow/**"
+      - "packaging/**"
   pull_request:
     paths:
+      - ".github/workflows/metahict-smoke.yml"
+      - "README.md"
+      - "docs/**"
+      - "example_dataset/**"
+      - "metahict"
+      - "metahict_manager.py"
+      - "modules/**"
+      - "installation/**"
       - "nextflow/**"
+      - "packaging/**"
 
 jobs:
+  policy-and-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Enforce vendoring, architecture, and documentation policies
+        run: |
+          python3 nextflow/ci/check_no_vendored_tools.py
+          python3 nextflow/ci/check_architecture_policy.py
+          python3 nextflow/ci/check_documentation.py
+          python3 nextflow/ci/check_example_dataset.py
+
+      - name: Test third-party integration adapters
+        run: |
+          python3 -m unittest nextflow/ci/test_binning_refiner_adapter.py
+          python3 -m unittest nextflow/ci/test_manager_cli.py
+          python3 -m unittest nextflow/ci/test_stage_interfaces.py
+          python3 -m unittest nextflow/ci/test_scientific_comparison.py
+
+      - name: Validate shell and Python syntax
+        run: |
+          sh -n metahict
+          find . -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in Path('.').rglob('*.py'):
+              ast.parse(path.read_text(), filename=str(path))
+          PY
+
+      - name: Verify immutable environment-lock checksums
+        working-directory: installation/locks
+        run: sha256sum -c SHA256SUMS
+
   smoke:
     runs-on: ubuntu-latest
     steps:
@@ -32,18 +85,13 @@ jobs:
           mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db"
           mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db"
           touch "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd"
-          cat > "$PWD/nextflow/test_runs/ci_smoke/ci_resources.config" <<'EOF'
-          process {
-            withName: '.*' {
-              cpus = 2
-              memory = '4 GB'
-            }
-          }
-          EOF
+          stub_samplesheet="$(python3 nextflow/ci/create_stub_inputs.py \
+            --output-dir "$PWD/nextflow/test_runs/ci_smoke/stub_inputs")"
           nextflow run nextflow/main_dsl2.nf \
-            -profile local \
-            -c "$PWD/nextflow/test_runs/ci_smoke/ci_resources.config" \
-            --samplesheet nextflow/assets/test_data_samplesheet.csv \
+            -params-file nextflow/assets/example_dataset_configuration.yaml \
+            -profile stub \
+            -c "$PWD/nextflow/ci/stub_resources.config" \
+            --samplesheet "$stub_samplesheet" \
             --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
             --report_dir "$PWD/nextflow/reports/ci_smoke" \
             -work-dir "$PWD/nextflow/work/ci_smoke" \
@@ -58,4 +106,4 @@ jobs:
             -ansi-log false
           python3 nextflow/bin/check_expected_outputs.py \
             --root "$PWD/nextflow/test_runs/ci_smoke/results" \
-            --manifest nextflow/tests/expected/native_dsl2_stub_outputs.tsv
+            --manifest nextflow/tests/expected/workflow_stub_outputs.tsv

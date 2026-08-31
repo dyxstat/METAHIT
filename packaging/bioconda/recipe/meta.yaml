@@ -1,0 +1,50 @@
+{% set name = "metahict" %}
+{% set version = "1.1.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+# Local source keeps this recipe testable before the release archive exists.
+# Replace with the tagged archive URL and SHA-256 before submission to
+# bioconda-recipes; see ../README.md.
+source:
+  path: ../../..
+
+build:
+  number: 0
+  noarch: generic
+  script: bash "${RECIPE_DIR}/build.sh"
+
+requirements:
+  host:
+    - python >=3.9
+  run:
+    - bash >=5
+    - curl
+    - git
+    - nextflow >=26.04.6,<27
+    - python >=3.9
+    - tar
+
+test:
+  commands:
+    - metahict --help
+    - metahict-nextflow -help
+    - test -s "${PREFIX}/share/metahict/nextflow/main_dsl2.nf"
+
+about:
+  home: https://github.com/dyxstat/METAHICT
+  summary: Genome-resolved metagenomic Hi-C analysis with Nextflow DSL2
+  license: GPL-3.0-only
+  license_file: LICENSE
+  doc_url: https://github.com/dyxstat/METAHICT/tree/main/docs
+  dev_url: https://github.com/dyxstat/METAHICT
+
+extra:
+  recipe-maintainers:
+    - dyxstat
+  notes: |
+    This is the METAHICT workflow layer. Complete scientific execution uses
+    the exact project-local environment bundle installed by `metahict install`;
+    reference databases remain external.

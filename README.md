@@ -1,103 +1,197 @@
 # METAHICT
 
-**METAHICT** enables comprehensive genome-resolved microbiome analysis with metagenomic Hi-C.
+METAHICT is a Nextflow DSL2 workflow for genome-resolved analysis of short- or
+long-read shotgun metagenomes with paired-end metagenomic Hi-C data. It performs read preprocessing,
+assembly, Hi-C alignment, coverage and contact analysis, binning, bin
+reassembly, scaffolding, taxonomic annotation, and detection of mobile genetic
+elements (MGEs) and candidate MGE–host pairs.
 
-METAHICT v1.1.0 is distributed as a Nextflow DSL2 workflow with module-level command-line wrappers. The workflow supports raw-read processing, assembly, Hi-C alignment, coverage estimation, contact generation and normalization, Hi-C-informed binning and consolidation, per-bin reassembly, Hi-C-guided scaffolding, GTDB-Tk annotation, and MGE-MAG candidate proximity-association analysis.
-
-![METAHICT overview](images/METAHICT_Overview.png)
+![METAHICT workflow overview](images/METAHICT_Overview.png)
 
 ## Quick start
 
-Clone the repository:
+### Requirements
+
+METAHICT 1.1.0 supports and tests on 64-bit x86 Linux systems. The host must
+provide Conda, `curl`, `tar`, and Git. Python, Nextflow, and the scientific
+programs are installed into project-local environments by METAHICT.
+
+Default allocations reach 16 threads and 64 GB RAM. METAHICT can cap requests
+to the available local resources, but large datasets may still need a
+high-memory server. Reference databases, results, and Nextflow work files also
+require substantial storage.
+
+### 1. Download METAHICT
 
 ```bash
 git clone https://github.com/dyxstat/METAHICT.git
 cd METAHICT
+chmod +x metahict nextflow/bin/nextflow
 ```
 
-Install the local software environments:
+### 2. Install and test the software
 
 ```bash
-bash installation/run_setup_in_venv.sh
+./metahict doctor
+./metahict install
+./metahict test workflow
 ```
 
-Download the reference databases into the default project layout:
+`doctor` checks the operating system, architecture, required commands, and distributed lock files before installation. `install` creates and verifies the locked software environments. `test workflow` compiles the complete Nextflow workflow and runs the stub implementation of every stage, checking all stage connections without downloading reference databases or analyzing real reads.
+
+
+### 3. Install and validate the reference databases
 
 ```bash
-bash installation/db/checkm_db.sh databases/checkm_db
-bash installation/db/checkm2_db.sh databases/checkm2_db
-bash installation/db/gtdbtk_db.sh databases/gtdbtk_db/release220
-bash installation/db/genomad_db.sh databases/genomad_db
+./metahict database all
+./metahict doctor --runtime --databases
 ```
 
-Run the bundled smoke test:
+This installs the CheckM, CheckM2, GTDB-Tk, and geNomad databases in the
+default `databases/` directory. Shared or existing databases are supported;
+see [Installation and databases](docs/installation.md).
+
+### 4. Create the configuration and samplesheet
+
+Create the complete configuration template:
 
 ```bash
-bash nextflow/ci/run_smoke_ci.sh
+./metahict config
 ```
 
-Prepare the shell for direct Nextflow execution:
+For a first analysis, keep the scientific defaults and review the `resources`
+section of `metahict_configuration.yaml` for the available server.
+
+Create a samplesheet using the real FASTQ paths and the restriction enzyme or
+enzyme combination used to prepare the Hi-C library:
 
 ```bash
-export JAVA_HOME="$PWD/conda_envs/metahict_venv"
-export PATH="$PWD/nextflow/bin:$PWD/conda_envs/metahict_venv/bin:$PWD/conda_envs/metahict_env/bin:$PWD/external/bin:$PATH"
-export NXF_HOME="$PWD/nextflow/.nextflow"
+./metahict samplesheet \
+  --sample sample_01 \
+  --sg-r1 /data/sample_01/shotgun_R1.fastq.gz \
+  --sg-r2 /data/sample_01/shotgun_R2.fastq.gz \
+  --hic-r1 /data/sample_01/hic_R1.fastq.gz \
+  --hic-r2 /data/sample_01/hic_R2.fastq.gz \
+  --enzyme Sau3AI,MluCI \
+  --output samplesheet.csv
 ```
 
-Download the test FASTQ files from Zenodo before running the test sample sheet:
+Replace the paths, sample name, and enzymes with the study metadata.
 
-```text
-https://doi.org/10.5281/zenodo.21695166
-```
+For a single-file long-read shotgun library, omit `--sg-r2` and add its
+long read type, for example `--long-read-type nano-hq`. Accepted values are
+`pacbio-raw`, `pacbio-corr`, `pacbio-hifi`, `nano-raw`, `nano-corr`, and
+`nano-hq`.
+
+### 5. Run the complete workflow
+
+Start the analysis:
 
 ```bash
-nextflow run nextflow/main_dsl2.nf \
-  -profile local \
-  --samplesheet nextflow/assets/test_data_samplesheet.csv \
-  --out_root "$PWD/results/test_data" \
-  --report_dir "$PWD/results/test_data/nextflow_reports" \
-  -work-dir "$PWD/results/test_data/nextflow_work" \
-  -ansi-log false
+./metahict run \
+  --samplesheet samplesheet.csv \
+  --config metahict_configuration.yaml \
+  --outdir results
 ```
 
-## Documentation
+METAHICT writes each sample to `results/<sample>/` and workflow reports to
+`results/nextflow_reports/`.
 
-The detailed documentation is split into focused pages:
+After correcting a failed task, repeat the run command with `--resume` and
+keep `results/nextflow_work/` so Nextflow can reuse successful tasks.
 
-- [Installation and databases](docs/installation.md)
-- [Test dataset](docs/test_dataset.md)
-- [Nextflow workflow usage](docs/nextflow.md)
-- [Module documentation](docs/modules/README.md)
+### 6. Run individual modules (optional)
 
-Module-specific pages describe inputs, outputs, parameters, and selected-module execution:
+METAHICT can run one stage independently when its required upstream results
+already exist. Available entry names are `preprocessing`, `assembly`,
+`alignment`, `coverage`, `contact`, `binning`, `reassembly`, `scaffolding`,
+`annotation`, and `mge`.
 
-- [Module 1: preprocessing](docs/modules/module1_preprocessing.md)
-- [Module 2: assembly](docs/modules/module2_assembly.md)
-- [Module 3: alignment](docs/modules/module3_alignment.md)
-- [Module 4: coverage](docs/modules/module4_coverage.md)
-- [Module 5: contact generation and normalization](docs/modules/module5_contact.md)
-- [Module 6: binning and consolidation](docs/modules/module6_binning.md)
-- [Module 7: reassembly](docs/modules/module7_reassembly.md)
-- [Module 8: scaffolding](docs/modules/module8_scaffolding.md)
-- [Module 9: annotation](docs/modules/module9_annotation.md)
-- [Module 10: MGE analysis](docs/modules/module10_mge.md)
+Before running a stage, display its required inputs, configuration parameters,
+outputs, and complete example command:
 
-## Key outputs
+```bash
+./metahict run --entry-module binning --help
+```
 
-Important workflow outputs include:
+Replace `binning` with the required entry name. The [module
+reference](docs/modules/README.md) provides the same information as browsable
+guides for all ten stages.
 
-- consolidated MAGs: `6_binning/binning/metahict/metahict_50_10_bins/`
-- reassembled bins: `7_reassembly/reassembly/reassembled_bins/`
-- reassembled-bin name map: `7_reassembly/reassembly/reassembled_bin_name_map.tsv`
-- combined contigs for downstream analysis: `7_reassembly/reassembly/combined_contigs.fa`
-- MGE-MAG candidate associations: `10_MGE/mge/candidate_mge_mag_associations_zscore_filtered.tsv`
-- sequence topology annotations: `10_MGE/mge/sequence_topology.tsv`
-- GTDB-Tk annotations: `9_annotation/annotation/gtdbtk.*.summary.tsv`
+## Test with the bundled example dataset
+
+After installing the databases, run a complete analysis with the included
+paired reads:
+
+```bash
+./metahict run \
+  --samplesheet nextflow/assets/example_dataset_samplesheet.csv \
+  --config nextflow/assets/example_dataset_configuration.yaml \
+  --outdir results \
+  --check-outputs
+```
+
+This is a real scientific-program test and can take substantially longer than
+the workflow stub. Details are in [Testing METAHICT](docs/test_dataset.md).
+
+## Main results
+
+| Result | Location below `results/sample_01/` |
+| --- | --- |
+| Cleaned shotgun and Hi-C reads | `1_preprocessing/sg/`; `1_preprocessing/hic/` |
+| Metagenome assembly | `2_assembly/final_assembly.fasta` |
+| Filtered Hi-C alignment | `3_alignment/sorted_map.bam` |
+| Shotgun depth | `4_coverage/coverage.txt` |
+| Normalized contact matrix | `5_contact/denoised_contact_matrix_normcc.npz` |
+| Consolidated MAGs | `6_binning/metahict/final_bins/` |
+| Reassembled MAGs (paired short reads only) | `7_reassembly/reassembled_bins/` |
+| Scaffolded MAGs | `8_scaffolding/<BIN_ID>/scaffolded_bin.fa` |
+| GTDB-Tk taxonomy | `9_annotation/classify/gtdbtk.*.summary.tsv` |
+| MGE calls, circular contigs, and candidate MGE–host pairs | `10_MGE/` |
+
+## Run from another directory
+
+The launcher can be called by its absolute path. Absolute analysis paths make
+the saved command unambiguous:
+
+```bash
+/path/to/METAHICT/metahict run \
+  --samplesheet /path/to/analysis/samplesheet.csv \
+  --config /path/to/analysis/metahict_configuration.yaml \
+  --outdir /path/to/analysis/results
+```
+
+## Documentation and help
+
+| Goal | Documentation |
+| --- | --- |
+| First complete analysis | [Command-by-command tutorial](docs/quickstart.md) |
+| Understand the biological stages | [Concepts](docs/concepts.md) |
+| Install or reuse environments and databases | [Installation and databases](docs/installation.md) |
+| Change resources or algorithms | [Configuration reference](docs/configuration.md) |
+| Run one module | [Module reference](docs/modules/README.md) |
+| Understand results, resume, or run outside the checkout | [Workflow execution](docs/nextflow.md) |
+| Inspect logs and provenance | [Logging](docs/logging.md) |
+| Diagnose a failure | [Troubleshooting](docs/troubleshooting.md) |
+
+Command-line help is generated from the current interface:
+
+```bash
+./metahict --help
+./metahict run --help
+./metahict run --entry-module binning --help
+```
+
+The complete documentation index is [docs/README.md](docs/README.md).
 
 ## Third-party software
 
-Integrated software, versions, licenses, and citations are summarized in [THIRD_PARTY.md](THIRD_PARTY.md).
+Versions, licenses, sources, and citations for external programs are listed in
+[Third-party software](docs/third_party.md).
 
 ## License
 
-METAHICT is distributed under the GNU General Public License. See [LICENSE](LICENSE).
+METAHICT is distributed under the GNU General Public License; see
+[LICENSE](LICENSE). A workflow-layer Bioconda recipe is staged under
+`packaging/bioconda/` but is not a published Bioconda package until accepted by
+the Bioconda project.

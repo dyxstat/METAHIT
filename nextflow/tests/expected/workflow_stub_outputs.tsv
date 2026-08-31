@@ -1,0 +1,54 @@
+path	required	non_empty	description
+example_dataset/1_preprocessing/sg/final_sg_1.fastq.gz	1	0	Shotgun preprocessing task output
+example_dataset/1_preprocessing/sg/final_sg_2.fastq.gz	1	0	Shotgun preprocessing reverse-read output
+example_dataset/1_preprocessing/hic/final_hic_1.fastq.gz	1	0	Hi-C preprocessing task output
+example_dataset/1_preprocessing/hic/final_hic_2.fastq.gz	1	0	Hi-C preprocessing reverse-read output
+example_dataset/2_assembly/final_assembly.fasta	1	0	Assembly task output
+example_dataset/3_alignment/sorted_map.bam	1	0	Original-assembly Hi-C alignment task output
+example_dataset/4_coverage/coverage.txt	1	0	Coverage task output
+example_dataset/5_contact/Raw_contact_matrix.npz	1	0	Original-assembly contact task output
+example_dataset/5_contact/denoised_contact_matrix_normcc.npz	1	0	Original-assembly normalized contact output
+example_dataset/5_contact/contig_info.csv	1	0	Original-assembly contact contig order
+example_dataset/6_binning/metahict/final_bins/bin.1.fa	1	0	Binning task output
+example_dataset/6_binning/metahict/final_bins_quality.tsv	1	0	Final-bin quality table
+example_dataset/6_binning/metahict/contig_to_bin.tsv	1	0	Final contig-to-bin membership
+example_dataset/6_binning/metahict/combined_final_bins.fa	1	0	Combined final-bin FASTA
+example_dataset/6_binning/metahict/run_parameters.yaml	1	0	Effective binning parameters
+example_dataset/7_reassembly/combined_contigs.fa	1	0	Reassembly task output
+example_dataset/7_reassembly/reassembled_bins/bin1.fa	1	0	Reassembled-bin handoff to downstream tasks
+example_dataset/7_reassembly/reassembled_bins_quality.tsv	1	0	Final reassembled-bin quality table
+example_dataset/7_reassembly/reassembled_bin_name_map.tsv	1	0	Selected reassembly name mapping
+example_dataset/7_reassembly/residual_contigs.fa	1	0	Residual unassigned contigs
+example_dataset/7_reassembly/read_selection_summary.json	1	0	Compact Hi-C read-selection diagnostics
+example_dataset/7_reassembly/quality/original_bins_quality.tsv	1	0	Original-bin comparison table
+example_dataset/7_reassembly/quality/checkm2_quality_report.tsv	1	0	Final raw CheckM2 table
+example_dataset/7_reassembly/run_parameters.yaml	1	0	Effective reassembly parameters
+example_dataset/8_scaffolding/bin1/scaffolded_bin.fa	1	0	Scaffolding task output for reassembled bin1
+example_dataset/8_scaffolding/bin1/scaffolded_bin.agp	1	0	Scaffolding AGP output for reassembled bin1
+example_dataset/8_scaffolding/bin1/scaffolding_metrics.txt	1	1	Scaffolding metrics output for reassembled bin1
+example_dataset/9_annotation/classify/gtdbtk.bac120.summary.tsv	1	0	Annotation task output
+example_dataset/10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	1	0	MGE analysis task output
+example_dataset/10_MGE/input_assembly/contig_to_host.tsv	1	0	Contig-to-host membership for MGE–host pairs
+example_dataset/10_MGE/sequence_topology.tsv	1	0	MGE sequence-topology output
+example_dataset/10_MGE/mge_reports/MGE_summary.txt	1	0	MGE, circularity, and pair-analysis summary
+long_read_example/1_preprocessing/hic/final_hic_1.fastq.gz	1	0	Long-read sample Hi-C preprocessing task output
+long_read_example/1_preprocessing/hic/final_hic_2.fastq.gz	1	0	Long-read sample Hi-C preprocessing reverse-read output
+long_read_example/2_assembly/final_assembly.fasta	1	0	metaFlye assembly task output
+long_read_example/3_alignment/sorted_map.bam	1	0	Long-read assembly Hi-C alignment task output
+long_read_example/4_coverage/coverage.txt	1	0	Long-read coverage task output
+long_read_example/5_contact/Raw_contact_matrix.npz	1	0	Long-read assembly contact task output
+long_read_example/5_contact/denoised_contact_matrix_normcc.npz	1	0	Long-read assembly normalized contact output
+long_read_example/5_contact/contig_info.csv	1	0	Long-read assembly contact contig order
+long_read_example/6_binning/metahict/final_bins/bin.1.fa	1	0	Long-read binning task output
+long_read_example/6_binning/metahict/final_bins_quality.tsv	1	0	Long-read final-bin quality table
+long_read_example/6_binning/metahict/contig_to_bin.tsv	1	0	Long-read final contig-to-bin membership
+long_read_example/6_binning/metahict/combined_final_bins.fa	1	0	Long-read combined final-bin FASTA
+long_read_example/6_binning/metahict/run_parameters.yaml	1	0	Long-read effective binning parameters
+long_read_example/8_scaffolding/bin.1/scaffolded_bin.fa	1	0	Scaffolding output for long-read bin.1
+long_read_example/8_scaffolding/bin.1/scaffolded_bin.agp	1	0	Scaffolding AGP output for long-read bin.1
+long_read_example/8_scaffolding/bin.1/scaffolding_metrics.txt	1	1	Scaffolding metrics output for long-read bin.1
+long_read_example/9_annotation/classify/gtdbtk.bac120.summary.tsv	1	0	Long-read annotation task output
+long_read_example/10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	1	0	Long-read MGE pair-analysis output
+long_read_example/10_MGE/input_assembly/contig_to_host.tsv	1	0	Long-read contig-to-host membership
+long_read_example/10_MGE/sequence_topology.tsv	1	0	Long-read MGE sequence-topology output
+long_read_example/10_MGE/mge_reports/MGE_summary.txt	1	0	Long-read MGE summary

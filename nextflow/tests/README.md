@@ -1,19 +1,30 @@
 # METAHICT Nextflow test assets
 
-`expected/native_dsl2_stub_outputs.tsv` is used by the CI smoke test. It
-asserts that every native DSL2 process publishes its declared result artifact,
-including MGE-specific re-alignment and contact construction.
+`expected/workflow_stub_outputs.tsv` is used by the CI smoke test. It
+asserts that every native DSL2 process publishes its declared result artifact.
+Its generated samplesheet contains one paired short-read sample and one
+single-file long-read sample, so the test also verifies long-read routing and
+the absence of shotgun preprocessing and reassembly for that row.
 
-`expected/test_data_outputs.tsv` is for a real, containerized test-data
-run on a system with all required reference databases. Run it with:
+`expected/example_dataset_outputs.tsv` is for a real bundled-example run on a
+system with all required environments and reference databases. Run it with:
 
 ```bash
 python nextflow/bin/check_expected_outputs.py \
-  --root /path/to/metahict_results \
-  --manifest nextflow/tests/expected/test_data_outputs.tsv
+  --root results \
+  --manifest nextflow/tests/expected/example_dataset_outputs.tsv
 ```
 
-The real manifest checks non-empty biological outputs; it is not a scientific
-benchmark. The externally archived test dataset is used for end-to-end
-workflow testing on systems with sufficient sequencing depth and configured
-external databases.
+The real manifest checks non-empty biological outputs; it is not by itself a
+scientific benchmark. After the run, compare it with the accepted baseline:
+
+```bash
+./metahict compare \
+  --baseline /path/to/accepted-results/example_dataset \
+  --candidate results/example_dataset \
+  --report validation/scientific-regression.tsv
+```
+
+The comparison normalizes FASTA record order, applies declared numerical
+tolerances to tables and sparse matrices, and compares final bin directories.
+It exits nonzero on any unexplained difference.
