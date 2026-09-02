@@ -868,6 +868,7 @@ process SCAFFOLDING {
     mkdir -p scaffolding
     touch scaffolding/scaffolded_bin.fa scaffolding/scaffolded_bin.agp
     printf 'Scaffolding Quality Metrics\n' > scaffolding/scaffolding_metrics.txt
+    printf 'bin\tstatus\treason\ttotal_contigs\teligible_contigs\tlongest_contig_bp\tmin_contig_length\n%s\tcompleted\t\t2\t2\t5000\t5000\n' "${bin_fasta.name}" > scaffolding/scaffolding_status.tsv
     """
 }
 

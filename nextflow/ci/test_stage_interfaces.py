@@ -70,6 +70,10 @@ REASSEMBLY_DRIVER = load_module(
     "metahict_reassembly_driver",
     "modules/7_reassembly/run_reassembly.py",
 )
+SCAFFOLDING_ELIGIBILITY = load_module(
+    "metahict_scaffolding_eligibility",
+    "modules/8_scaffolding/scaffolding_eligibility.py",
+)
 BINNING_PLOT = load_plot_module(
     "metahict_binning_plot", "modules/6_binning/plot_binning_results.py"
 )
@@ -520,9 +524,19 @@ class PublicationContractTest(unittest.TestCase):
         workflow = (ROOT / "nextflow/main_dsl2.nf").read_text()
         processes = (ROOT / "nextflow/modules/local/metahict_modules.nf").read_text()
         block = processes.split("process SCAFFOLDING {", 1)[1].split("\nprocess ", 1)[0]
+        complete = workflow.split("workflow RUN_ALL {", 1)[1].split(
+            "\nworkflow PREPROCESSING_WORKFLOW", 1
+        )[0]
+        selected = workflow.split("workflow SCAFFOLDING_WORKFLOW {", 1)[1].split(
+            "\nworkflow ANNOTATION_WORKFLOW", 1
+        )[0]
 
         self.assertIn("params.scaffolding_bin", workflow)
         self.assertIn("scaffoldingBinStageChannel()", workflow)
+        self.assertNotIn("SCAFFOLDING(", complete)
+        self.assertIn("SCAFFOLDING(scaffolding_input)", selected)
+        self.assertNotIn("reassembledBinStageChannel", workflow)
+        self.assertNotIn("binningBinStageChannel", workflow)
         self.assertIn("path(bin_fasta)", block)
         self.assertIn('--fasta "${bin_fasta}"', block)
         self.assertNotIn("reassembly_dir", block)
@@ -585,9 +599,38 @@ class PublicationContractTest(unittest.TestCase):
         self.assertIn('os.path.join(args.outdir, "intermediates")', source)
         self.assertIn("cleanup_intermediates(intermediate_dir)", source)
         self.assertIn('os.path.join(args.outdir, "quality")', source)
-        self.assertIn("8_scaffolding/*/scaffolded_bin.fa", real_expected)
+        self.assertNotIn("8_scaffolding/", real_expected)
         self.assertIn("8_scaffolding/bin1/scaffolded_bin.fa", stub_expected)
+        self.assertIn("8_scaffolding/bin1/scaffolding_status.tsv", stub_expected)
         self.assertNotIn("8_scaffolding/*/scaffolds.fa", real_expected)
+
+    def test_scaffolding_eligibility_requires_two_retained_contigs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            fasta = Path(temporary) / "bin.fa"
+            fasta.write_text(">long\n" + "A" * 5000 + "\n>short\nACGT\n")
+            assessment = SCAFFOLDING_ELIGIBILITY.assess_scaffolding_eligibility(
+                fasta, 5000
+            )
+        self.assertEqual(assessment["total_contigs"], 2)
+        self.assertEqual(assessment["eligible_contigs"], 1)
+        self.assertEqual(assessment["longest_contig_bp"], 5000)
+        self.assertEqual(assessment["reason"], "fewer_than_two_eligible_contigs")
+
+    def test_scaffolding_status_records_skipped_outcomes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            fasta = root / "bin.fa"
+            fasta.write_text(">one\nAAAA\n>two\nAAAA\n")
+            assessment = SCAFFOLDING_ELIGIBILITY.assess_scaffolding_eligibility(
+                fasta, 5
+            )
+            status = root / "scaffolding_status.tsv"
+            SCAFFOLDING_ELIGIBILITY.write_scaffolding_status(
+                status, fasta, "skipped", assessment
+            )
+            text = status.read_text()
+        self.assertIn("bin\tstatus\treason", text)
+        self.assertIn("bin.fa\tskipped\tno_contigs_meet_minimum_length", text)
 
     def test_every_scaffolding_parser_argument_is_used(self) -> None:
         source = (ROOT / "modules/8_scaffolding/scaffolding.py").read_text()

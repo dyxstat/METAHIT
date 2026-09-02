@@ -35,6 +35,11 @@ warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
 from MetaCC.Script.normalized_contact import NormCCMap
 from MetaCC.Script.utils import save_object, make_dir
 from MetaCC.Script.normcc import normcc
+from scaffolding_eligibility import (
+    assess_scaffolding_eligibility,
+    fasta_sequence_lengths,
+    write_scaffolding_status,
+)
 
 class ApplicationException(Exception):
     pass
@@ -56,29 +61,6 @@ def filter_fasta_by_length(input_fasta, output_fasta, min_length=5000):
             f_out.write(header + "\n" + seq + "\n")
             retained += 1
     return retained
-
-
-def fasta_sequence_lengths(fasta):
-    """Return sequence lengths keyed by the first token of each FASTA header."""
-    lengths = {}
-    name = None
-    length = 0
-    with open(fasta) as handle:
-        for line in handle:
-            if line.startswith(">"):
-                if name is not None:
-                    if name in lengths:
-                        raise ValueError(f"Duplicate FASTA sequence identifier: {name}")
-                    lengths[name] = length
-                name = line[1:].strip().split()[0]
-                length = 0
-            else:
-                length += len(line.strip())
-    if name is not None:
-        if name in lengths:
-            raise ValueError(f"Duplicate FASTA sequence identifier: {name}")
-        lengths[name] = length
-    return lengths
 
 
 def validate_bam_reference(bam, fasta):
@@ -446,9 +428,29 @@ if __name__ == "__main__":
         make_dir(intermediate_dir)
         # Step 1: filter
         filt_fa = os.path.join(intermediate_dir, "filtered_bin.fa")
+        assessment = assess_scaffolding_eligibility(args.fasta, args.min_contig_len)
         kept = filter_fasta_by_length(args.fasta, filt_fa, args.min_contig_len)
-        if kept == 0:
-            logger.error(f"No contigs >= {args.min_contig_len} bp"); sys.exit(1)
+        if kept != assessment["eligible_contigs"]:
+            raise RuntimeError("Internal FASTA eligibility count mismatch")
+        if kept < 2:
+            unscaffolded = os.path.join(args.outdir, "unscaffolded_bin.fa")
+            shutil.copy2(args.fasta, unscaffolded)
+            write_scaffolding_status(
+                os.path.join(args.outdir, "scaffolding_status.tsv"),
+                args.fasta,
+                "skipped",
+                assessment,
+            )
+            logger.warning(
+                "Skipping scaffolding: %d of %d contigs are at least %d bp; "
+                "at least two eligible contigs are required",
+                kept,
+                assessment["total_contigs"],
+                args.min_contig_len,
+            )
+            if not args.keep_temp:
+                cleanup_intermediates(intermediate_dir)
+            sys.exit(0)
         # Step 2: index
         if not os.path.exists(filt_fa + ".fai"):
             run_command(["samtools", "faidx", filt_fa])
@@ -556,6 +558,13 @@ if __name__ == "__main__":
             os.path.join(args.outdir, "quality"),
         )
         save_metrics(metrics, os.path.join(args.outdir, "scaffolding_metrics.txt"))
+        assessment["reason"] = ""
+        write_scaffolding_status(
+            os.path.join(args.outdir, "scaffolding_status.tsv"),
+            args.fasta,
+            "completed",
+            assessment,
+        )
         if not args.keep_temp:
             cleanup_intermediates(intermediate_dir)
         logger.info("Scaffolding complete.")

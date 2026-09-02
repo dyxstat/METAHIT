@@ -91,7 +91,7 @@ and provenance, the generated complete template is recommended.
 | Contact | 1 | 32 GB | Current normalization is serial; matrix memory scales with contig count |
 | Binning | 16 | 64 GB | Multiple binners, refinement, and CheckM2 share the task |
 | Reassembly | 16 | 64 GB | Parallel per-bin SPAdes jobs share a total budget |
-| Scaffolding | 8 | 32 GB | Each task scaffolds one selected bin |
+| Scaffolding | 8 | 32 GB | Standalone task for one selected MAG |
 | Annotation | 8 | 64 GB | GTDB-Tk classification is memory-intensive and may require an increase |
 | MGE | 16 | 32 GB | One allocation covers MGE detection, circular-contig discovery, and MGE–host pairing |
 
@@ -158,8 +158,9 @@ For one selected stage, a command-line override is convenient:
 ```
 
 For a complete workflow, `-t` and `-m` override every selected stage. Thus
-`-m 96G` gives 96 GB to both light and heavy tasks, replacing all ten YAML
-memory values. Per-stage YAML editing is normally better for a complete run.
+`-m 96G` gives 96 GB to both light and heavy core tasks, replacing their
+per-stage YAML memory values. Per-stage YAML editing is normally better for a
+complete run.
 
 The YAML omits wall-time limits because they depend on scheduler and site
 policy. Scheduler users can define them in an institution-specific Nextflow

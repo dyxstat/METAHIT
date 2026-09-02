@@ -58,10 +58,11 @@ The installed environments are:
 ./metahict test workflow
 ```
 
-The workflow test creates temporary synthetic inputs, compiles the complete
-Nextflow graph, runs all stages in stub mode, and checks the published output
-contract. It does not require the reference databases. A passing result
-confirms the installed workflow engine and stage connections.
+The workflow test creates temporary synthetic inputs and runs the default core
+workflow in stub mode. It then tests the standalone scaffolding entry with the
+generated stub MAGs and checks the combined published output contract. It does
+not require the reference databases. A passing result confirms the installed
+workflow engine and stage connections.
 
 Developers changing METAHICT source can additionally run
 `./metahict test source`; ordinary installations do not require that test.

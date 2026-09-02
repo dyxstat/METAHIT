@@ -155,6 +155,8 @@ Start the complete workflow:
 ```
 
 A successful invocation ends with `[PASS] METAHICT workflow completed`.
+Scaffolding is not run automatically. It is an optional per-MAG analysis; use
+`./metahict run --entry-module scaffolding --help` after selecting a MAG.
 
 ## 8. Check the main results
 

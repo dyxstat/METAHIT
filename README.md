@@ -37,7 +37,12 @@ chmod +x metahict nextflow/bin/nextflow
 ./metahict test workflow
 ```
 
-`doctor` checks the operating system, architecture, required commands, and distributed lock files before installation. `install` creates and verifies the locked software environments. `test workflow` compiles the complete Nextflow workflow and runs the stub implementation of every stage, checking all stage connections without downloading reference databases or analyzing real reads. Typical installation time is 1–5 minutes, excluding database installation.
+`doctor` checks the operating system, architecture, required commands, and
+distributed lock files before installation. `install` creates and verifies the
+locked software environments. `test workflow` runs the core workflow and the
+standalone scaffolding entry with stub tasks, without downloading databases or
+analyzing real reads. Typical installation time is 1–5 minutes, excluding
+database installation.
 
 
 ### 3. Install and validate the reference databases
@@ -95,7 +100,8 @@ Start the analysis:
 ```
 
 METAHICT writes each sample to `results/<sample>/` and workflow reports to
-`results/nextflow_reports/`.
+`results/nextflow_reports/`. Scaffolding is not run automatically; it remains
+available as a selected-module analysis for MAGs chosen by the user.
 
 After correcting a failed task, repeat the run command with `--resume` and
 keep `results/nextflow_work/` so Nextflow can reuse successful tasks.
@@ -120,20 +126,17 @@ guides for all ten stages.
 
 ## Test with the bundled example dataset
 
-After installing the databases, run a complete analysis with the included
-paired reads:
+After installing the databases, run the core workflow and then exercise
+scaffolding on every MAG recovered from the included paired reads:
 
 ```bash
-./metahict run \
-  --samplesheet nextflow/assets/example_dataset_samplesheet.csv \
-  --config nextflow/assets/example_dataset_configuration.yaml \
-  --outdir results \
-  --check-outputs
+./metahict test example --outdir results
 ```
 
 This is a real scientific-program test and can take substantially longer than
-the workflow stub. Details are in [Testing METAHICT](docs/test_dataset.md). 
-The complete workflow takes approximately 25–30 minutes to run on the example dataset, depending on your system.
+the workflow stub. The bundled example test typically takes approximately
+25–30 minutes, depending on the system. Details are in [Testing
+METAHICT](docs/test_dataset.md).
 
 ## Main results
 
@@ -146,7 +149,7 @@ The complete workflow takes approximately 25–30 minutes to run on the example 
 | Normalized contact matrix | `5_contact/denoised_contact_matrix_normcc.npz` |
 | Consolidated MAGs | `6_binning/metahict/final_bins/` |
 | Reassembled MAGs (paired short reads only) | `7_reassembly/reassembled_bins/` |
-| Scaffolded MAGs | `8_scaffolding/<BIN_ID>/scaffolded_bin.fa` |
+| Scaffolded MAGs (optional standalone module) | `8_scaffolding/<BIN_ID>/scaffolded_bin.fa` |
 | GTDB-Tk taxonomy | `9_annotation/classify/gtdbtk.*.summary.tsv` |
 | MGE calls, circular contigs, and candidate MGE–host pairs | `10_MGE/` |
 

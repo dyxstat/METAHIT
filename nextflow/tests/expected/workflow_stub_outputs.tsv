@@ -26,6 +26,7 @@ example_dataset/7_reassembly/run_parameters.yaml	1	0	Effective reassembly parame
 example_dataset/8_scaffolding/bin1/scaffolded_bin.fa	1	0	Scaffolding task output for reassembled bin1
 example_dataset/8_scaffolding/bin1/scaffolded_bin.agp	1	0	Scaffolding AGP output for reassembled bin1
 example_dataset/8_scaffolding/bin1/scaffolding_metrics.txt	1	1	Scaffolding metrics output for reassembled bin1
+example_dataset/8_scaffolding/bin1/scaffolding_status.tsv	1	1	Standalone scaffolding status for reassembled bin1
 example_dataset/9_annotation/classify/gtdbtk.bac120.summary.tsv	1	0	Annotation task output
 example_dataset/10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	1	0	MGE analysis task output
 example_dataset/10_MGE/input_assembly/contig_to_host.tsv	1	0	Contig-to-host membership for MGE–host pairs
@@ -47,6 +48,7 @@ long_read_example/6_binning/metahict/run_parameters.yaml	1	0	Long-read effective
 long_read_example/8_scaffolding/bin.1/scaffolded_bin.fa	1	0	Scaffolding output for long-read bin.1
 long_read_example/8_scaffolding/bin.1/scaffolded_bin.agp	1	0	Scaffolding AGP output for long-read bin.1
 long_read_example/8_scaffolding/bin.1/scaffolding_metrics.txt	1	1	Scaffolding metrics output for long-read bin.1
+long_read_example/8_scaffolding/bin.1/scaffolding_status.tsv	1	1	Standalone scaffolding status for long-read bin.1
 long_read_example/9_annotation/classify/gtdbtk.bac120.summary.tsv	1	0	Long-read annotation task output
 long_read_example/10_MGE/candidate_mge_host_pairs_zscore_filtered.tsv	1	0	Long-read MGE pair-analysis output
 long_read_example/10_MGE/input_assembly/contig_to_host.tsv	1	0	Long-read contig-to-host membership

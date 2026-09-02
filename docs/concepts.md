@@ -54,8 +54,9 @@ workflow filters, not universal definitions of a good genome.
 | 9. Annotation | Where do the MAGs fall in the GTDB taxonomy? | GTDB-Tk summary tables |
 | 10. MGE | Which contigs are candidate viruses/plasmids, and which hosts have contact support? | MGE calls and candidate MGE–host pairs |
 
-The complete workflow carries files between these stages automatically.
-Selected-module commands are useful when a stage must be repeated or when
+The complete workflow carries files automatically between the core stages.
+Scaffolding is optional and runs separately on a selected MAG. Other
+selected-module commands are useful when a stage must be repeated or when
 compatible results were produced elsewhere.
 
 ## Why contacts are normalized

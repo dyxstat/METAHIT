@@ -304,46 +304,6 @@ def scaffoldingBinStageChannel() {
         }
 }
 
-def reassembledBinStageChannel(results) {
-    results.flatMap { sample, row, reassembly_directory ->
-        def bins = files(
-            "${reassembly_directory}/reassembled_bins/*.{fa,fasta,fna}",
-            checkIfExists: true
-        ) as List
-        bins.sort { left, right -> left.name <=> right.name }
-            .collect { bin ->
-                tuple(
-                    sample,
-                    row,
-                    scaffoldingBinId(bin),
-                    bin,
-                    false,
-                    file("${baseDir}/assets/NO_SCAFFOLDING_BAM")
-                )
-            }
-    }
-}
-
-def binningBinStageChannel(results) {
-    results.flatMap { sample, row, binning_directory ->
-        def bins = files(
-            "${binning_directory}/metahict/final_bins/*.{fa,fasta,fna}",
-            checkIfExists: true
-        ) as List
-        bins.sort { left, right -> left.name <=> right.name }
-            .collect { bin ->
-                tuple(
-                    sample,
-                    row,
-                    scaffoldingBinId(bin),
-                    bin,
-                    false,
-                    file("${baseDir}/assets/NO_SCAFFOLDING_BAM")
-                )
-            }
-    }
-}
-
 def mgeAlignmentStageChannel() {
     if (params.mge_alignment_dir) {
         return directStageChannel(
@@ -507,18 +467,6 @@ workflow RUN_ALL {
         }
     annotation_input = short_annotation_input.mix(long_annotation_input)
     ANNOTATION(annotation_input)
-
-    short_scaffolding_bins = reassembledBinStageChannel(REASSEMBLY.out.results)
-    long_scaffolding_bins = binningBinStageChannel(
-        BINNING.out.results.filter { sample, row, binning_directory -> rowLongReadType(row) }
-    )
-    scaffolding_input = short_scaffolding_bins
-        .mix(long_scaffolding_bins)
-        .combine(hic_preprocessed, by: 0)
-        .map { sample, reassembly_row, bin_id, bin_fasta, use_bam, bam_input, hic_row, hic_directory ->
-            tuple(sample, reassembly_row, bin_id, bin_fasta, use_bam, bam_input, hic_directory)
-        }
-    SCAFFOLDING(scaffolding_input)
 
     /* Short-read runs use reassembled outputs. Long-read runs skip reassembly
      * and use the metaFlye assembly plus the final binning MAGs. */

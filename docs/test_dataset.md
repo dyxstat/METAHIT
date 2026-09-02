@@ -6,8 +6,8 @@ the complete example is recommended before analyzing important datasets.
 | Test | Command | What it checks |
 | --- | --- | --- |
 | Installed runtime | `./metahict verify` | Exact Conda packages and pinned artifacts |
-| Workflow stub | `./metahict test workflow` | Nextflow compilation, all stage connections, and output structure |
-| Bundled example | `./metahict run ... --check-outputs` | Real execution of every scientific stage and required database |
+| Workflow stub | `./metahict test workflow` | Core workflow, standalone scaffolding entry, and output structure |
+| Bundled example | `./metahict test example --outdir results` | Real core workflow followed by optional scaffolding |
 
 `./metahict test source` is a developer test for source code, interfaces,
 documentation, and policies. It is not required after an ordinary
@@ -22,10 +22,11 @@ Run immediately after `./metahict install`:
 ./metahict test workflow
 ```
 
-The workflow test generates temporary synthetic paired reads and dummy
-database paths. Nextflow runs every process in stub mode and validates the
-published files. It does not execute the bioinformatics programs on real data,
-so the reference databases are not needed.
+The workflow test generates temporary synthetic reads and dummy database
+paths. Nextflow first runs the default core workflow in stub mode and then
+runs the standalone scaffolding entry on the generated stub MAGs. It validates
+the published files without executing the bioinformatics programs, so the
+reference databases are not needed.
 
 The test passes when both Nextflow stub profiles and the expected-output check
 end with `[PASS]`.
@@ -46,19 +47,17 @@ The repository includes synchronized paired shotgun and Hi-C reads under
 `example_dataset/`. They are a compact functional test, not an unbiased
 biological benchmark.
 
-Run every stage and validate the documented outputs:
+Run the core workflow, scaffold the recovered MAGs, and validate the outputs:
 
 ```bash
-./metahict run \
-  --samplesheet nextflow/assets/example_dataset_samplesheet.csv \
-  --config nextflow/assets/example_dataset_configuration.yaml \
-  --outdir results \
-  --check-outputs
+./metahict test example --outdir results
 ```
 
-This command runs the actual scientific programs and databases. It can require
-substantial time, memory, and temporary storage even though the FASTQ files are
-small.
+This command runs the actual scientific programs and databases. It first runs
+the normal complete workflow, which excludes scaffolding, and then invokes the
+standalone scaffolding entry for every MAG recovered from the example. It can
+require substantial time, memory, and temporary storage even though the FASTQ
+files are small.
 
 The main results are written under:
 
@@ -66,16 +65,21 @@ The main results are written under:
 results/example_dataset/
 ```
 
-The directory should contain all ten numbered stages. Logs and provenance are
-under `results/nextflow_reports/`. A successful run ends with:
+The directory normally contains all ten numbered module directories because
+the example test adds optional scaffolding after the core run. The number of
+MAGs is not fixed. An unsuitable MAG is recorded as skipped instead of failing
+the test; if no MAG is available, the command reports that scaffolding was not
+run. Logs and provenance are under `results/nextflow_reports/`. A successful
+test ends with:
 
 ```text
-[PASS] METAHICT workflow completed
+[PASS] Bundled example test completed
 ```
 
-`--check-outputs` then verifies that the required files exist and are
-non-empty. This confirms functional execution; it is not a scientific accuracy
-benchmark.
+The validation checks the core output contract and the status of each attempted
+scaffolding run. It accepts both completed and biologically ineligible
+scaffolding outcomes. This confirms functional execution; it is not a
+scientific accuracy benchmark.
 
 ## If a test fails
 
@@ -88,8 +92,12 @@ cat results/nextflow_reports/failure_summary.txt
 
 The stub test uses a temporary directory, so its failing work path is printed
 directly in the terminal. For the example run, follow the instructions in
-[Troubleshooting](troubleshooting.md). After correcting the problem, repeat the
-example command with `--resume` and keep `results/nextflow_work/`.
+[Troubleshooting](troubleshooting.md). After correcting the problem, keep
+`results/nextflow_work/` and resume with:
+
+```bash
+./metahict test example --outdir results --resume
+```
 
 ## Developer validation
 

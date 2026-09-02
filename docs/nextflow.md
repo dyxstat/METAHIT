@@ -14,8 +14,11 @@ analyses.
   --outdir results
 ```
 
-The default entry is `all`. The launcher validates the configuration,
-required database paths, and exact environments before Nextflow starts.
+The default entry is `all`. It runs the core analysis through binning,
+reassembly where applicable, annotation, and MGE analysis. Scaffolding is run
+separately on MAGs selected by the user. The launcher validates the
+configuration, required database paths, and exact environments before
+Nextflow starts.
 
 ## Output and work directories
 
@@ -31,7 +34,6 @@ results/
 │   ├── 5_contact/
 │   ├── 6_binning/
 │   ├── 7_reassembly/
-│   ├── 8_scaffolding/
 │   ├── 9_annotation/
 │   └── 10_MGE/
 ├── nextflow_reports/
@@ -48,7 +50,8 @@ Published scientific results and work files have different roles:
 
 For long-read shotgun samples, stage 1 contains only `hic/` and stage 7 is
 absent. The complete workflow uses the original long reads for stages 2 and 4,
-then supplies stage 6 MAGs directly to stages 8–10.
+then supplies stage 6 MAGs directly to stages 9 and 10. An optional standalone
+scaffolding run adds `8_scaffolding/<BIN_ID>/` to the same sample directory.
 
 
 ## Run one module
@@ -96,8 +99,10 @@ any stage:
 The selected scaffolding entry operates on the FASTA supplied with
 `--scaffolding-bin`. It aligns cleaned Hi-C reads to that bin unless
 `--scaffolding-bam` supplies a BAM aligned to exactly the same reference
-sequences and lengths. The complete workflow automatically creates one
-scaffolding task for every reassembled bin.
+sequences and lengths. Scaffolding is not submitted by the default complete
+workflow because it is an optional and relatively expensive per-MAG analysis.
+If fewer than two contigs pass the configured length filter, the module records
+the MAG as skipped and preserves its original FASTA.
 
 ### Annotation accepts a MAG directory
 

@@ -984,6 +984,56 @@ class StubInputTest(unittest.TestCase):
                 self.assertTrue(handle.readline().startswith("@stub_long_read"))
 
 
+class ExampleScaffoldingTest(unittest.TestCase):
+    def test_discovers_every_supported_bin_without_assuming_a_count(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            results = Path(temporary)
+            short_dir = (
+                results
+                / "short_sample"
+                / "7_reassembly"
+                / "reassembled_bins"
+            )
+            short_dir.mkdir(parents=True)
+            for name in ("bin1.fa", "bin2.fasta", "bin3.fna", "notes.txt"):
+                (short_dir / name).touch()
+            bins = manager.example_scaffolding_bins(
+                results, {"sample": "short_sample", "long_read_type": ""}
+            )
+        self.assertEqual(
+            [path.name for path in bins], ["bin1.fa", "bin2.fasta", "bin3.fna"]
+        )
+
+    def test_dynamic_validation_accepts_completed_and_skipped_bins(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            results = Path(temporary)
+            completed_bin = results / "inputs" / "completed.fa"
+            skipped_bin = results / "inputs" / "skipped.fa"
+            completed_bin.parent.mkdir()
+            completed_bin.touch()
+            skipped_bin.touch()
+            for bin_fasta, status in (
+                (completed_bin, "completed"),
+                (skipped_bin, "skipped"),
+            ):
+                output = results / "sample" / "8_scaffolding" / bin_fasta.stem
+                output.mkdir(parents=True)
+                (output / "scaffolding_status.tsv").write_text(
+                    "bin\tstatus\treason\n"
+                    f"{bin_fasta.name}\t{status}\t\n"
+                )
+            manager.validate_example_scaffolding(
+                results,
+                [("sample", completed_bin), ("sample", skipped_bin)],
+            )
+
+    def test_example_scope_has_simple_defaults(self) -> None:
+        args = manager.build_parser().parse_args(["test", "example"])
+        self.assertEqual(args.scope, "example")
+        self.assertEqual(args.outdir, "results")
+        self.assertTrue(str(args.config).endswith("example_dataset_configuration.yaml"))
+
+
 class TopLevelHelpTest(unittest.TestCase):
     def test_top_level_help_is_a_first_run_guide(self) -> None:
         help_text = manager.build_parser().format_help()

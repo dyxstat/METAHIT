@@ -7,7 +7,8 @@ sequences and lengths match the selected bin.
 
 Scaffolding orders and orients contigs and may insert gaps. The result remains
 a draft genome whose joins and residual gaps require review. Run it after
-choosing a MAG for further structural analysis.
+choosing a MAG for further structural analysis. The default complete workflow
+does not run scaffolding automatically.
 
 ## Before you run
 
@@ -15,6 +16,11 @@ Confirm the exact one-bin FASTA, the actual restriction enzyme, and enough
 Hi-C support for that bin. If supplying a BAM, its reference dictionary must
 match every retained FASTA sequence and length. A whole-assembly BAM is
 compatible only when its reference dictionary matches the selected bin.
+
+At least two contigs must pass `input_filter.min_contig_length` before they can
+be joined. A MAG that does not meet this condition is preserved as
+`unscaffolded_bin.fa`, recorded as skipped in `scaffolding_status.tsv`, and
+does not cause the workflow to fail.
 
 ## Required parameters
 
@@ -93,6 +99,7 @@ longer constructs an unused second bin3C matrix.
 
 | Output | Description |
 | --- | --- |
+| `8_scaffolding/<BIN_ID>/scaffolding_status.tsv` | Completed or skipped status and input-contig summary |
 | `8_scaffolding/<BIN_ID>/scaffolded_bin.fa` | Final scaffolded MAG |
 | `8_scaffolding/<BIN_ID>/scaffolded_bin.agp` | Final scaffold structure reported by YaHS |
 | `8_scaffolding/<BIN_ID>/scaffolding_metrics.txt` | Before-and-after assembly, quality, and Hi-C metrics |
@@ -100,11 +107,13 @@ longer constructs an unused second bin3C matrix.
 | `8_scaffolding/<BIN_ID>/quality/` | Original and scaffolded CheckM2 reports, unless CheckM2 is skipped |
 | `8_scaffolding/<BIN_ID>/scaffolding.log` | Scaffolding program log |
 | `8_scaffolding/<BIN_ID>/intermediates/` | Optional working files, present only when `keep_temporary_files: true` |
+| `8_scaffolding/<BIN_ID>/unscaffolded_bin.fa` | Original MAG, written instead of scaffold outputs when fewer than two contigs pass the length filter |
 
 The default result for one bin is therefore:
 
 ```text
 8_scaffolding/<BIN_ID>/
+├── scaffolding_status.tsv
 ├── scaffolded_bin.fa
 ├── scaffolded_bin.agp
 ├── scaffolding_metrics.txt
@@ -116,6 +125,10 @@ The default result for one bin is therefore:
 `intermediates/` is omitted after a successful default run. If retained for
 debugging, it contains the filtered input, alignments, contact matrices,
 scaffold mapping, and raw YaHS files under one directory.
+
+For a skipped MAG, the directory contains `scaffolding_status.tsv`,
+`unscaffolded_bin.fa`, and `scaffolding.log` instead of the scaffold, AGP,
+metrics, and heatmap files.
 
 ## How to check the result
 
@@ -175,9 +188,9 @@ A whole-assembly BAM can be reused when its reference sequences match the
 selected bin. Cleaned Hi-C reads remain required because scaffolding realigns
 them to the new scaffold for the final MetaCC matrix and heatmap.
 
-The complete workflow runs one independent scaffolding task per final MAG. It
-uses `7_reassembly/reassembled_bins/` for paired short-read samples and
-`6_binning/metahict/final_bins/` for long-read samples. Results are published
+The bundled example test invokes this standalone entry for every MAG it
+recovers so that scaffolding remains covered by functional testing. Routine
+complete runs omit it. Results from an explicitly selected MAG are published
 below `8_scaffolding/<BIN_ID>/`.
 
 [Previous: Reassembly](reassembly.md) · [Next: Annotation](annotation.md) · [All modules](README.md)

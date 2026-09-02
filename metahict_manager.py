@@ -1191,6 +1191,20 @@ def run_stub_test(profile: str) -> None:
             "false",
         ]
         run_command(command, cwd=PROJECT_ROOT, env=nextflow_environment())
+        unexpected_scaffolding = sorted(results.glob("*/8_scaffolding"))
+        if unexpected_scaffolding:
+            raise MetahictError(
+                "The default complete workflow unexpectedly ran scaffolding:\n  "
+                + "\n  ".join(str(path) for path in unexpected_scaffolding)
+            )
+        run_stub_scaffolding_entries(
+            profile=profile,
+            source_samplesheet=stub_samplesheet,
+            results=results,
+            root=root,
+            nextflow=nextflow,
+            checkm2_database=dummy / "checkm2.dmnd",
+        )
         run_command(
             [
                 sys.executable,
@@ -1214,12 +1228,206 @@ def run_stub_test(profile: str) -> None:
     print(f"[PASS] Nextflow {profile} stub test")
 
 
+def sample_rows(samplesheet: Path) -> list[dict[str, str]]:
+    """Read non-empty sample rows from a METAHICT samplesheet."""
+    with samplesheet.open(newline="") as handle:
+        return [
+            row
+            for row in csv.DictReader(handle)
+            if (row.get("sample") or "").strip()
+        ]
+
+
+def write_one_sample_sheet(
+    source_samplesheet: Path, destination: Path, selected_row: dict[str, str]
+) -> None:
+    """Write one existing samplesheet row without changing its columns."""
+    with source_samplesheet.open(newline="") as source:
+        fieldnames = csv.DictReader(source).fieldnames
+    if not fieldnames:
+        raise MetahictError(f"Samplesheet has no header: {source_samplesheet}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerow({field: selected_row.get(field, "") for field in fieldnames})
+
+
+def example_scaffolding_bins(results: Path, row: dict[str, str]) -> list[Path]:
+    """Return all final MAG FASTAs available for optional example scaffolding."""
+    sample = row["sample"].strip()
+    if (row.get("long_read_type") or "").strip():
+        directory = results / sample / "6_binning" / "metahict" / "final_bins"
+    else:
+        directory = results / sample / "7_reassembly" / "reassembled_bins"
+    if not directory.is_dir():
+        return []
+    suffixes = {".fa", ".fasta", ".fna"}
+    return sorted(
+        path
+        for path in directory.iterdir()
+        if path.is_file() and path.suffix.lower() in suffixes
+    )
+
+
+def run_stub_scaffolding_entries(
+    *,
+    profile: str,
+    source_samplesheet: Path,
+    results: Path,
+    root: Path,
+    nextflow: Path,
+    checkm2_database: Path,
+) -> None:
+    """Exercise the standalone scaffolding entry after the default stub run."""
+    for row in sample_rows(source_samplesheet):
+        sample = row["sample"].strip()
+        bins = example_scaffolding_bins(results, row)
+        if not bins:
+            print(f"[WARN] Stub sample {sample} produced no bin for scaffolding")
+            continue
+        one_sample_sheet = root / "scaffolding_samplesheets" / f"{sample}.csv"
+        write_one_sample_sheet(source_samplesheet, one_sample_sheet, row)
+        for bin_fasta in bins:
+            safe_bin = safe_log_name(bin_fasta.stem)
+            command = [
+                nextflow,
+                "run",
+                PROJECT_ROOT / "nextflow" / "main_dsl2.nf",
+                "-params-file",
+                PROJECT_ROOT / "nextflow" / "assets" / "example_dataset_configuration.yaml",
+                "-profile",
+                profile,
+                "-c",
+                PROJECT_ROOT / "nextflow" / "ci" / "stub_resources.config",
+                "--entry_module",
+                "scaffolding",
+                "--samplesheet",
+                one_sample_sheet,
+                "--scaffolding_bin",
+                bin_fasta,
+                "--preprocessing_dir",
+                results / sample / "1_preprocessing",
+                "--out_root",
+                results,
+                "--report_dir",
+                root / "scaffolding_reports" / sample / safe_bin,
+                "-work-dir",
+                root / "scaffolding_work" / sample / safe_bin,
+                "--checkm2_db",
+                checkm2_database,
+                "--threads",
+                "2",
+                "-stub-run",
+                "-ansi-log",
+                "false",
+            ]
+            run_command(command, cwd=PROJECT_ROOT, env=nextflow_environment())
+
+
+def validate_example_scaffolding(
+    results: Path, attempts: Sequence[tuple[str, Path]]
+) -> None:
+    """Validate interfaces without requiring a particular biological outcome."""
+    for sample, bin_fasta in attempts:
+        output = results / sample / "8_scaffolding" / bin_fasta.stem
+        status_file = output / "scaffolding_status.tsv"
+        if not status_file.is_file() or status_file.stat().st_size == 0:
+            raise MetahictError(
+                f"Scaffolding did not report a status for {sample}:{bin_fasta.name}"
+            )
+        with status_file.open(newline="") as handle:
+            rows = list(csv.DictReader(handle, delimiter="\t"))
+        if len(rows) != 1 or rows[0].get("status") not in {"completed", "skipped"}:
+            raise MetahictError(f"Invalid scaffolding status file: {status_file}")
+
+
+def append_example_database_options(command: list[str], args: argparse.Namespace) -> None:
+    for argument_name, _, _ in DATABASE_ARGUMENTS.values():
+        value = getattr(args, argument_name, None)
+        if value:
+            command.extend(
+                [f"--{argument_name.replace('_', '-')}", str(Path(value).expanduser())]
+            )
+
+
+def run_example_test(args: argparse.Namespace) -> None:
+    """Run the bundled data through core stages and optional scaffolding."""
+    results = Path(args.outdir).expanduser().resolve()
+    samplesheet = PROJECT_ROOT / "nextflow" / "assets" / "example_dataset_samplesheet.csv"
+    config = Path(args.config).expanduser().resolve()
+    base = [
+        "run",
+        "--samplesheet",
+        str(samplesheet),
+        "--config",
+        str(config),
+        "--outdir",
+        str(results),
+    ]
+    if args.resume:
+        base.append("--resume")
+    append_example_database_options(base, args)
+    command_run(build_parser().parse_args(base))
+
+    attempts: list[tuple[str, Path]] = []
+    for row in sample_rows(samplesheet):
+        sample = row["sample"].strip()
+        bins = example_scaffolding_bins(results, row)
+        if not bins:
+            print(f"[WARN] No final MAGs were available for scaffolding in {sample}")
+            continue
+        one_sample_sheet = (
+            results
+            / "nextflow_reports"
+            / "example_test_samplesheets"
+            / f"{sample}.csv"
+        )
+        write_one_sample_sheet(samplesheet, one_sample_sheet, row)
+        for bin_fasta in bins:
+            scaffold = [
+                "run",
+                "--entry-module",
+                "scaffolding",
+                "--samplesheet",
+                str(one_sample_sheet),
+                "--config",
+                str(config),
+                "--scaffolding-bin",
+                str(bin_fasta),
+                "--preprocessing-dir",
+                str(results / sample / "1_preprocessing"),
+                "--outdir",
+                str(results),
+            ]
+            if args.resume:
+                scaffold.append("--resume")
+            append_example_database_options(scaffold, args)
+            command_run(build_parser().parse_args(scaffold))
+            attempts.append((sample, bin_fasta))
+
+    run_command(
+        [
+            sys.executable,
+            PROJECT_ROOT / "nextflow" / "bin" / "check_expected_outputs.py",
+            "--root",
+            results,
+            "--manifest",
+            PROJECT_ROOT / "nextflow" / "tests" / "expected" / "example_dataset_outputs.tsv",
+        ]
+    )
+    validate_example_scaffolding(results, attempts)
+    print("[PASS] Bundled example test completed")
+
+
 def command_test(args: argparse.Namespace) -> None:
     if args.scope in {"source", "all"}:
         source_checks()
     if args.scope in {"workflow", "all"}:
         run_stub_test("stub")
         run_stub_test("local")
+    if args.scope == "example":
+        run_example_test(args)
 
 
 def command_compare(args: argparse.Namespace) -> None:
@@ -2127,7 +2335,9 @@ def validate_run_inputs(args: argparse.Namespace) -> None:
     validate_preprocessing_input(args, samplesheet, entry_module)
     verify_runtime(verbose=getattr(args, "verbose_preflight", False))
     if getattr(args, "check_outputs", False) and entry_module != "all":
-        raise MetahictError("--check-outputs is available only for the complete example-dataset workflow")
+        raise MetahictError(
+            "--check-outputs is available only for the complete core example-dataset workflow"
+        )
     required_databases = required_databases_for_run(args)
     if not required_databases:
         return
@@ -2488,7 +2698,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  1. Check the host and install the reproducible Linux runtime:\n"
             "     ./metahict doctor\n"
             "     ./metahict install\n\n"
-            "  2. Test the complete workflow graph:\n"
+            "  2. Test the core workflow and standalone scaffolding entry:\n"
             "     ./metahict test workflow\n\n"
             "  3. Install the required reference databases:\n"
             "     ./metahict database all\n\n"
@@ -2542,9 +2752,52 @@ def build_parser() -> argparse.ArgumentParser:
     verify_parser.set_defaults(handler=lambda _: verify_runtime())
 
     test_parser = subparsers.add_parser(
-        "test", help="Run source checks and/or Nextflow stub tests"
+        "test",
+        help="Run source, workflow, or bundled-example tests",
+        description=(
+            "Run developer source checks, fast stub workflow checks, or the "
+            "bundled real-data example. The workflow test exercises the default "
+            "complete workflow and the standalone scaffolding entry separately."
+        ),
     )
-    test_parser.add_argument("scope", nargs="?", choices=("source", "workflow", "all"), default="all")
+    test_parser.add_argument(
+        "scope",
+        nargs="?",
+        choices=("source", "workflow", "example", "all"),
+        default="all",
+    )
+    test_parser.add_argument(
+        "--outdir",
+        default="results",
+        help="Output directory used by `test example`",
+    )
+    test_parser.add_argument(
+        "--config",
+        default=str(
+            PROJECT_ROOT
+            / "nextflow"
+            / "assets"
+            / "example_dataset_configuration.yaml"
+        ),
+        help="Configuration used by `test example`",
+    )
+    test_parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume cached tasks during `test example`",
+    )
+    test_parser.add_argument(
+        "--checkm-db", help="CheckM reference directory for `test example`"
+    )
+    test_parser.add_argument(
+        "--checkm2-db", help="CheckM2 database for `test example`"
+    )
+    test_parser.add_argument(
+        "--gtdbtk-db", help="GTDB-Tk reference directory for `test example`"
+    )
+    test_parser.add_argument(
+        "--genomad-db", help="geNomad reference directory for `test example`"
+    )
     test_parser.set_defaults(handler=command_test)
 
     compare_parser = subparsers.add_parser(
@@ -2606,7 +2859,9 @@ def build_parser() -> argparse.ArgumentParser:
         "run",
         help="Run the complete workflow or one named Nextflow stage",
         description=(
-            "Run the complete METAHICT workflow (default) or one selected module.\n\n"
+            "Run the complete METAHICT core workflow (default) or one selected "
+            "module. Scaffolding is an optional selected-module analysis and is "
+            "not run automatically.\n\n"
             "Read-file paths and restriction enzymes come from --samplesheet. "
             "Algorithm settings and normal per-module resources come from --config. "
             "Explicit command-line -t/--threads and -m/--memory values override "
@@ -2780,7 +3035,7 @@ def build_parser() -> argparse.ArgumentParser:
     control_group.add_argument(
         "--check-outputs",
         action="store_true",
-        help="Check the documented example-dataset outputs after completion",
+        help="Check the documented core example-dataset outputs after completion",
     )
     control_group.add_argument(
         "--show-command", action="store_true", help="Print the generated Nextflow command and exit"

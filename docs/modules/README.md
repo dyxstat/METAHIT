@@ -1,6 +1,7 @@
 # Module reference
 
-The complete workflow runs ten scientific stages in dependency order.
+The complete workflow runs nine core modules in dependency order. Scaffolding
+is the tenth available module and is run separately on a selected MAG.
 Selected-module runs use the same Nextflow resource management, exact
 environments, reports, logs, and resume behavior as the complete workflow.
 
