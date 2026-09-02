@@ -41,7 +41,7 @@ chmod +x metahict nextflow/bin/nextflow
 distributed lock files before installation. `install` creates and verifies the
 locked software environments. `test workflow` runs the core workflow and the
 standalone scaffolding entry with stub tasks, without downloading databases or
-analyzing real reads. Typical installation time is 1–5 minutes, excluding
+analyzing real reads. Typical installation time is 10–20 minutes, excluding
 database installation.
 
 
@@ -135,7 +135,7 @@ scaffolding on every MAG recovered from the included paired reads:
 
 This is a real scientific-program test and can take substantially longer than
 the workflow stub. The bundled example test typically takes approximately
-25–30 minutes, depending on the system. Details are in [Testing
+20–30 minutes, depending on the system. Details are in [Testing
 METAHICT](docs/test_dataset.md).
 
 ## Main results
