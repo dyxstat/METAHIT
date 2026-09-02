@@ -72,7 +72,8 @@ Expected outcome:
 - `doctor` confirms the supported host and distributed lock checksums;
 - `install` creates and verifies the project-local environments under
   `conda_envs/`; and
-- `test workflow` runs the complete Nextflow graph with stub processes.
+- `test workflow` runs the core workflow and standalone scaffolding entry with
+  dependency-free stub processes.
 
 The workflow test does not need the reference databases and does not perform a
 biological analysis. Continue only after `install` and `test workflow` pass.

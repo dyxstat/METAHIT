@@ -1,7 +1,8 @@
 # METAHICT Nextflow test assets
 
 `expected/workflow_stub_outputs.tsv` is used by the CI smoke test. It
-asserts that every native DSL2 process publishes its declared result artifact.
+asserts that every native DSL2 process publishes its declared result artifact
+across the core workflow and the separate scaffolding invocation.
 Its generated samplesheet contains one paired short-read sample and one
 single-file long-read sample, so the test also verifies long-read routing and
 the absence of shotgun preprocessing and reassembly for that row.

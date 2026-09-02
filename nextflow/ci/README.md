@@ -11,9 +11,11 @@ Run the local smoke test from the METAHICT repository root:
 ./metahict test workflow
 ```
 
-The smoke test uses Nextflow stub mode. It checks workflow parsing, module
-ordering, profile loading, report generation, and sample-sheet handling without
-requiring sequencing data or large reference databases. Tiny valid paired
+The smoke test uses the dependency-free Nextflow stub profile. It runs the
+default core workflow and then the standalone scaffolding entry, checking
+workflow parsing, module ordering, report generation, sample-sheet handling,
+and the combined output contract without requiring sequencing data, installed
+scientific environments, or large reference databases. Tiny valid paired
 short-read and single-file long-read FASTQs and their samplesheet are created
 in the temporary test directory.
 

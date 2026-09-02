@@ -985,6 +985,12 @@ class StubInputTest(unittest.TestCase):
 
 
 class ExampleScaffoldingTest(unittest.TestCase):
+    def test_workflow_scope_runs_the_dependency_free_stub_profile(self) -> None:
+        args = argparse.Namespace(scope="workflow")
+        with mock.patch.object(manager, "run_stub_test") as run_stub:
+            manager.command_test(args)
+        run_stub.assert_called_once_with("stub")
+
     def test_discovers_every_supported_bin_without_assuming_a_count(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             results = Path(temporary)

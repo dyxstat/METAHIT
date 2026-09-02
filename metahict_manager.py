@@ -1425,7 +1425,6 @@ def command_test(args: argparse.Namespace) -> None:
         source_checks()
     if args.scope in {"workflow", "all"}:
         run_stub_test("stub")
-        run_stub_test("local")
     if args.scope == "example":
         run_example_test(args)
 

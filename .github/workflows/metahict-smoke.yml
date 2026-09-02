@@ -80,30 +80,4 @@ jobs:
           echo "$PWD/nextflow/bin" >> "$GITHUB_PATH"
 
       - name: Run DSL2 stub smoke test
-        run: |
-          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm_db"
-          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db"
-          mkdir -p "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db"
-          touch "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd"
-          stub_samplesheet="$(python3 nextflow/ci/create_stub_inputs.py \
-            --output-dir "$PWD/nextflow/test_runs/ci_smoke/stub_inputs")"
-          nextflow run nextflow/main_dsl2.nf \
-            -params-file nextflow/assets/example_dataset_configuration.yaml \
-            -profile stub \
-            -c "$PWD/nextflow/ci/stub_resources.config" \
-            --samplesheet "$stub_samplesheet" \
-            --out_root "$PWD/nextflow/test_runs/ci_smoke/results" \
-            --report_dir "$PWD/nextflow/reports/ci_smoke" \
-            -work-dir "$PWD/nextflow/work/ci_smoke" \
-            --checkm_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm_db" \
-            --checkm2_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/checkm2.dmnd" \
-            --gtdbtk_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/gtdbtk_db" \
-            --genomad_db "$PWD/nextflow/test_runs/ci_smoke/dummy_db/genomad_db" \
-            --threads 2 \
-            --clean true \
-            --chain true \
-            -stub-run \
-            -ansi-log false
-          python3 nextflow/bin/check_expected_outputs.py \
-            --root "$PWD/nextflow/test_runs/ci_smoke/results" \
-            --manifest nextflow/tests/expected/workflow_stub_outputs.tsv
+        run: python3 metahict_manager.py test workflow
