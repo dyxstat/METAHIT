@@ -37,7 +37,7 @@ chmod +x metahict nextflow/bin/nextflow
 ./metahict test workflow
 ```
 
-`doctor` checks the operating system, architecture, required commands, and distributed lock files before installation. `install` creates and verifies the locked software environments. `test workflow` compiles the complete Nextflow workflow and runs the stub implementation of every stage, checking all stage connections without downloading reference databases or analyzing real reads.
+`doctor` checks the operating system, architecture, required commands, and distributed lock files before installation. `install` creates and verifies the locked software environments. `test workflow` compiles the complete Nextflow workflow and runs the stub implementation of every stage, checking all stage connections without downloading reference databases or analyzing real reads. Typical installation time is 1–5 minutes, excluding database installation.
 
 
 ### 3. Install and validate the reference databases
@@ -132,7 +132,8 @@ paired reads:
 ```
 
 This is a real scientific-program test and can take substantially longer than
-the workflow stub. Details are in [Testing METAHICT](docs/test_dataset.md).
+the workflow stub. Details are in [Testing METAHICT](docs/test_dataset.md). 
+The complete workflow takes approximately 25–30 minutes to run on the example dataset, depending on your system.
 
 ## Main results
 
