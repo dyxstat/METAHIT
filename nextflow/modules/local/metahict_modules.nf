@@ -635,7 +635,7 @@ process BINNING {
     printf 'bin_id\tcompleteness\tcontamination\n' > binning/metahict/final_bins_quality.tsv
     printf 'contig\tbin_id\n' > binning/metahict/contig_to_bin.tsv
     touch binning/metahict/combined_final_bins.fa
-    printf 'metahict_version: 1.1.0\nmodule: binning\n' > binning/metahict/run_parameters.yaml
+    printf 'metahict_version: 1.2.0\nmodule: binning\n' > binning/metahict/run_parameters.yaml
     """
 }
 
@@ -723,7 +723,7 @@ process REASSEMBLY {
     printf '{"selection": {}}\n' > reassembly/read_selection_summary.json
     printf 'bin\tcompleteness\tcontamination\n' > reassembly/quality/original_bins_quality.tsv
     printf 'Name\tCompleteness\tContamination\n' > reassembly/quality/checkm2_quality_report.tsv
-    printf 'metahict_version: 1.1.0\nmodule: reassembly\n' > reassembly/run_parameters.yaml
+    printf 'metahict_version: 1.2.0\nmodule: reassembly\n' > reassembly/run_parameters.yaml
     """
 }
 

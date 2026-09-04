@@ -1,17 +1,18 @@
 {% set name = "metahict" %}
-{% set version = "1.1.0" %}
+{% set version = "1.2.0" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://github.com/dyxstat/METAHICT/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: REPLACE_WITH_SHA256_FROM_STEP_1
+  path: ../../..
 
 build:
   number: 0
-  skip: true  # [not linux64]
+  noarch: generic
+  run_exports:
+    - {{ pin_subpackage(name, max_pin="x") }}
   script: bash "${RECIPE_DIR}/build.sh"
 
 requirements:
@@ -21,6 +22,7 @@ requirements:
     - python >=3.9
   run:
     - bash >=5
+    - conda >=24
     - curl
     - git
     - nextflow >=26.04.6,<27
@@ -29,10 +31,13 @@ requirements:
 
 test:
   commands:
+    - conda --version
     - metahict --version
     - metahict --help
     - metahict-nextflow -help
     - test -s "${PREFIX}/share/metahict/nextflow/main_dsl2.nf"
+    - test -x "${PREFIX}/share/metahict/metahict"
+    - ${PREFIX}/share/metahict/metahict --version
 
 about:
   home: https://github.com/dyxstat/METAHICT
