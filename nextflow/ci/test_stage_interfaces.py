@@ -316,7 +316,7 @@ class BinningOutputLayoutTest(unittest.TestCase):
             BINNING_STAGE.write_run_parameters(manifest, args)
 
             text = manifest.read_text()
-            self.assertIn('metahict_version: "1.1.0"', text)
+            self.assertIn('metahict_version: "1.2.0"', text)
             self.assertIn("  threads: 32", text)
             self.assertIn('  enzyme: "Sau3AI,MluCI"', text)
             self.assertIn("  keep_temp: false", text)

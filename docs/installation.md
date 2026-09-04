@@ -6,7 +6,7 @@ run with the locked environments selected by Nextflow.
 
 ## Supported host
 
-METAHICT 1.1.0 supports and tests on 64-bit x86 Linux systems and requires:
+METAHICT 1.2.0 supports and tests on 64-bit x86 Linux systems and requires:
 
 - Conda;
 - `curl`, `tar`, and Git;

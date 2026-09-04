@@ -18,7 +18,7 @@ class BinningError(RuntimeError):
 
 
 DEFAULT_THREADS = 16
-METAHICT_VERSION = "1.1.0"
+METAHICT_VERSION = "1.2.0"
 
 
 def run(command: Sequence[object]) -> None:

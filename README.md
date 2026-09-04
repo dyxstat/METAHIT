@@ -12,7 +12,7 @@ elements (MGEs) and candidate MGE–host pairs.
 
 ### Requirements
 
-METAHICT 1.1.0 supports and tests on 64-bit x86 Linux systems. The host must
+METAHICT 1.2.0 supports and tests on 64-bit x86 Linux systems. The host must
 provide Conda, `curl`, `tar`, and Git. Python, Nextflow, and the scientific
 programs are installed into project-local environments by METAHICT.
 
@@ -196,6 +196,6 @@ Versions, licenses, sources, and citations for external programs are listed in
 ## License
 
 METAHICT is distributed under the GNU General Public License; see
-[LICENSE](LICENSE). A workflow-layer Bioconda recipe is staged under
-`packaging/bioconda/` but is not a published Bioconda package until accepted by
-the Bioconda project.
+[LICENSE](LICENSE). The METAHICT workflow layer is available through Bioconda.
+The `metahict install` command creates the locked scientific software
+environments, while reference databases are installed separately.

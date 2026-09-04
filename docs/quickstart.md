@@ -33,7 +33,7 @@ The following sections explain each step.
 
 ## 1. Check the server and input data
 
-METAHICT 1.1.0 supports and tests on 64-bit x86 Linux systems. The host must
+METAHICT 1.2.0 supports and tests on 64-bit x86 Linux systems. The host must
 provide Conda, `curl`, `tar`, and Git. Python, Nextflow, and the scientific
 programs are installed into project-local environments by METAHICT.
 

@@ -31,7 +31,7 @@ from typing import Iterable, Optional, Sequence
 from urllib.parse import unquote, urlparse
 
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_CONFIG = PROJECT_ROOT / "nextflow" / "assets" / "metahict_configuration.yaml"
 LOCK_DIR = PROJECT_ROOT / "installation" / "locks" / "linux-64"

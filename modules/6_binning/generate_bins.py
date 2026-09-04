@@ -54,7 +54,7 @@ import fileinput
 ##Ignore the warning information of package deprecation##
 warnings.filterwarnings("ignore")
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 def replace_in_file(file_path):
     with fileinput.input(file_path, inplace=True) as file:
