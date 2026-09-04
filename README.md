@@ -195,7 +195,7 @@ Versions, licenses, sources, and citations for external programs are listed in
 
 ## Bioconda availability
 
-METAHICT has been accepted into Bioconda. The Bioconda channel currently provides old version, while the current workflow release is v1.2.0. Until the v1.2.0 recipe update is published, install the current release using the GitHub instructions below.
+METAHICT has been accepted into Bioconda. The Bioconda channel currently provides old version, while the current workflow release is v1.2.0. Until the v1.2.0 recipe update is published, install the latest release using the GitHub instructions above.
 
 ## License
 
